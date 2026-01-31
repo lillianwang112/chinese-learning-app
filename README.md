@@ -65,13 +65,14 @@ To reset everything, clear your site data/localStorage in the browser.
 3. Copy chinese-learning-app.jsx into:
    ```bash
    src/ChineseLearningApp.jsx
-5. Import and render it in src/App.jsx:
+4. Import and render it in src/App.jsx:
    ```bash
    import ChineseLearningApp from "./ChineseLearningApp.jsx";
 
    export default function App() {
     return <ChineseLearningApp />;
   }
-6. Run:
+5. Run:
+  ```bash
    npm run dev
 
