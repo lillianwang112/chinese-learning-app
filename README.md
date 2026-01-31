@@ -71,7 +71,7 @@ To reset everything, clear your site data/localStorage in the browser.
 
    export default function App() {
     return <ChineseLearningApp />;
-  }
+    }
 5. Run:
   ```bash
    npm run dev
