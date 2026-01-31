@@ -63,13 +63,15 @@ To reset everything, clear your site data/localStorage in the browser.
    npm install lucide-react
 2. If you want the styling to match, set up Tailwind CSS in your project.
 3. Copy chinese-learning-app.jsx into:
+   ```bash
    src/ChineseLearningApp.jsx
-4. Import and render it in src/App.jsx:
+5. Import and render it in src/App.jsx:
+   ```bash
    import ChineseLearningApp from "./ChineseLearningApp.jsx";
 
    export default function App() {
     return <ChineseLearningApp />;
   }
-5. Run:
+6. Run:
    npm run dev
 
