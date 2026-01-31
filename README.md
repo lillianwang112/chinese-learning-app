@@ -73,6 +73,6 @@ To reset everything, clear your site data/localStorage in the browser.
     return <ChineseLearningApp />;
     }
 5. Run:
-  ```bash
-     npm run dev
+   ```bash
+   npm run dev
 
