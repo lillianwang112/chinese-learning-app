@@ -1,0 +1,2066 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { BookOpen, Plus, Play, Edit2, Trash2, Download, Upload, Volume2, Check, X, Brain, TrendingUp } from 'lucide-react';
+
+const ChineseLearningApp = () => {
+  // Touch/swipe state
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const [swipeDirection, setSwipeDirection] = useState(null);
+  const cardRef = useRef(null);
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
+  // Sample HSK 1 deck
+  const sampleDeck = {
+    id: 'hsk1-sample',
+    name: 'HSK 1 Sample Vocabulary',
+    cards: [
+      { id: 1, chinese: '你好', pinyin: 'nǐ hǎo', english: 'hello', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 2, chinese: '谢谢', pinyin: 'xièxie', english: 'thank you', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 3, chinese: '再见', pinyin: 'zàijiàn', english: 'goodbye', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 4, chinese: '对不起', pinyin: 'duìbuqǐ', english: 'sorry', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 5, chinese: '我', pinyin: 'wǒ', english: 'I, me', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 6, chinese: '你', pinyin: 'nǐ', english: 'you', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 7, chinese: '他', pinyin: 'tā', english: 'he, him', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 8, chinese: '是', pinyin: 'shì', english: 'to be', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 9, chinese: '的', pinyin: 'de', english: 'possessive particle', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 10, chinese: '吗', pinyin: 'ma', english: 'question particle', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 11, chinese: '什么', pinyin: 'shénme', english: 'what', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 12, chinese: '中国', pinyin: 'zhōngguó', english: 'China', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 13, chinese: '爱', pinyin: 'ài', english: 'to love', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 14, chinese: '吃', pinyin: 'chī', english: 'to eat', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+      { id: 15, chinese: '喝', pinyin: 'hē', english: 'to drink', known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 },
+    ]
+  };
+
+  // Load decks from localStorage or use sample deck
+  const [decks, setDecks] = useState(() => {
+    const saved = localStorage.getItem('chineseDecks');
+    return saved ? JSON.parse(saved) : [sampleDeck];
+  });
+
+  const [currentView, setCurrentView] = useState('home'); // home, study, learn, create, edit, stats, match, test
+  const [selectedDeck, setSelectedDeck] = useState(null);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [newCard, setNewCard] = useState({ chinese: '', pinyin: '', english: '' });
+  const [newDeckName, setNewDeckName] = useState('');
+  const [editingDeck, setEditingDeck] = useState(null);
+  const [shuffledCards, setShuffledCards] = useState([]);
+
+  // Learn Mode state
+  const [learnMode, setLearnMode] = useState('multiple-choice'); // multiple-choice, fill-blank, written
+  const [learnCards, setLearnCards] = useState([]);
+  const [currentLearnIndex, setCurrentLearnIndex] = useState(0);
+  const [userAnswer, setUserAnswer] = useState('');
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [multipleChoiceOptions, setMultipleChoiceOptions] = useState([]);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [answerResult, setAnswerResult] = useState(null); // 'correct' or 'incorrect'
+
+  // Study streak tracking
+  const [studyStreak, setStudyStreak] = useState(() => {
+    const saved = localStorage.getItem('studyStreak');
+    return saved ? JSON.parse(saved) : { currentStreak: 0, lastStudyDate: null, longestStreak: 0 };
+  });
+
+  // Match game state
+  const [matchCards, setMatchCards] = useState([]);
+  const [selectedMatchCards, setSelectedMatchCards] = useState([]);
+  const [matchedPairs, setMatchedPairs] = useState([]);
+  const [matchStartTime, setMatchStartTime] = useState(null);
+  const [matchEndTime, setMatchEndTime] = useState(null);
+
+  // Practice test state
+  const [testQuestions, setTestQuestions] = useState([]);
+  const [currentTestIndex, setCurrentTestIndex] = useState(0);
+  const [testAnswers, setTestAnswers] = useState([]);
+  const [showTestResults, setShowTestResults] = useState(false);
+
+  // Character writing practice state
+  const [writingCards, setWritingCards] = useState([]);
+  const [currentWritingIndex, setCurrentWritingIndex] = useState(0);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [strokes, setStrokes] = useState([]);
+  const [currentStroke, setCurrentStroke] = useState([]);
+  const canvasRef = useRef(null);
+  const [writingFeedback, setWritingFeedback] = useState(null);
+  const [practicedCardIds, setPracticedCardIds] = useState([]); // Track which cards we've practiced
+  const [writingSessionComplete, setWritingSessionComplete] = useState(false);
+
+  // Delete confirmation modal
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null); // { deckId, deckName }
+
+  // Save decks to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('chineseDecks', JSON.stringify(decks));
+  }, [decks]);
+
+  // Save study streak to localStorage
+  useEffect(() => {
+    localStorage.setItem('studyStreak', JSON.stringify(studyStreak));
+  }, [studyStreak]);
+
+  // Update study streak
+  const updateStudyStreak = () => {
+    const today = new Date().toDateString();
+    const lastDate = studyStreak.lastStudyDate ? new Date(studyStreak.lastStudyDate).toDateString() : null;
+
+    if (lastDate === today) {
+      // Already studied today
+      return;
+    }
+
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    
+    if (lastDate === yesterday) {
+      // Studied yesterday, continue streak
+      setStudyStreak({
+        currentStreak: studyStreak.currentStreak + 1,
+        lastStudyDate: Date.now(),
+        longestStreak: Math.max(studyStreak.longestStreak, studyStreak.currentStreak + 1)
+      });
+    } else if (!lastDate) {
+      // First time studying
+      setStudyStreak({
+        currentStreak: 1,
+        lastStudyDate: Date.now(),
+        longestStreak: 1
+      });
+    } else {
+      // Broke streak, start over
+      setStudyStreak({
+        currentStreak: 1,
+        lastStudyDate: Date.now(),
+        longestStreak: studyStreak.longestStreak
+      });
+    }
+  };
+
+  // Swipe handlers
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      // Swipe left = Still Learning
+      handleSwipe('left');
+    } else if (isRightSwipe) {
+      // Swipe right = I Know This
+      handleSwipe('right');
+    }
+  };
+
+  const handleSwipe = (direction) => {
+    if (!selectedDeck || currentView !== 'study') return;
+    
+    const currentCard = shuffledCards[currentCardIndex];
+    setSwipeDirection(direction);
+    
+    setTimeout(() => {
+      if (direction === 'right') {
+        // I Know This
+        updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, 5);
+      } else {
+        // Still Learning
+        updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, 2);
+      }
+      
+      // Check if we're at the last card
+      if (currentCardIndex < shuffledCards.length - 1) {
+        setCurrentCardIndex(currentCardIndex + 1);
+        setIsFlipped(false);
+      } else {
+        // Reached the end of the deck
+        alert('Great job! You\'ve finished studying this deck!');
+        setCurrentView('home');
+      }
+      
+      setSwipeDirection(null);
+    }, 300);
+  };
+
+  // SM-2 Spaced Repetition Algorithm
+  const updateCardWithSpacedRepetition = (deckId, cardId, quality) => {
+    // quality: 0-5 (0 = total blackout, 5 = perfect response)
+    const updatedDecks = decks.map(deck => {
+      if (deck.id === deckId) {
+        return {
+          ...deck,
+          cards: deck.cards.map(card => {
+            if (card.id === cardId) {
+              let { easeFactor, interval, repetitions } = card;
+              
+              // Update ease factor
+              easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
+              
+              // Update repetitions and interval
+              if (quality < 3) {
+                repetitions = 0;
+                interval = 1;
+              } else {
+                repetitions += 1;
+                if (repetitions === 1) {
+                  interval = 1;
+                } else if (repetitions === 2) {
+                  interval = 6;
+                } else {
+                  interval = Math.round(interval * easeFactor);
+                }
+              }
+
+              // Calculate next review date
+              const nextReview = Date.now() + (interval * 24 * 60 * 60 * 1000);
+              
+              return {
+                ...card,
+                known: quality >= 4,
+                lastReviewed: Date.now(),
+                difficulty: 5 - quality,
+                easeFactor,
+                interval,
+                repetitions,
+                nextReview
+              };
+            }
+            return card;
+          })
+        };
+      }
+      return deck;
+    });
+    setDecks(updatedDecks);
+  };
+
+  // Text-to-speech for Chinese pronunciation
+  const speakChinese = (text) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'zh-CN';
+      utterance.rate = 0.8;
+      window.speechSynthesis.cancel(); // Cancel any ongoing speech
+      window.speechSynthesis.speak(utterance);
+    } else {
+      alert('Text-to-speech not supported in this browser');
+    }
+  };
+
+  // Initialize Learn Mode
+  const startLearnMode = (deck) => {
+    // Prioritize cards that need review (based on difficulty and last reviewed)
+    const sortedCards = [...deck.cards].sort((a, b) => {
+      // Cards never reviewed come first
+      if (!a.lastReviewed && b.lastReviewed) return -1;
+      if (a.lastReviewed && !b.lastReviewed) return 1;
+      
+      // Then by difficulty (higher difficulty = needs more practice)
+      if (a.difficulty !== b.difficulty) return b.difficulty - a.difficulty;
+      
+      // Then by last reviewed (older first)
+      return (a.lastReviewed || 0) - (b.lastReviewed || 0);
+    });
+
+    setSelectedDeck(deck);
+    setLearnCards(sortedCards);
+    setCurrentLearnIndex(0);
+    setLearnMode('multiple-choice');
+    setShowAnswer(false);
+    setUserAnswer('');
+    setAnswerResult(null);
+    generateMultipleChoiceOptions(sortedCards[0], deck.cards);
+    setCurrentView('learn');
+  };
+
+  // Generate multiple choice options
+  const generateMultipleChoiceOptions = (correctCard, allCards) => {
+    const options = [correctCard.english];
+    const otherCards = allCards.filter(c => c.id !== correctCard.id);
+    
+    while (options.length < 4 && otherCards.length > 0) {
+      const randomIndex = Math.floor(Math.random() * otherCards.length);
+      const option = otherCards[randomIndex].english;
+      if (!options.includes(option)) {
+        options.push(option);
+      }
+      otherCards.splice(randomIndex, 1);
+    }
+    
+    // Shuffle options
+    setMultipleChoiceOptions(options.sort(() => Math.random() - 0.5));
+  };
+
+  // Convert pinyin with numbers to tone marks (e.g., "ni3 hao3" -> "nǐ hǎo")
+  const convertNumbersToTones = (pinyin) => {
+    const toneMap = {
+      'a1': 'ā', 'a2': 'á', 'a3': 'ǎ', 'a4': 'à',
+      'e1': 'ē', 'e2': 'é', 'e3': 'ě', 'e4': 'è',
+      'i1': 'ī', 'i2': 'í', 'i3': 'ǐ', 'i4': 'ì',
+      'o1': 'ō', 'o2': 'ó', 'o3': 'ǒ', 'o4': 'ò',
+      'u1': 'ū', 'u2': 'ú', 'u3': 'ǔ', 'u4': 'ù',
+      'ü1': 'ǖ', 'ü2': 'ǘ', 'ü3': 'ǚ', 'ü4': 'ǜ',
+      'v1': 'ǖ', 'v2': 'ǘ', 'v3': 'ǚ', 'v4': 'ǜ'
+    };
+
+    let result = pinyin.toLowerCase();
+    
+    // Replace tone numbers with tone marks
+    for (const [key, value] of Object.entries(toneMap)) {
+      result = result.replace(new RegExp(key, 'g'), value);
+    }
+    
+    // Remove remaining numbers (neutral tone)
+    result = result.replace(/[0-9]/g, '');
+    
+    return result;
+  };
+
+  // Normalize pinyin for comparison (accepts both tone marks and numbers)
+  const normalizePinyin = (pinyin) => {
+    // Convert numbers to tone marks first
+    const withTones = convertNumbersToTones(pinyin);
+    // Remove all spaces and convert to lowercase
+    return withTones.toLowerCase().replace(/\s+/g, '');
+  };
+
+  // Check answer in Learn Mode
+  const checkAnswer = () => {
+    const currentCard = learnCards[currentLearnIndex];
+    let isCorrect = false;
+    let quality = 0;
+
+    if (learnMode === 'multiple-choice') {
+      isCorrect = selectedOption === currentCard.english;
+      quality = isCorrect ? 5 : 1;
+    } else if (learnMode === 'fill-blank' || learnMode === 'written') {
+      // Normalize both the user's answer and the correct answer
+      const normalizedAnswer = normalizePinyin(userAnswer);
+      const normalizedCorrect = normalizePinyin(currentCard.pinyin);
+      isCorrect = normalizedAnswer === normalizedCorrect;
+      quality = isCorrect ? 4 : 2;
+    }
+
+    setAnswerResult(isCorrect ? 'correct' : 'incorrect');
+    updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, quality);
+    
+    // Update difficulty for adaptive progression
+    const updatedDecks = decks.map(deck => {
+      if (deck.id === selectedDeck.id) {
+        return {
+          ...deck,
+          cards: deck.cards.map(card => {
+            if (card.id === currentCard.id) {
+              return { ...card, difficulty: isCorrect ? Math.max(0, card.difficulty - 1) : Math.min(5, card.difficulty + 1) };
+            }
+            return card;
+          })
+        };
+      }
+      return deck;
+    });
+    setDecks(updatedDecks);
+
+    setShowAnswer(true);
+  };
+
+  // Progress to next question in Learn Mode
+  const nextLearnCard = () => {
+    if (currentLearnIndex < learnCards.length - 1) {
+      const nextIndex = currentLearnIndex + 1;
+      setCurrentLearnIndex(nextIndex);
+      
+      // Adapt difficulty based on performance
+      const currentCard = learnCards[nextIndex];
+      if (currentCard.difficulty <= 1 && learnMode === 'multiple-choice') {
+        setLearnMode('fill-blank');
+      } else if (currentCard.difficulty === 0 && learnMode === 'fill-blank') {
+        setLearnMode('written');
+      }
+      
+      setShowAnswer(false);
+      setUserAnswer('');
+      setSelectedOption(null);
+      setAnswerResult(null);
+      
+      if (learnMode === 'multiple-choice') {
+        generateMultipleChoiceOptions(learnCards[nextIndex], selectedDeck.cards);
+      }
+    } else {
+      // Finished learning session
+      alert('Great job! You\'ve completed this learning session!');
+      setCurrentView('home');
+    }
+  };
+
+  // Create new deck
+  const createDeck = () => {
+    if (!newDeckName.trim()) {
+      alert('Please enter a deck name');
+      return;
+    }
+    const newDeck = {
+      id: `deck-${Date.now()}`,
+      name: newDeckName,
+      cards: []
+    };
+    setDecks([...decks, newDeck]);
+    setNewDeckName('');
+    setCurrentView('home');
+  };
+
+  // Add card to deck
+  const addCard = (deckId) => {
+    if (!newCard.chinese || !newCard.pinyin || !newCard.english) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    const updatedDecks = decks.map(deck => {
+      if (deck.id === deckId) {
+        const card = {
+          id: Date.now(),
+          chinese: newCard.chinese,
+          pinyin: newCard.pinyin,
+          english: newCard.english,
+          known: false,
+          lastReviewed: null,
+          difficulty: 0,
+          easeFactor: 2.5,
+          interval: 0,
+          repetitions: 0
+        };
+        return { ...deck, cards: [...deck.cards, card] };
+      }
+      return deck;
+    });
+
+    setDecks(updatedDecks);
+    setNewCard({ chinese: '', pinyin: '', english: '' });
+  };
+
+  // Delete card
+  const deleteCard = (deckId, cardId) => {
+    const updatedDecks = decks.map(deck => {
+      if (deck.id === deckId) {
+        return { ...deck, cards: deck.cards.filter(card => card.id !== cardId) };
+      }
+      return deck;
+    });
+    setDecks(updatedDecks);
+  };
+
+  // Delete deck
+  const deleteDeck = (deckId, deckName) => {
+    const confirmed = window.confirm(`Are you sure you want to delete "${deckName}"?\n\nThis action cannot be undone.`);
+    if (confirmed) {
+      setDecks(decks.filter(deck => deck.id !== deckId));
+      setCurrentView('home');
+    }
+  };
+
+  // Export deck as JSON
+  const exportDeck = (deck) => {
+    const dataStr = JSON.stringify(deck, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${deck.name}.json`;
+    link.click();
+  };
+
+  // Import deck
+  const importDeck = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          imported.id = `deck-${Date.now()}`; // Generate new ID
+          setDecks([...decks, imported]);
+          alert('Deck imported successfully!');
+        } catch (error) {
+          alert('Error importing deck. Please check the file format.');
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  // Start studying a deck
+  const startStudy = (deck) => {
+    setSelectedDeck(deck);
+    setShuffledCards([...deck.cards]); // Start with original order
+    setCurrentCardIndex(0);
+    setIsFlipped(false);
+    setCurrentView('study');
+    updateStudyStreak();
+  };
+
+  // Shuffle cards in study mode
+  const shuffleCards = () => {
+    const shuffled = [...shuffledCards].sort(() => Math.random() - 0.5);
+    setShuffledCards(shuffled);
+    setCurrentCardIndex(0);
+    setIsFlipped(false);
+  };
+
+  // Start Match Game
+  const startMatchGame = (deck) => {
+    if (deck.cards.length < 4) {
+      alert('You need at least 4 cards to play Match!');
+      return;
+    }
+
+    // Select random cards (max 8 pairs)
+    const shuffled = [...deck.cards].sort(() => Math.random() - 0.5).slice(0, 8);
+    
+    // Create pairs: chinese and meaning
+    const pairs = [];
+    shuffled.forEach(card => {
+      pairs.push({ id: `${card.id}-chinese`, content: card.chinese, type: 'chinese', matchId: card.id });
+      pairs.push({ id: `${card.id}-english`, content: card.english, type: 'english', matchId: card.id });
+    });
+
+    setMatchCards(pairs.sort(() => Math.random() - 0.5));
+    setSelectedMatchCards([]);
+    setMatchedPairs([]);
+    setMatchStartTime(Date.now());
+    setMatchEndTime(null);
+    setSelectedDeck(deck);
+    setCurrentView('match');
+  };
+
+  // Handle Match card selection
+  const selectMatchCard = (card) => {
+    if (selectedMatchCards.length === 2) return;
+    if (selectedMatchCards.find(c => c.id === card.id)) return;
+    if (matchedPairs.includes(card.matchId)) return;
+
+    const newSelected = [...selectedMatchCards, card];
+    setSelectedMatchCards(newSelected);
+
+    if (newSelected.length === 2) {
+      // Check if they match
+      if (newSelected[0].matchId === newSelected[1].matchId) {
+        // Match!
+        setTimeout(() => {
+          setMatchedPairs([...matchedPairs, card.matchId]);
+          setSelectedMatchCards([]);
+          
+          // Check if game is complete
+          if (matchedPairs.length + 1 === matchCards.length / 2) {
+            setMatchEndTime(Date.now());
+          }
+        }, 500);
+      } else {
+        // No match
+        setTimeout(() => {
+          setSelectedMatchCards([]);
+        }, 1000);
+      }
+    }
+  };
+
+  // Start Practice Test
+  const startPracticeTest = (deck) => {
+    if (deck.cards.length < 5) {
+      alert('You need at least 5 cards for a practice test!');
+      return;
+    }
+
+    // Create 10 random questions (or all cards if fewer than 10)
+    const numQuestions = Math.min(10, deck.cards.length);
+    const shuffled = [...deck.cards].sort(() => Math.random() - 0.5).slice(0, numQuestions);
+    
+    const questions = shuffled.map(card => {
+      const otherCards = deck.cards.filter(c => c.id !== card.id);
+      const options = [card.english];
+      
+      while (options.length < 4 && otherCards.length > 0) {
+        const randomIndex = Math.floor(Math.random() * otherCards.length);
+        const option = otherCards[randomIndex].english;
+        if (!options.includes(option)) {
+          options.push(option);
+        }
+        otherCards.splice(randomIndex, 1);
+      }
+
+      return {
+        card,
+        options: options.sort(() => Math.random() - 0.5),
+        userAnswer: null
+      };
+    });
+
+    setTestQuestions(questions);
+    setCurrentTestIndex(0);
+    setTestAnswers(new Array(questions.length).fill(null));
+    setShowTestResults(false);
+    setSelectedDeck(deck);
+    setCurrentView('test');
+    updateStudyStreak();
+  };
+
+  // Answer test question
+  const answerTestQuestion = (answer) => {
+    const newAnswers = [...testAnswers];
+    newAnswers[currentTestIndex] = answer;
+    setTestAnswers(newAnswers);
+  };
+
+  // Submit test
+  const submitTest = () => {
+    setShowTestResults(true);
+  };
+
+  // Start Writing Practice
+  const startWritingPractice = (deck) => {
+    if (deck.cards.length === 0) {
+      alert('You need cards to practice writing!');
+      return;
+    }
+
+    // Select 10 random cards (or all if fewer than 10)
+    const numCards = Math.min(10, deck.cards.length);
+    const shuffled = [...deck.cards].sort(() => Math.random() - 0.5).slice(0, numCards);
+    
+    setWritingCards(shuffled);
+    setPracticedCardIds(shuffled.map(c => c.id)); // Track these cards as practiced
+    setCurrentWritingIndex(0);
+    setStrokes([]);
+    setCurrentStroke([]);
+    setWritingFeedback(null);
+    setWritingSessionComplete(false);
+    setSelectedDeck(deck);
+    setCurrentView('writing');
+    updateStudyStreak();
+  };
+
+  // Get a NEW set of 10 cards (excluding already practiced ones)
+  const getNewWritingSet = () => {
+    if (!selectedDeck) return;
+    
+    // Get cards we haven't practiced yet
+    const unpracticedCards = selectedDeck.cards.filter(c => !practicedCardIds.includes(c.id));
+    
+    // If we've practiced everything, reset and start over
+    if (unpracticedCards.length === 0) {
+      alert('Great job! You\'ve practiced all cards in this deck. Starting over with a new random set!');
+      setPracticedCardIds([]);
+      const numCards = Math.min(10, selectedDeck.cards.length);
+      const shuffled = [...selectedDeck.cards].sort(() => Math.random() - 0.5).slice(0, numCards);
+      setWritingCards(shuffled);
+      setPracticedCardIds(shuffled.map(c => c.id));
+    } else {
+      // Get up to 10 unpracticed cards
+      const numCards = Math.min(10, unpracticedCards.length);
+      const newSet = [...unpracticedCards].sort(() => Math.random() - 0.5).slice(0, numCards);
+      setWritingCards(newSet);
+      setPracticedCardIds([...practicedCardIds, ...newSet.map(c => c.id)]);
+    }
+    
+    // Reset all session state
+    setCurrentWritingIndex(0);
+    setStrokes([]);
+    setCurrentStroke([]);
+    setWritingFeedback(null);
+    setWritingSessionComplete(false);
+    
+    // Clear canvas if it exists
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
+  };
+
+  // Shuffle/Randomize - get a completely NEW set of 10
+  const shuffleWritingCards = () => {
+    getNewWritingSet();
+  };
+
+  // Handle "I Forgot" - re-queue the card to appear again soon
+  const handleForgotCard = () => {
+    const currentCard = writingCards[currentWritingIndex];
+    
+    // Update the card with higher difficulty
+    updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, 1);
+    
+    // Re-insert the card 2-3 positions ahead (or at end if near the end)
+    const newWritingCards = [...writingCards];
+    const reinsertPosition = Math.min(
+      currentWritingIndex + Math.floor(Math.random() * 2) + 2, // 2-3 cards ahead
+      writingCards.length
+    );
+    
+    // Add the card back into the queue
+    newWritingCards.splice(reinsertPosition, 0, currentCard);
+    
+    setWritingCards(newWritingCards);
+    clearCanvas();
+    setWritingFeedback(null);
+    
+    // Move to next card
+    if (currentWritingIndex < newWritingCards.length - 1) {
+      setCurrentWritingIndex(currentWritingIndex + 1);
+    } else {
+      // Session complete - show completion screen
+      setWritingSessionComplete(true);
+    }
+  };
+
+  // Handle "I Know This" - move to next without re-queuing
+  const handleKnowCard = () => {
+    const currentCard = writingCards[currentWritingIndex];
+    
+    // Update with good score
+    updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, 5);
+    
+    clearCanvas();
+    setWritingFeedback(null);
+    
+    // Move to next card
+    if (currentWritingIndex < writingCards.length - 1) {
+      setCurrentWritingIndex(currentWritingIndex + 1);
+    } else {
+      // Session complete - show completion screen
+      setWritingSessionComplete(true);
+    }
+  };
+
+  // Canvas drawing handlers
+  const startDrawing = (e) => {
+    setIsDrawing(true);
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+    const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+    setCurrentStroke([{ x, y }]);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing) return;
+    
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+    const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+    
+    const newPoint = { x, y };
+    setCurrentStroke(prev => [...prev, newPoint]);
+    
+    // Draw the line
+    if (currentStroke.length > 0) {
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      
+      const lastPoint = currentStroke[currentStroke.length - 1];
+      ctx.beginPath();
+      ctx.moveTo(lastPoint.x, lastPoint.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+  };
+
+  const stopDrawing = () => {
+    if (isDrawing && currentStroke.length > 0) {
+      setStrokes(prev => [...prev, currentStroke]);
+      setCurrentStroke([]);
+    }
+    setIsDrawing(false);
+  };
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setStrokes([]);
+    setCurrentStroke([]);
+    setWritingFeedback(null);
+  };
+
+  const checkWriting = () => {
+    // Simple validation: check if user drew something
+    if (strokes.length === 0) {
+      setWritingFeedback({ correct: false, message: 'Please draw the character first!' });
+      return;
+    }
+
+    // For now, we'll do a simple check based on stroke count
+    // In a real app, you'd use a library like Hanzi Writer or OCR
+    const currentCard = writingCards[currentWritingIndex];
+    
+    // Estimate expected strokes (this is a simplified approximation)
+    const expectedStrokes = currentCard.chinese.length * 5; // rough estimate
+    const drawnStrokes = strokes.length;
+    
+    // Give feedback based on effort
+    if (drawnStrokes >= 3) {
+      setWritingFeedback({ 
+        correct: true, 
+        message: 'Great effort! Keep practicing to improve your stroke order.' 
+      });
+      updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, 4);
+    } else {
+      setWritingFeedback({ 
+        correct: false, 
+        message: 'Try drawing more strokes. Chinese characters need multiple strokes!' 
+      });
+      updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, 2);
+    }
+  };
+
+  const nextWritingCard = () => {
+    if (currentWritingIndex < writingCards.length - 1) {
+      setCurrentWritingIndex(currentWritingIndex + 1);
+      clearCanvas();
+      setWritingFeedback(null);
+    } else {
+      alert('Great job! You\'ve completed the writing practice!');
+      setCurrentView('home');
+    }
+  };
+
+  // Navigate cards
+  const nextCard = () => {
+    if (currentCardIndex < shuffledCards.length - 1) {
+      setCurrentCardIndex(currentCardIndex + 1);
+      setIsFlipped(false);
+    } else {
+      // Reached the end of the deck
+      alert('Great job! You\'ve finished studying this deck!');
+      setCurrentView('home');
+    }
+  };
+
+  const previousCard = () => {
+    if (currentCardIndex > 0) {
+      setCurrentCardIndex(currentCardIndex - 1);
+      setIsFlipped(false);
+    }
+  };
+
+  // Edit deck
+  const startEditDeck = (deck) => {
+    setEditingDeck(deck);
+    setCurrentView('edit');
+  };
+
+  // HOME VIEW
+  if (currentView === 'home') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">汉语学习 Chinese Learning</h1>
+            <p className="text-gray-600">Master Chinese with adaptive flashcards and spaced repetition</p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-4 mb-8 justify-center flex-wrap">
+            <button
+              onClick={() => setCurrentView('create')}
+              className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
+            >
+              <Plus size={20} />
+              Create New Deck
+            </button>
+            <button
+              onClick={() => setCurrentView('stats')}
+              className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
+            >
+              <TrendingUp size={20} />
+              View Stats
+            </button>
+            <label className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition cursor-pointer">
+              <Upload size={20} />
+              Import Deck
+              <input type="file" accept=".json" onChange={importDeck} className="hidden" />
+            </label>
+          </div>
+
+          {/* Decks Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {decks.map(deck => {
+              const knownCards = deck.cards.filter(c => c.known).length;
+              const totalCards = deck.cards.length;
+              const progress = totalCards > 0 ? (knownCards / totalCards) * 100 : 0;
+
+              return (
+                <div key={deck.id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-gray-800 mb-1">{deck.name}</h3>
+                      <p className="text-sm text-gray-600">{totalCards} cards</p>
+                    </div>
+                    <BookOpen className="text-red-600" size={24} />
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="mb-4">
+                    <div className="flex justify-between text-xs text-gray-600 mb-1">
+                      <span>Progress</span>
+                      <span>{knownCards}/{totalCards}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-green-500 h-2 rounded-full transition-all"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => startStudy(deck)}
+                        disabled={totalCards === 0}
+                        className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        <Play size={16} />
+                        Study
+                      </button>
+                      <button
+                        onClick={() => startLearnMode(deck)}
+                        disabled={totalCards === 0}
+                        className="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        <Brain size={16} />
+                        Learn
+                      </button>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => startMatchGame(deck)}
+                        disabled={totalCards < 4}
+                        className="flex-1 bg-yellow-600 text-white py-2 rounded-lg hover:bg-yellow-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+                      >
+                        Match
+                      </button>
+                      <button
+                        onClick={() => startPracticeTest(deck)}
+                        disabled={totalCards < 5}
+                        className="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+                      >
+                        Test
+                      </button>
+                      <button
+                        onClick={() => startWritingPractice(deck)}
+                        disabled={totalCards === 0}
+                        className="flex-1 bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+                      >
+                        Write
+                      </button>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEditDeck(deck);
+                        }}
+                        className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition flex-1"
+                        title="Edit deck"
+                      >
+                        <Edit2 size={16} className="mx-auto" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          exportDeck(deck);
+                        }}
+                        className="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition flex-1"
+                        title="Export deck"
+                      >
+                        <Download size={16} className="mx-auto" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteConfirmation({ deckId: deck.id, deckName: deck.name });
+                        }}
+                        className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition flex-1"
+                        title="Delete deck"
+                      >
+                        <Trash2 size={16} className="mx-auto" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {decks.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-600 text-lg">No decks yet. Create your first deck to get started!</p>
+            </div>
+          )}
+        </div>
+
+        {/* Delete Confirmation Modal */}
+        {deleteConfirmation && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setDeleteConfirmation(null)}>
+            <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Delete Deck?</h2>
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to delete <span className="font-bold">"{deleteConfirmation.deckName}"</span>?
+                <br /><br />
+                This action cannot be undone.
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setDeleteConfirmation(null)}
+                  className="flex-1 bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setDecks(decks.filter(d => d.id !== deleteConfirmation.deckId));
+                    setDeleteConfirmation(null);
+                  }}
+                  className="flex-1 bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition font-medium"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // CREATE DECK VIEW
+  if (currentView === 'create') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-6">
+        <div className="max-w-2xl mx-auto">
+          <button
+            onClick={() => setCurrentView('home')}
+            className="mb-6 text-gray-600 hover:text-gray-800 flex items-center gap-2"
+          >
+            ← Back to Home
+          </button>
+
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Create New Deck</h2>
+            
+            <div className="mb-6">
+              <label className="block text-gray-700 font-medium mb-2">Deck Name</label>
+              <input
+                type="text"
+                value={newDeckName}
+                onChange={(e) => setNewDeckName(e.target.value)}
+                placeholder="e.g., HSK 2 Vocabulary"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
+              />
+            </div>
+
+            <button
+              onClick={createDeck}
+              className="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition font-medium"
+            >
+              Create Deck
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // EDIT DECK VIEW
+  if (currentView === 'edit' && editingDeck) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <button
+            onClick={() => {
+              setEditingDeck(null);
+              setCurrentView('home');
+            }}
+            className="mb-6 text-gray-600 hover:text-gray-800 flex items-center gap-2"
+          >
+            ← Back to Home
+          </button>
+
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Edit: {editingDeck.name}</h2>
+            
+            {/* Add New Card Form */}
+            <div className="mb-8 p-6 bg-gray-50 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Add New Card</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Chinese Character</label>
+                  <input
+                    type="text"
+                    value={newCard.chinese}
+                    onChange={(e) => setNewCard({ ...newCard, chinese: e.target.value })}
+                    placeholder="你好"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Pinyin</label>
+                  <input
+                    type="text"
+                    value={newCard.pinyin}
+                    onChange={(e) => setNewCard({ ...newCard, pinyin: e.target.value })}
+                    placeholder="nǐ hǎo"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">English Translation</label>
+                  <input
+                    type="text"
+                    value={newCard.english}
+                    onChange={(e) => setNewCard({ ...newCard, english: e.target.value })}
+                    placeholder="hello"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={() => addCard(editingDeck.id)}
+                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium"
+              >
+                Add Card
+              </button>
+            </div>
+
+            {/* Cards List */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Cards ({editingDeck.cards.length})
+              </h3>
+              
+              {editingDeck.cards.length === 0 ? (
+                <p className="text-gray-600 text-center py-8">No cards yet. Add your first card above!</p>
+              ) : (
+                <div className="space-y-3">
+                  {editingDeck.cards.map(card => (
+                    <div key={card.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                      <div className="flex-1 grid grid-cols-3 gap-4">
+                        <div>
+                          <span className="text-2xl font-bold text-gray-800">{card.chinese}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-700">{card.pinyin}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">{card.english}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => speakChinese(card.chinese)}
+                          className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        >
+                          <Volume2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => deleteCard(editingDeck.id, card.id)}
+                          className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // STUDY VIEW
+  if (currentView === 'study' && selectedDeck) {
+    const currentCard = shuffledCards[currentCardIndex];
+
+    if (!currentCard) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-6 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-xl text-gray-600 mb-4">No cards in this deck yet!</p>
+            <button
+              onClick={() => setCurrentView('home')}
+              className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-6">
+        <style>{`
+          .flip-card {
+            perspective: 1000px;
+          }
+          
+          .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+          }
+          
+          .flip-card-inner.flipped {
+            transform: rotateY(180deg);
+          }
+          
+          .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+          }
+          
+          .flip-card-back {
+            transform: rotateY(180deg);
+          }
+
+          .swipe-left {
+            animation: swipeLeft 0.3s ease-out;
+          }
+
+          .swipe-right {
+            animation: swipeRight 0.3s ease-out;
+          }
+
+          @keyframes swipeLeft {
+            0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateX(-100px) rotate(-10deg); opacity: 0; }
+          }
+
+          @keyframes swipeRight {
+            0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateX(100px) rotate(10deg); opacity: 0; }
+          }
+        `}</style>
+
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => setCurrentView('home')}
+              className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            >
+              ← Exit Study Mode
+            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={shuffleCards}
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center gap-2"
+              >
+                🔀 Shuffle
+              </button>
+              <div className="text-gray-600">
+                Card {currentCardIndex + 1} of {shuffledCards.length}
+              </div>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-red-600 h-2 rounded-full transition-all"
+                style={{ width: `${((currentCardIndex + 1) / shuffledCards.length) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Swipe Instructions */}
+          <div className="text-center mb-4">
+            <p className="text-gray-600">
+              Tap to flip • Swipe right if you know it • Swipe left if you're still learning
+            </p>
+          </div>
+
+          {/* Flashcard with 3D Flip */}
+          <div className="mb-8" style={{ minHeight: '500px' }}>
+            <div
+              ref={cardRef}
+              className={`flip-card ${swipeDirection === 'left' ? 'swipe-left' : ''} ${swipeDirection === 'right' ? 'swipe-right' : ''}`}
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+              style={{ height: '500px', width: '100%' }}
+            >
+              <div
+                onClick={() => setIsFlipped(!isFlipped)}
+                className={`flip-card-inner ${isFlipped ? 'flipped' : ''}`}
+                style={{ cursor: 'pointer', height: '100%' }}
+              >
+                {/* Front: Chinese Character */}
+                <div className="flip-card-front bg-white rounded-2xl shadow-2xl p-12 flex items-center justify-center" style={{ height: '100%' }}>
+                  <div className="text-center w-full">
+                    <div className="text-8xl font-bold text-gray-800 mb-4">
+                      {currentCard.chinese}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        speakChinese(currentCard.chinese);
+                      }}
+                      className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 mx-auto"
+                    >
+                      <Volume2 size={20} />
+                      Pronounce
+                    </button>
+                    <p className="text-gray-500 mt-8">Tap to flip</p>
+                  </div>
+                </div>
+
+                {/* Back: Pinyin + English */}
+                <div className="flip-card-back bg-white rounded-2xl shadow-2xl p-12 flex items-center justify-center" style={{ height: '100%' }}>
+                  <div className="text-center w-full">
+                    <div className="text-4xl text-red-600 font-semibold mb-4">
+                      {currentCard.pinyin}
+                    </div>
+                    <div className="text-3xl text-gray-700">
+                      {currentCard.english}
+                    </div>
+                    <p className="text-gray-500 mt-8">Tap to flip back</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Know/Don't Know Buttons (only show when flipped) */}
+          {isFlipped && !swipeDirection && (
+            <div className="flex gap-4 mb-8 justify-center">
+              <button
+                onClick={() => handleSwipe('left')}
+                className="flex items-center gap-2 bg-red-600 text-white px-8 py-4 rounded-lg hover:bg-red-700 transition text-lg font-medium"
+              >
+                <X size={24} />
+                Still Learning
+              </button>
+              <button
+                onClick={() => handleSwipe('right')}
+                className="flex items-center gap-2 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 transition text-lg font-medium"
+              >
+                <Check size={24} />
+                I Know This
+              </button>
+            </div>
+          )}
+
+          {/* Navigation Buttons */}
+          <div className="flex justify-between">
+            <button
+              onClick={previousCard}
+              disabled={currentCardIndex === 0}
+              className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              ← Previous
+            </button>
+            <button
+              onClick={nextCard}
+              disabled={currentCardIndex === shuffledCards.length - 1}
+              className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // STATS VIEW
+  if (currentView === 'stats') {
+    const totalCards = decks.reduce((sum, deck) => sum + deck.cards.length, 0);
+    const knownCards = decks.reduce((sum, deck) => sum + deck.cards.filter(c => c.known).length, 0);
+    const studiedToday = decks.some(deck => 
+      deck.cards.some(card => {
+        if (!card.lastReviewed) return false;
+        const today = new Date().toDateString();
+        const reviewDate = new Date(card.lastReviewed).toDateString();
+        return today === reviewDate;
+      })
+    );
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <button
+            onClick={() => setCurrentView('home')}
+            className="mb-6 text-gray-600 hover:text-gray-800 flex items-center gap-2"
+          >
+            ← Back to Home
+          </button>
+
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
+            <h2 className="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3">
+              <TrendingUp size={32} className="text-green-600" />
+              Your Progress
+            </h2>
+
+            {/* Study Streak */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-xl">
+                <div className="text-4xl font-bold text-orange-600 mb-2">
+                  🔥 {studyStreak.currentStreak}
+                </div>
+                <div className="text-gray-700 font-medium">Day Streak</div>
+                <div className="text-sm text-gray-600 mt-1">
+                  {studiedToday ? "Studied today! ✓" : "Study today to continue streak"}
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-6 rounded-xl">
+                <div className="text-4xl font-bold text-purple-600 mb-2">
+                  {studyStreak.longestStreak}
+                </div>
+                <div className="text-gray-700 font-medium">Longest Streak</div>
+                <div className="text-sm text-gray-600 mt-1">Keep it up!</div>
+              </div>
+
+              <div className="bg-gradient-to-br from-green-50 to-teal-50 p-6 rounded-xl">
+                <div className="text-4xl font-bold text-green-600 mb-2">
+                  {knownCards}/{totalCards}
+                </div>
+                <div className="text-gray-700 font-medium">Cards Mastered</div>
+                <div className="text-sm text-gray-600 mt-1">
+                  {totalCards > 0 ? Math.round((knownCards / totalCards) * 100) : 0}% complete
+                </div>
+              </div>
+            </div>
+
+            {/* Deck Stats */}
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">Deck Statistics</h3>
+            <div className="space-y-4">
+              {decks.map(deck => {
+                const deckKnown = deck.cards.filter(c => c.known).length;
+                const deckTotal = deck.cards.length;
+                const deckProgress = deckTotal > 0 ? (deckKnown / deckTotal) * 100 : 0;
+
+                const needsReview = deck.cards.filter(card => {
+                  if (!card.nextReview) return false;
+                  return Date.now() >= card.nextReview;
+                }).length;
+
+                return (
+                  <div key={deck.id} className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-semibold text-gray-800">{deck.name}</h4>
+                      <span className="text-sm text-gray-600">{deckKnown}/{deckTotal} mastered</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                      <div
+                        className="bg-green-500 h-2 rounded-full transition-all"
+                        style={{ width: `${deckProgress}%` }}
+                      />
+                    </div>
+                    {needsReview > 0 && (
+                      <div className="text-sm text-orange-600">
+                        {needsReview} card{needsReview > 1 ? 's' : ''} need{needsReview === 1 ? 's' : ''} review
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // LEARN MODE VIEW
+  if (currentView === 'learn' && selectedDeck && learnCards.length > 0) {
+    const currentCard = learnCards[currentLearnIndex];
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => setCurrentView('home')}
+              className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            >
+              ← Exit Learn Mode
+            </button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-purple-600">
+                <Brain size={20} />
+                <span className="font-medium">
+                  {learnMode === 'multiple-choice' ? 'Multiple Choice' : 
+                   learnMode === 'fill-blank' ? 'Fill in the Blank' : 'Written Answer'}
+                </span>
+              </div>
+              <div className="text-gray-600">
+                {currentLearnIndex + 1} / {learnCards.length}
+              </div>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-purple-600 h-2 rounded-full transition-all"
+                style={{ width: `${((currentLearnIndex + 1) / learnCards.length) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Question Card */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
+            {/* Chinese Character */}
+            <div className="text-center mb-8">
+              <div className="text-7xl font-bold text-gray-800 mb-4">
+                {currentCard.chinese}
+              </div>
+              <button
+                onClick={() => speakChinese(currentCard.chinese)}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 mx-auto"
+              >
+                <Volume2 size={20} />
+                Listen
+              </button>
+            </div>
+
+            {/* Question based on mode */}
+            {learnMode === 'multiple-choice' && !showAnswer && (
+              <div>
+                <p className="text-xl text-gray-700 mb-6 text-center">Select the correct meaning:</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {multipleChoiceOptions.map((option, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedOption(option)}
+                      className={`p-4 rounded-lg border-2 transition text-lg ${
+                        selectedOption === option
+                          ? 'border-purple-600 bg-purple-50'
+                          : 'border-gray-300 hover:border-purple-400'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={checkAnswer}
+                  disabled={!selectedOption}
+                  className="w-full mt-6 bg-purple-600 text-white py-4 rounded-lg hover:bg-purple-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed text-lg font-medium"
+                >
+                  Check Answer
+                </button>
+              </div>
+            )}
+
+            {(learnMode === 'fill-blank' || learnMode === 'written') && !showAnswer && (
+              <div>
+                <p className="text-xl text-gray-700 mb-6 text-center">
+                  Type the pinyin pronunciation:
+                </p>
+                <input
+                  type="text"
+                  value={userAnswer}
+                  onChange={(e) => setUserAnswer(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && userAnswer.trim()) {
+                      checkAnswer();
+                    }
+                  }}
+                  placeholder="e.g., nǐ hǎo or ni3 hao3"
+                  className="w-full px-6 py-4 text-xl border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 mb-4"
+                  autoFocus
+                />
+                <p className="text-sm text-gray-500 mb-6 text-center">
+                  Tip: Type with tone marks (nǐ hǎo) or numbers (ni3 hao3)
+                </p>
+                <button
+                  onClick={checkAnswer}
+                  disabled={!userAnswer.trim()}
+                  className="w-full bg-purple-600 text-white py-4 rounded-lg hover:bg-purple-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed text-lg font-medium"
+                >
+                  Check Answer
+                </button>
+              </div>
+            )}
+
+            {/* Answer Result */}
+            {showAnswer && (
+              <div className={`p-6 rounded-lg ${answerResult === 'correct' ? 'bg-green-50' : 'bg-red-50'}`}>
+                <div className="flex items-center gap-3 mb-4">
+                  {answerResult === 'correct' ? (
+                    <Check size={32} className="text-green-600" />
+                  ) : (
+                    <X size={32} className="text-red-600" />
+                  )}
+                  <h3 className={`text-2xl font-bold ${answerResult === 'correct' ? 'text-green-600' : 'text-red-600'}`}>
+                    {answerResult === 'correct' ? 'Correct!' : 'Not quite...'}
+                  </h3>
+                </div>
+
+                <div className="mb-4">
+                  <p className="text-gray-700 text-lg mb-2">
+                    <span className="font-semibold">Pinyin:</span> {currentCard.pinyin}
+                  </p>
+                  <p className="text-gray-700 text-lg">
+                    <span className="font-semibold">Meaning:</span> {currentCard.english}
+                  </p>
+                </div>
+
+                <button
+                  onClick={nextLearnCard}
+                  className="w-full bg-purple-600 text-white py-4 rounded-lg hover:bg-purple-700 transition text-lg font-medium"
+                >
+                  {currentLearnIndex < learnCards.length - 1 ? 'Next Question →' : 'Finish Session'}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Difficulty Indicator */}
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow">
+              <TrendingUp size={16} className="text-purple-600" />
+              <span className="text-sm text-gray-600">
+                Difficulty Level: {currentCard.difficulty}/5
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // MATCH GAME VIEW
+  if (currentView === 'match' && selectedDeck) {
+    const allMatched = matchedPairs.length === matchCards.length / 2;
+    const timeElapsed = matchEndTime ? Math.round((matchEndTime - matchStartTime) / 1000) : 
+                       matchStartTime ? Math.round((Date.now() - matchStartTime) / 1000) : 0;
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-orange-50 p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => setCurrentView('home')}
+              className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            >
+              ← Back to Home
+            </button>
+            <div className="text-gray-600">
+              {matchedPairs.length} / {matchCards.length / 2} matched • {timeElapsed}s
+            </div>
+          </div>
+
+          {allMatched ? (
+            <div className="bg-white rounded-xl shadow-xl p-12 text-center">
+              <div className="text-6xl mb-4">🎉</div>
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Congratulations!</h2>
+              <p className="text-xl text-gray-600 mb-6">
+                You matched all pairs in {timeElapsed} seconds!
+              </p>
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={() => startMatchGame(selectedDeck)}
+                  className="bg-yellow-600 text-white px-8 py-3 rounded-lg hover:bg-yellow-700 transition"
+                >
+                  Play Again
+                </button>
+                <button
+                  onClick={() => setCurrentView('home')}
+                  className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition"
+                >
+                  Back to Home
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Match Game</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {matchCards.map(card => {
+                  const isMatched = matchedPairs.includes(card.matchId);
+                  const isSelected = selectedMatchCards.find(c => c.id === card.id);
+
+                  return (
+                    <button
+                      key={card.id}
+                      onClick={() => selectMatchCard(card)}
+                      disabled={isMatched}
+                      className={`p-6 rounded-xl text-center transition-all transform hover:scale-105 ${
+                        isMatched
+                          ? 'bg-green-100 text-green-800 opacity-50 cursor-not-allowed'
+                          : isSelected
+                          ? 'bg-blue-600 text-white shadow-xl scale-105'
+                          : 'bg-white text-gray-800 shadow-lg hover:shadow-xl'
+                      }`}
+                    >
+                      <div className={`${card.type === 'chinese' ? 'text-3xl font-bold' : 'text-lg'}`}>
+                        {card.content}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // PRACTICE TEST VIEW
+  if (currentView === 'test' && selectedDeck) {
+    if (showTestResults) {
+      const correctAnswers = testQuestions.filter((q, i) => testAnswers[i] === q.card.english).length;
+      const score = Math.round((correctAnswers / testQuestions.length) * 100);
+
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
+          <div className="max-w-4xl mx-auto">
+            <button
+              onClick={() => setCurrentView('home')}
+              className="mb-6 text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            >
+              ← Back to Home
+            </button>
+
+            <div className="bg-white rounded-xl shadow-xl p-8">
+              <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Test Results</h2>
+              
+              <div className="text-center mb-8">
+                <div className={`text-6xl font-bold mb-4 ${score >= 80 ? 'text-green-600' : score >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
+                  {score}%
+                </div>
+                <p className="text-xl text-gray-600">
+                  {correctAnswers} out of {testQuestions.length} correct
+                </p>
+              </div>
+
+              <div className="space-y-4 mb-8">
+                {testQuestions.map((q, index) => {
+                  const isCorrect = testAnswers[index] === q.card.english;
+                  return (
+                    <div key={index} className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        {isCorrect ? (
+                          <Check className="text-green-600" size={20} />
+                        ) : (
+                          <X className="text-red-600" size={20} />
+                        )}
+                        <span className="text-2xl font-bold">{q.card.chinese}</span>
+                        <span className="text-gray-600">({q.card.pinyin})</span>
+                      </div>
+                      <div className="ml-7">
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Your answer:</span> {testAnswers[index] || '(no answer)'}
+                        </p>
+                        {!isCorrect && (
+                          <p className="text-green-700">
+                            <span className="font-semibold">Correct answer:</span> {q.card.english}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  onClick={() => startPracticeTest(selectedDeck)}
+                  className="flex-1 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition"
+                >
+                  Take Another Test
+                </button>
+                <button
+                  onClick={() => setCurrentView('home')}
+                  className="flex-1 bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition"
+                >
+                  Back to Home
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const currentQuestion = testQuestions[currentTestIndex];
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => setCurrentView('home')}
+              className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            >
+              ← Exit Test
+            </button>
+            <div className="text-gray-600">
+              Question {currentTestIndex + 1} of {testQuestions.length}
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-indigo-600 h-2 rounded-full transition-all"
+                style={{ width: `${((currentTestIndex + 1) / testQuestions.length) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-xl p-8 mb-6">
+            <div className="text-center mb-8">
+              <div className="text-7xl font-bold text-gray-800 mb-4">
+                {currentQuestion.card.chinese}
+              </div>
+              <button
+                onClick={() => speakChinese(currentQuestion.card.chinese)}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 mx-auto"
+              >
+                <Volume2 size={20} />
+                Listen
+              </button>
+            </div>
+
+            <p className="text-xl text-gray-700 mb-6 text-center">Select the correct meaning:</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {currentQuestion.options.map((option, index) => (
+                <button
+                  key={index}
+                  onClick={() => answerTestQuestion(option)}
+                  className={`p-4 rounded-lg border-2 transition text-lg ${
+                    testAnswers[currentTestIndex] === option
+                      ? 'border-indigo-600 bg-indigo-50'
+                      : 'border-gray-300 hover:border-indigo-400'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-between">
+            <button
+              onClick={() => setCurrentTestIndex(Math.max(0, currentTestIndex - 1))}
+              disabled={currentTestIndex === 0}
+              className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              ← Previous
+            </button>
+            
+            {currentTestIndex === testQuestions.length - 1 ? (
+              <button
+                onClick={submitTest}
+                disabled={testAnswers.some(a => a === null)}
+                className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                Submit Test
+              </button>
+            ) : (
+              <button
+                onClick={() => setCurrentTestIndex(Math.min(testQuestions.length - 1, currentTestIndex + 1))}
+                className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition"
+              >
+                Next →
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // CHARACTER WRITING PRACTICE VIEW
+  if (currentView === 'writing' && selectedDeck && writingCards.length > 0) {
+    // Show completion screen if session is complete
+    if (writingSessionComplete) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 p-6 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-2xl p-12 max-w-2xl mx-auto text-center">
+            <div className="text-6xl mb-6">🎉</div>
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">Great Job!</h2>
+            <p className="text-xl text-gray-600 mb-8">
+              You've completed this writing practice session!
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => setCurrentView('home')}
+                className="bg-gray-600 text-white px-8 py-4 rounded-lg hover:bg-gray-700 transition text-lg font-medium"
+              >
+                Finish
+              </button>
+              <button
+                onClick={getNewWritingSet}
+                className="bg-pink-600 text-white px-8 py-4 rounded-lg hover:bg-pink-700 transition text-lg font-medium"
+              >
+                Practice Next 10 →
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const currentCard = writingCards[currentWritingIndex];
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => setCurrentView('home')}
+              className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            >
+              ← Exit Writing Practice
+            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={shuffleWritingCards}
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center gap-2"
+              >
+                🔀 Shuffle
+              </button>
+              <div className="text-gray-600">
+                Character {currentWritingIndex + 1} of {writingCards.length}
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-pink-600 h-2 rounded-full transition-all"
+                style={{ width: `${((currentWritingIndex + 1) / writingCards.length) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Character to Practice */}
+          <div className="bg-white rounded-xl shadow-xl p-8 mb-6">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">Practice Writing:</h3>
+              <div className="text-8xl font-bold text-gray-800 mb-4">
+                {currentCard.chinese}
+              </div>
+              <div className="text-2xl text-red-600 mb-2">{currentCard.pinyin}</div>
+              <div className="text-xl text-gray-600 mb-4">{currentCard.english}</div>
+              <button
+                onClick={() => speakChinese(currentCard.chinese)}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 mx-auto"
+              >
+                <Volume2 size={20} />
+                Pronounce
+              </button>
+            </div>
+          </div>
+
+          {/* Drawing Canvas */}
+          <div className="bg-white rounded-xl shadow-xl p-8 mb-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">
+              Draw the character below:
+            </h3>
+            
+            {/* Canvas */}
+            <div className="mb-4">
+              <canvas
+                ref={canvasRef}
+                width={500}
+                height={500}
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseLeave={stopDrawing}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  startDrawing(e);
+                }}
+                onTouchMove={(e) => {
+                  e.preventDefault();
+                  draw(e);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  stopDrawing();
+                }}
+                className="border-4 border-gray-300 rounded-lg mx-auto cursor-crosshair touch-none bg-white"
+                style={{ width: '100%', maxWidth: '500px', height: 'auto', aspectRatio: '1' }}
+              />
+            </div>
+
+            <div className="flex gap-4 justify-center mb-4">
+              <button
+                onClick={clearCanvas}
+                className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition"
+              >
+                Clear
+              </button>
+              <button
+                onClick={handleKnowCard}
+                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+              >
+                <Check size={20} />
+                I Know This
+              </button>
+              <button
+                onClick={handleForgotCard}
+                className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition flex items-center gap-2"
+              >
+                <X size={20} />
+                I Forgot
+              </button>
+            </div>
+
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-gray-700 text-center">
+                💡 <strong>Tip:</strong> Practice writing, then click "I Know This" if you got it right or "I Forgot" if you need more practice. Cards you forget will come back soon!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+export default ChineseLearningApp;
