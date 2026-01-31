@@ -1,6 +1,6 @@
 # Chinese Learning App (Prototype)
 
-A single-file React prototype for learning Chinese vocabulary using **flashcards + spaced repetition**, with several practice modes (Study, Learn, Match, Test, Writing). Designed as a lightweight starting point that runs entirely in the browser and saves progress locally.
+A single-file React prototype for learning Chinese vocabulary using **flashcards + spaced repetition**, with several practice modes (Study, Learn, Match, Test, Writing). Designed as a lightweight starting point that runs entirely in the browser and saves progress locally. Perfect for 100-level Chinese students.
 
 > **File:** `chinese-learning-app.jsx`  
 > **Tech:** React hooks, Tailwind CSS classes, `lucide-react` icons, browser `localStorage`, and Web Speech API (text-to-speech).
