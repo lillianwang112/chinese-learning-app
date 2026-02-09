@@ -1,0 +1,32 @@
+{
+  "name": "现在好还是从前好",
+  "cards": [
+    {"id": 1, "chinese": "变化", "pinyin": "biànhuà", "english": "change; to change"},
+    {"id": 2, "chinese": "上海", "pinyin": "Shànghǎi", "english": "Shanghai"},
+    {"id": 3, "chinese": "城市", "pinyin": "chéngshì", "english": "city"},
+    {"id": 4, "chinese": "盖", "pinyin": "gài", "english": "to build"},
+    {"id": 5, "chinese": "建", "pinyin": "jiàn", "english": "to build, to construct"},
+    {"id": 6, "chinese": "重新", "pinyin": "chóngxīn", "english": "anew, begin again from scratch"},
+    {"id": 7, "chinese": "适应", "pinyin": "shìyìng", "english": "to adapt"},
+    {"id": 8, "chinese": "改变", "pinyin": "gǎibiàn", "english": "to change; change"},
+    {"id": 9, "chinese": "衣食住行", "pinyin": "yīshízhùxíng", "english": "food, clothing, dwelling and transportation"},
+    {"id": 10, "chinese": "与", "pinyin": "yǔ", "english": "and"},
+    {"id": 11, "chinese": "通货", "pinyin": "tōnghuò", "english": "currency"},
+    {"id": 12, "chinese": "膨胀", "pinyin": "péngzhàng", "english": "to expand; expansion (通货膨胀: inflation)"},
+    {"id": 13, "chinese": "压力", "pinyin": "yālì", "english": "pressure"},
+    {"id": 14, "chinese": "加重", "pinyin": "jiāzhòng", "english": "to increase (pressure)"},
+    {"id": 15, "chinese": "过去", "pinyin": "guòqù", "english": "past"},
+    {"id": 16, "chinese": "确实", "pinyin": "quèshí", "english": "indeed"},
+    {"id": 17, "chinese": "搞", "pinyin": "gǎo", "english": "to make"},
+    {"id": 18, "chinese": "活", "pinyin": "huó", "english": "alive"},
+    {"id": 19, "chinese": "谋杀", "pinyin": "móushā", "english": "to murder"},
+    {"id": 20, "chinese": "吸毒", "pinyin": "xīdú", "english": "to do drugs"},
+    {"id": 21, "chinese": "贪污", "pinyin": "tānwū", "english": "corruption"},
+    {"id": 22, "chinese": "妓女", "pinyin": "jìnǚ", "english": "prostitute"},
+    {"id": 23, "chinese": "提", "pinyin": "tí", "english": "to mention"},
+    {"id": 24, "chinese": "开放", "pinyin": "kāifàng", "english": "open (as opposed to 封闭)"},
+    {"id": 25, "chinese": "既…又", "pinyin": "jì...yòu...", "english": "not only ... but also"},
+    {"id": 26, "chinese": "毒品", "pinyin": "dúpǐn", "english": "drugs"},
+    {"id": 27, "chinese": "封闭", "pinyin": "fēngbì", "english": "tightly closed"}
+  ]
+}

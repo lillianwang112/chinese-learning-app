@@ -1,0 +1,28 @@
+{
+  "name": "铁饭碗打破了",
+  "cards": [
+    {"id": 1, "chinese": "铁饭碗", "pinyin": "tiěfànwǎn", "english": "'iron rice bowl' – a secure job"},
+    {"id": 2, "chinese": "打破", "pinyin": "dǎpò", "english": "break; smash"},
+    {"id": 3, "chinese": "设立", "pinyin": "shèlì", "english": "设; establish"},
+    {"id": 4, "chinese": "办事处", "pinyin": "bànshìchù", "english": "office; agency"},
+    {"id": 5, "chinese": "计算机", "pinyin": "jìsuànjī", "english": "computer"},
+    {"id": 6, "chinese": "快餐", "pinyin": "kuàicān", "english": "fast food"},
+    {"id": 7, "chinese": "办公室", "pinyin": "bàngōngshì", "english": "office"},
+    {"id": 8, "chinese": "汉语", "pinyin": "Hànyǔ", "english": "Chinese language"},
+    {"id": 9, "chinese": "同时", "pinyin": "tóngshí", "english": "at the same time; in the meantime"},
+    {"id": 10, "chinese": "平常", "pinyin": "píngcháng", "english": "common; ordinary"},
+    {"id": 11, "chinese": "毕业", "pinyin": "bìyè", "english": "graduate"},
+    {"id": 12, "chinese": "毕业生", "pinyin": "bìyèshēng", "english": "college graduate"},
+    {"id": 13, "chinese": "分配", "pinyin": "fēnpèi", "english": "distribute; allot"},
+    {"id": 14, "chinese": "促进", "pinyin": "cùjìn", "english": "promote; accelerate"},
+    {"id": 15, "chinese": "观念", "pinyin": "guānniàn", "english": "concept; notion; idea"},
+    {"id": 16, "chinese": "制度", "pinyin": "zhìdù", "english": "system"},
+    {"id": 17, "chinese": "稳定", "pinyin": "wěndìng", "english": "stable (only modify abstract nouns)"},
+    {"id": 18, "chinese": "各行各业", "pinyin": "gèháng gèyè", "english": "all trades and professions"},
+    {"id": 19, "chinese": "竞争", "pinyin": "jìngzhēng", "english": "competition, compete"},
+    {"id": 20, "chinese": "认识到", "pinyin": "rènshi dào", "english": "realize; understand; comprehend; recognize"},
+    {"id": 21, "chinese": "成功", "pinyin": "chénggōng", "english": "success, succeed, successful"},
+    {"id": 22, "chinese": "大锅饭", "pinyin": "dàguōfàn", "english": "food prepared in a large pot; 'eat out of the same pot' – reap the same benefits regardless of who works more"},
+    {"id": 23, "chinese": "不再", "pinyin": "búzài", "english": "no longer"}
+  ]
+}

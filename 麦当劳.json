@@ -1,0 +1,30 @@
+{
+  "name": "麦当劳",
+  "cards": [
+    {"id": 1, "chinese": "麦当劳", "pinyin": "Màidāngláo", "english": "McDonald's"},
+    {"id": 2, "chinese": "汉堡包", "pinyin": "hànbǎobāo", "english": "hamburger"},
+    {"id": 3, "chinese": "炸", "pinyin": "zhá", "english": "to fry"},
+    {"id": 4, "chinese": "薯条", "pinyin": "shǔtiáo", "english": "French fries"},
+    {"id": 5, "chinese": "可口可乐", "pinyin": "kěkǒukělè", "english": "Coca Cola"},
+    {"id": 6, "chinese": "花钱", "pinyin": "huāqián", "english": "to spend money"},
+    {"id": 7, "chinese": "大众化", "pinyin": "dàzhònghuà", "english": "popular"},
+    {"id": 8, "chinese": "快餐", "pinyin": "kuàicān", "english": "fast-food"},
+    {"id": 9, "chinese": "店", "pinyin": "diàn", "english": "store"},
+    {"id": 10, "chinese": "高级", "pinyin": "gāojí", "english": "high class, first rate"},
+    {"id": 11, "chinese": "享受", "pinyin": "xiǎngshòu", "english": "luxurious enjoyment; to enjoy"},
+    {"id": 12, "chinese": "各国", "pinyin": "gèguó", "english": "each and every country"},
+    {"id": 13, "chinese": "代表", "pinyin": "dàibiǎo", "english": "representative; to represent"},
+    {"id": 14, "chinese": "不幸", "pinyin": "búxìng", "english": "unfortunate"},
+    {"id": 15, "chinese": "一向", "pinyin": "yīxiàng", "english": "all along"},
+    {"id": 16, "chinese": "认为", "pinyin": "rènwéi", "english": "to believe, to think, to consider"},
+    {"id": 17, "chinese": "正", "pinyin": "zhèng", "english": "just, precisely"},
+    {"id": 18, "chinese": "说明", "pinyin": "shuōmíng", "english": "to show (in this context), to illustrate, to clarify, to explain"},
+    {"id": 19, "chinese": "吸引", "pinyin": "xīyǐn", "english": "to attract, to draw"},
+    {"id": 20, "chinese": "水饺", "pinyin": "shuǐjiǎo", "english": "boiled dumplings (Chinese ravioli)"},
+    {"id": 21, "chinese": "服务员", "pinyin": "fúwùyuán", "english": "service personnel"},
+    {"id": 22, "chinese": "效率", "pinyin": "xiàolǜ", "english": "efficiency"},
+    {"id": 23, "chinese": "笑容", "pinyin": "xiàoróng", "english": "smile"},
+    {"id": 24, "chinese": "起码", "pinyin": "qǐmǎ", "english": "most basic"},
+    {"id": 25, "chinese": "离开", "pinyin": "líkāi", "english": "to leave"}
+  ]
+}
