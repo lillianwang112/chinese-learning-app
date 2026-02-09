@@ -2,7 +2,7 @@
 
 大家好! 👋
 
-I built this app to help with learning the vocabulary for CHI 108. It's a full-featured Chinese learning tool with flashcards, writing practice, games, and more! 
+I built this app to help with learning the vocabulary for CHI 108. It's a full-featured Chinese learning tool with flashcards, handwriting practice, games, and more! 
 
 ## 📱 What Can This App Do?
 
@@ -107,9 +107,13 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
 
 ### ✍️ Writing Practice
 - **Two modes**: Practice 10 cards or all cards at once
-- Draw characters with your mouse/finger on the canvas
-- Scroll slightly down to cover up the character(s) to exercise your memory
-- Cards you forget will come back in your practice queue
+- Draw characters with your mouse/stylus/finger on the canvas
+- **Pro tip**: Scroll slightly down to cover up the character(s) to exercise your memory (recommended)
+- Scroll back up when you're done drawing to see if you got it right
+- Rate yourself honestly:
+  - **"I Know This"** - You wrote it correctly → Card moves to the back of the queue
+  - **"I Forgot"** - You got it wrong or needed to peek → Card comes back sooner for more practice
+- Keep practicing! Cards you struggle with will reappear until you master them
 
 ### 🎮 Match Game
 - Match Chinese words with English meanings
