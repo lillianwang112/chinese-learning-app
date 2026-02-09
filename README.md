@@ -7,6 +7,7 @@ I built this app to help with learning the vocabulary for CHI 108. It's a full-f
 ## 📱 What Can This App Do?
 
 - **Flashcard Mode**: Smart spaced repetition (cards you struggle with come back sooner!)
+- **Learn Mode**: Quiz yourself actively with multiple choice, fill-in-blank, or written answer questions
 - **Writing Practice**: Draw characters with your mouse/finger and get instant feedback
 - **Match Game**: Fun timed matching exercise
 - **Test Mode**: Quiz yourself with multiple choice
@@ -101,7 +102,8 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
 ## ✨ App Features
 
 ### 📖 Flashcard Mode
-- Flip cards to test yourself
+- Flip cards to test yourself (click to flip between Chinese and English)
+- **Quick navigation**: Swipe right if you know it, swipe left if you don't
 - Smart spaced repetition schedules reviews automatically
 - Cards you struggle with come back sooner!
 
@@ -114,6 +116,16 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
   - **"I Know This"** - You wrote it correctly → Card moves to the back of the queue
   - **"I Forgot"** - You got it wrong or needed to peek → Card comes back sooner for more practice
 - Keep practicing! Cards you struggle with will reappear until you master them
+
+### 🧠 Learn Mode
+- **Interactive quiz format** with three question types:
+  - **Multiple Choice**: Select the correct English meaning
+  - **Fill in the Blank**: Type the pinyin or English translation
+  - **Written Answer**: Write out the full answer
+- Shows the Chinese character and lets you hear the pronunciation
+- Get instant feedback on whether your answer is correct
+- Perfect for **active recall** - testing yourself helps memorization!
+- Progress bar shows how many questions you have left
 
 ### 🎮 Match Game
 - Match Chinese words with English meanings
@@ -153,7 +165,9 @@ A: Yes! Import as many vocabulary decks as you want at a time.
 
 ## 🙏 About This Project
 
-This was created by a CHI 108 student for a more tailored vocabulary learning app experience.
+This was created by a CHI 108 student for a more tailored vocabulary learning app experience. 
+
+**Note:** This app is still a work in progress and may have bugs. If you find any issues or have suggestions for improvements, please let me know at **lw3319@princeton.edu**. Your feedback helps make it better for everyone!
 
 The app is open source and available for anyone to use. If you find it helpful, feel free to share it with other Chinese learners!
 
