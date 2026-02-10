@@ -229,7 +229,6 @@ A: Yes! Click the edit (pencil) button on a deck, then delete individual cards y
 - ✅ Purpose-built for studying and memorization
 - ✅ Spaced repetition for efficient learning
 - ✅ Multiple study modes
-- ⚠️ Use Pleco + this app together for best results!
 
 ### 💡 Bottom Line
 If you're already paying for Skritter, Quizlet Plus, etc., and love it, keep using it! But if you're looking for a **free, comprehensive study tool specifically for CHI 108**, this app has you covered.
