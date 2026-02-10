@@ -185,6 +185,9 @@ A: The app accepts both! Type "ni3 ha3o" or "nǐ hǎo" - it checks both.
 **Q: Can I delete cards I already know?**
 A: Yes! Click the edit (pencil) button on a deck, then delete individual cards you don't need.
 
+**Q: How does the spaced repetition work?**
+A: Cards you mark "I Know This" come back less frequently. Cards you mark "Still Learning" or get wrong in quizzes come back sooner for more practice.
+
 ## 🆚 How Does This Compare to Other Apps?
 
 ### vs. Skritter
@@ -231,7 +234,7 @@ A: Yes! Click the edit (pencil) button on a deck, then delete individual cards y
 - ✅ Multiple study modes
 
 ### 💡 Bottom Line
-If you're already paying for Skritter, Quizlet Plus, etc., and love it, keep using it! But if you're looking for a **free, comprehensive study tool specifically for CHI 108**, this app has you covered.
+If you're already paying for Skritter or Quizlet Plus and love them, keep using them! But if you're looking for a **free, comprehensive, ad-free study tool specifically made for CHI 108**, this app has you covered. **No paywalls. No subscriptions. No ads. Just learning.** 🎯
 
 ## 🙏 About This Project
 
