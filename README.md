@@ -127,7 +127,6 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
 - Clear button to erase and try again
 - Audio pronunciation button available
 - Keep practicing! Cards you struggle with will reappear until you master them
-
 - **Pro tip**: Scroll slightly down to cover up the character(s) to exercise your memory (recommended)
 <p align="center">
   <img src="screenshots/writing-before.jpg" width="30%" />
