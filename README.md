@@ -198,48 +198,17 @@ A: Cards you mark "I Know This" come back less frequently. Cards you mark "Still
 
 ## 🆚 How Does This Compare to Other Apps?
 
-### vs. Skritter
-**Skritter** ($15-20/month, ~$100/year)
-- ✅ Advanced stroke order correction
-- ✅ 10+ years of development
-- ❌ Expensive subscription
-- ❌ Requires paid account for full features
-
-**This App** (FREE!)
-- ✅ Completely free, no ads
-- ✅ Handwriting practice with canvas
-- ✅ 6 study modes in one place (Study, Learn, Match, Test, Write, Edit)
-- ✅ Pre-loaded with CHI 108 course vocabulary
-- ✅ Works in browser, no app download needed
-- ⚠️ No stroke order correction (but you can check yourself!)
-
-### vs. Quizlet
-**Quizlet** (Free with ads, $8/month for Quizlet Plus)
-- ✅ Huge library of shared decks
-- ✅ Very popular, network effects
-- ❌ Many features behind paywall (Learn mode, ad-free)
-- ❌ Frequent ads on free tier
-- ❌ No handwriting practice mode
-- ❌ Not optimized for Chinese-specific needs
-
-**This App** (FREE!)
-- ✅ Completely free, no paywalls
-- ✅ No ads ever
-- ✅ Handwriting practice built-in
-- ✅ Chinese-specific features (pinyin, audio, tone marks)
-- ✅ Made specifically for CHI 108 students
-
-### vs. Pleco
-**Pleco** (Free dictionary, paid add-ons)
-- ✅ Best Chinese dictionary app
-- ✅ Excellent handwriting recognition for lookup
-- ✅ OCR for reading text
-- ⚠️ Primarily a dictionary, not a study/flashcard app
-
-**This App** (FREE!)
-- ✅ Purpose-built for studying and memorization
-- ✅ Spaced repetition for efficient learning
-- ✅ Multiple study modes
+| Feature | Skritter | Quizlet | Pleco | **This App** |
+|---------|----------|---------|-------|--------------|
+| **Price** | $15-20/month (~$100/year) | Free with ads / $8/month Plus | Free + paid add-ons | **100% FREE** |
+| **Ads** | No ads (paid) | ❌ Ads on free tier | No ads | ✅ **No ads ever** |
+| **Handwriting Practice** | ✅ Advanced stroke order | ❌ None | ⚠️ Recognition only | ✅ **Canvas practice** |
+| **Spaced Repetition** | ✅ Yes | ✅ Yes (paywalled) | Limited | ✅ **SM-2 algorithm** |
+| **Multiple Study Modes** | ⚠️ Writing-focused | ✅ Yes (some paywalled) | ⚠️ Dictionary-focused | ✅ **6 modes included** |
+| **Chinese-Specific Features** | ✅ Stroke order, tones | ⚠️ Basic | ✅ OCR, dictionary | ✅ **Pinyin, audio, tones** |
+| **CHI 108 Vocabulary** | ❌ Manual import | ❌ Manual import | ❌ N/A | ✅ **Pre-loaded** |
+| **Works Offline** | ✅ Yes | ⚠️ Limited | ✅ Yes | ✅ **Yes** |
+| **No Download Required** | ❌ App required | ❌ App required | ❌ App required | ✅ **Browser-based** |
 
 ### 💡 Bottom Line
 If you're already paying for Skritter or Quizlet Plus and love them, keep using them! But if you're looking for a **free, comprehensive, ad-free study tool specifically made for CHI 108**, this app has you covered. **No paywalls. No subscriptions. No ads. Just learning.** 🎯
