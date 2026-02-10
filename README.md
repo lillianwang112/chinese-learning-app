@@ -120,7 +120,6 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
 ### ✍️ Writing Practice
 - **Two modes**: Practice 10 cards or all cards at once
 - Draw characters with your mouse/stylus/finger on the canvas
-- **Pro tip**: Scroll slightly down to cover up the character(s) to exercise your memory (recommended)
 - Scroll back up when you're done drawing to see if you got it right
 - Rate yourself honestly:
   - **"I Know This"** - You wrote it correctly → Card moves to the back of the queue
@@ -129,6 +128,7 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
 - Audio pronunciation button available
 - Keep practicing! Cards you struggle with will reappear until you master them
 
+- **Pro tip**: Scroll slightly down to cover up the character(s) to exercise your memory (recommended)
 <p align="center">
   <img src="screenshots/writing-before.jpg" width="30%" />
   <img src="screenshots/writing-hidden.jpg" width="30%" />
