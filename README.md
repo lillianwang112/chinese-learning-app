@@ -45,10 +45,8 @@ All the CHI108 vocabulary JSON files are in the [108vocab folder](https://github
 ## 💡 Study Tips
 
 1. **Import multiple decks** - Add all the topics we're covering this semester
-2. **Study daily** - The app shows how many cards are due (red badge on Study button)
-3. **Be honest with ratings** - Rate "Again" or "Hard" if you struggled, so the card comes back sooner
-4. **Use writing practice** - Actually drawing characters helps with retention way more than just recognition
-5. **Try different modes** - Mix up flashcards, writing, matching, and tests to keep it interesting
+2. **Use writing practice** - Actually drawing characters helps with retention way more than just recognition
+3. **Try different modes** - Mix up flashcards, writing, matching, and tests to keep it interesting
 
 ## 📚 Available Vocabulary Decks
 
