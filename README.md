@@ -177,4 +177,4 @@ The app is open source and available for anyone to use. If you find it helpful, 
 
 *Perfect for: Daily review • 写字比赛 prep • Character practice • Quick refreshers before class*
 
-*Princeton University - CHI 108 - Spring 2026*
+*Made by Lillian Wang - Princeton University - CHI 108 - Spring 2026*
