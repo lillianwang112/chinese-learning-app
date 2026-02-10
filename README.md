@@ -196,6 +196,9 @@ A: Yes! Click the edit (pencil) button on a deck, then delete individual cards y
 **Q: How does the spaced repetition work?**
 A: Cards you mark "I Know This" come back less frequently. Cards you mark "Still Learning" or get wrong in quizzes come back sooner for more practice.
 
+**Q: My progress disappeared!?**
+A: Your progress is saved in your browser's local storage. If you clear browser data or switch browsers, you'll lose progress. Use the Export button (green) to back up your deck (especially if you added/deleted words)!
+
 ## 🆚 How Does This Compare to Other Apps?
 
 | Feature | Skritter | Quizlet | Pleco | **This App** |
