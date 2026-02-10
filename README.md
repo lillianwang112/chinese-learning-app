@@ -4,11 +4,19 @@
 
 I built this app to help with learning the vocabulary for CHI 108. It's a full-featured Chinese learning tool with flashcards, handwriting practice, games, and more! 
 
+## ⚡️ Quick Start (TL;DR)
+1. Visit the app → Click "Import Deck"
+2. Download JSON files from the [108vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/108vocab)
+3. Import them into the app
+4. Start with **Study Mode** to learn new words
+5. Use **Learn Mode** to test yourself
+6. Use **Writing** to practice handwriting characters
+
 ## 📱 What Can This App Do?
 
 - **Flashcard Mode**: Smart spaced repetition (cards you struggle with come back sooner!)
 - **Learn Mode**: Quiz yourself actively with multiple choice, fill-in-blank, or written answer questions
-- **Writing Practice**: Draw characters with your mouse/finger and get instant feedback
+- **Writing Practice**: Draw characters with your mouse/stylus/finger
 - **Match Game**: Fun timed matching exercise
 - **Test Mode**: Quiz yourself with multiple choice
 - **Progress Tracking**: See your stats and which cards need review
@@ -69,7 +77,7 @@ delete the extra ones, you may do so by editing the deck.)
 ### Week 5-6: Patriotism & Economy (Before Midterm)
 - **体育和爱国.json** (33 cards) - Lesson 22: Sports, patriotism, 女排
 - **中国制造.json** (31 cards) - ANC Lesson 24: Manufacturing, 工厂, 质量
-- **铁饭碗打破了.json** (23 cards) - ANC Lesson 26: Job security, 分配, 竞争
+- **铁饭碗打破了.json** (23 cards) - ANC Lesson 27: Job security, 分配, 竞争
 
 ### Week 7-8: Education System
 - **高考.json** (36 cards) - ANC Lesson 29: College entrance exam, 教育, 公平
@@ -99,11 +107,15 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
 
 ## ✨ App Features
 
-### 📖 Flashcard Mode
-- Flip cards to test yourself (click to flip between Chinese and English)
-- **Quick navigation**: Swipe right if you know it, swipe left if you don't
-- Smart spaced repetition schedules reviews automatically
-- Cards you struggle with come back sooner!
+### 📖 Study Mode (Flashcards)
+- Click the card to flip between Chinese character and detailed English definitions
+- Audio pronunciation button lets you hear the word
+- Shows pinyin with tone marks and comprehensive word meanings
+- After flipping, choose:
+  - **"I Know This" (swipe right/green button)** - Card moves further back in review queue
+  - **"Still Learning" (swipe left/red button)** - Card comes back sooner
+- **Pro tip**: Press "g" for grammar notes on certain words
+- Smart spaced repetition tracks which cards need more practice
 
 ### ✍️ Writing Practice
 - **Two modes**: Practice 10 cards or all cards at once
@@ -113,22 +125,26 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
 - Rate yourself honestly:
   - **"I Know This"** - You wrote it correctly → Card moves to the back of the queue
   - **"I Forgot"** - You got it wrong or needed to peek → Card comes back sooner for more practice
+- Clear button to erase and try again
+- Audio pronunciation button available
 - Keep practicing! Cards you struggle with will reappear until you master them
 
-### 🧠 Learn Mode
-- **Interactive quiz format** with three question types:
-  - **Multiple Choice**: Select the correct English meaning
-  - **Fill in the Blank**: Type the pinyin or English translation
-  - **Written Answer**: Write out the full answer
-- Shows the Chinese character and lets you hear the pronunciation
-- Get instant feedback on whether your answer is correct
-- Perfect for **active recall** - testing yourself helps memorization!
-- Progress bar shows how many questions you have left
+### 🧠 Learn Mode (Active Quizzing)
+- **Two question types** that alternate:
+  - **Multiple Choice**: See the Chinese character, select correct English meaning from 4 options
+  - **Fill in the Blank**: See the character, type the pinyin pronunciation
+- **Tip for typing pinyin**: You can type with tone numbers (ni3 ha3o) OR with tone marks (nǐ hǎo) - both work!
+- Instant feedback shows if you're correct or need more practice
+- Shows correct answer with pinyin and meaning after each question
+- Progress bar tracks your completion (e.g., "2 of 15")
+- **Adaptive difficulty**: Tracks how well you know each card (0/5 scale)
 
 ### 🎮 Match Game
-- Match Chinese words with English meanings
-- Timed challenge for quick reviews
-- Great for memorization!
+- 16 tiles appear: 8 Chinese characters + 8 English meanings
+- Click two tiles to match them
+- Correct matches stay revealed and fade out
+- Timer tracks how fast you complete all 8 pairs
+- Great for quick vocabulary refreshers!
 
 ### 📝 Test Mode
 - Multiple choice questions
@@ -155,11 +171,21 @@ A: More tailored features for Chinese (handwriting) practice and no ads.
 A: Yes! Once the page loads, you can study without internet.
 
 **Q: Does this work on my phone?**
-A: Absolutely! It works great on phones and tablets. Just open it in your mobile browser. Although it may be better to use on a tablet with 
-a stylus for the handwriting practice.
+A: Absolutely! Just open it in your mobile browser. Although it may be better to use on a tablet with 
+a stylus for the handwriting practice. Rotating your phone horizontally and handwriting with your finger
+also works.
 
 **Q: Can I study multiple topics at once?**
 A: Yes! Import as many vocabulary decks as you want at a time.
+
+**Q: What are the buttons at the bottom of each deck?**
+A: Blue pencil = Edit deck, Green = Export/Download, Red = Delete entire deck
+
+**Q: Do I need to enter tone marks when typing pinyin?**
+A: The app accepts both! Type "ni3 ha3o" or "nǐ hǎo" - it checks both.
+
+**Q: Can I delete cards I already know?**
+A: Yes! Click the edit (pencil) button on a deck, then delete individual cards you don't need.
 
 ## 🙏 About This Project
 
