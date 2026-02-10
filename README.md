@@ -164,8 +164,6 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
 - **All your progress is saved** in your browser automatically
 
 ## ❓ Questions?
-**Q: What's the difference between this and Quizlet?**
-A: More tailored features for Chinese (handwriting) practice and no ads.
 
 **Q: Can I use this offline?**
 A: Yes! Once the page loads, you can study without internet.
@@ -186,6 +184,55 @@ A: The app accepts both! Type "ni3 ha3o" or "nǐ hǎo" - it checks both.
 
 **Q: Can I delete cards I already know?**
 A: Yes! Click the edit (pencil) button on a deck, then delete individual cards you don't need.
+
+## 🆚 How Does This Compare to Other Apps?
+
+### vs. Skritter
+**Skritter** ($15-20/month, ~$100/year)
+- ✅ Advanced stroke order correction
+- ✅ 10+ years of development
+- ❌ Expensive subscription
+- ❌ Requires paid account for full features
+
+**This App** (FREE!)
+- ✅ Completely free, no ads
+- ✅ Handwriting practice with canvas
+- ✅ 6 study modes in one place (Study, Learn, Match, Test, Write, Edit)
+- ✅ Pre-loaded with CHI 108 course vocabulary
+- ✅ Works in browser, no app download needed
+- ⚠️ No stroke order correction (but you can check yourself!)
+
+### vs. Quizlet
+**Quizlet** (Free with ads, $8/month for Quizlet Plus)
+- ✅ Huge library of shared decks
+- ✅ Very popular, network effects
+- ❌ Many features behind paywall (Learn mode, ad-free)
+- ❌ Frequent ads on free tier
+- ❌ No handwriting practice mode
+- ❌ Not optimized for Chinese-specific needs
+
+**This App** (FREE!)
+- ✅ Completely free, no paywalls
+- ✅ No ads ever
+- ✅ Handwriting practice built-in
+- ✅ Chinese-specific features (pinyin, audio, tone marks)
+- ✅ Made specifically for CHI 108 students
+
+### vs. Pleco
+**Pleco** (Free dictionary, paid add-ons)
+- ✅ Best Chinese dictionary app
+- ✅ Excellent handwriting recognition for lookup
+- ✅ OCR for reading text
+- ⚠️ Primarily a dictionary, not a study/flashcard app
+
+**This App** (FREE!)
+- ✅ Purpose-built for studying and memorization
+- ✅ Spaced repetition for efficient learning
+- ✅ Multiple study modes
+- ⚠️ Use Pleco + this app together for best results!
+
+### 💡 Bottom Line
+If you're already paying for Skritter, Quizlet Plus, etc., and love it, keep using it! But if you're looking for a **free, comprehensive study tool specifically for CHI 108**, this app has you covered.
 
 ## 🙏 About This Project
 
