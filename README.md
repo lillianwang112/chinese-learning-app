@@ -129,14 +129,14 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
 - Audio pronunciation button available
 - Keep practicing! Cards you struggle with will reappear until you master them
 
-![Writing Practice - Before Scrolling](screenshots/writing-before.jpg)
-*Character visible for reference*
-
-![Writing Practice - After Scrolling](screenshots/writing-hidden.jpg)
-*Scroll down to hide character and test your memory*
-
-![Writing Practice - Check Answer](screenshots/writing-check.jpg)
-*Scroll back up to compare your answer*
+<p align="center">
+  <img src="screenshots/writing-before.jpg" width="30%" />
+  <img src="screenshots/writing-hidden.jpg" width="30%" />
+  <img src="screenshots/writing-check.jpg" width="30%" />
+</p>
+<p align="center">
+  <em>Left: Character visible | Middle: Scroll to hide character | Right: Compare your answer</em>
+</p>
 
 ### 🧠 Learn Mode (Active Quizzing)
 - **Two question types** that alternate:
