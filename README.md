@@ -16,7 +16,7 @@ I built this app to help with learning the vocabulary for CHI 108. It's a full-f
 
 - **Flashcard Mode**: Smart spaced repetition (cards you struggle with come back sooner!)
 - **Learn Mode**: Quiz yourself actively with multiple choice, fill-in-blank, or written answer questions
-- **Writing Practice**: Draw characters with your mouse/stylus/finger
+- **Writing Practice**: Handwrite/draw characters with your mouse/stylus/finger
 - **Match Game**: Fun timed matching exercise
 - **Test Mode**: Quiz yourself with multiple choice
 - **Progress Tracking**: See your stats and which cards need review
@@ -218,7 +218,7 @@ If you're already paying for Skritter or Quizlet Plus and love them, keep using 
 
 ## 🙏 About This Project
 
-This was created by a CHI 108 student for a more tailored vocabulary learning app experience. 
+This app was created by a CHI 108 student for a more tailored Chinese vocabulary learning experience. 
 
 **Note:** This app is still a work in progress and may have bugs. If you find any issues or have suggestions for improvements, please let me know at **lw3319@princeton.edu**. Your feedback helps make it better for everyone!
 
