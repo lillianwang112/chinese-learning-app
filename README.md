@@ -118,7 +118,6 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
   - **"I Know This" (swipe right/green button)** - Card moves further back in review queue
   - **"Still Learning" (swipe left/red button)** - Card comes back sooner for more practice
 - Cards you mark "Still Learning" are re-inserted proportionally into the deck (e.g., ~5-6 cards later in a 30-card deck) so you see them again without it feeling too soon
-- **Pro tip**: Press "g" for grammar notes on certain words
 - Smart spaced repetition tracks which cards need more practice
 
 ### ✍️ Writing Practice
