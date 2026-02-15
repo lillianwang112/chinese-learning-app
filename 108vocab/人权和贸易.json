@@ -1,0 +1,32 @@
+{
+  "name": "人权和贸易",
+  "cards": [
+    {"id": 1, "chinese": "人权", "pinyin": "rénquán", "english": "human rights"},
+    {"id": 2, "chinese": "改革", "pinyin": "gǎigé", "english": "reform"},
+    {"id": 3, "chinese": "开放", "pinyin": "kāifàng", "english": "practice the open-door policy"},
+    {"id": 4, "chinese": "放松", "pinyin": "fàngsōng", "english": "loosen; slacken"},
+    {"id": 5, "chinese": "控制", "pinyin": "kòngzhì", "english": "control"},
+    {"id": 6, "chinese": "条件", "pinyin": "tiáojiàn", "english": "condition"},
+    {"id": 7, "chinese": "改善", "pinyin": "gǎishàn", "english": "improvement/make better"},
+    {"id": 8, "chinese": "彻底", "pinyin": "chèdǐ", "english": "thorough"},
+    {"id": 9, "chinese": "集权", "pinyin": "jíquán", "english": "centralized power"},
+    {"id": 10, "chinese": "混", "pinyin": "hùn", "english": "lump together; mix"},
+    {"id": 11, "chinese": "国际警察", "pinyin": "guójì jǐngchá", "english": "international police"},
+    {"id": 12, "chinese": "管", "pinyin": "guǎn", "english": "interfere with"},
+    {"id": 13, "chinese": "基本", "pinyin": "jīběn", "english": "essential; basic"},
+    {"id": 14, "chinese": "发展中", "pinyin": "fāzhǎnzhōng", "english": "developing"},
+    {"id": 15, "chinese": "饱", "pinyin": "bǎo", "english": "full (with food, not hungry)"},
+    {"id": 16, "chinese": "宁可", "pinyin": "nìngkě", "english": "would rather"},
+    {"id": 17, "chinese": "快乐", "pinyin": "kuàilè", "english": "happy"},
+    {"id": 18, "chinese": "人道", "pinyin": "réndào", "english": "humane/humanitarianism"},
+    {"id": 19, "chinese": "地震", "pinyin": "dìzhèn", "english": "earthquake"},
+    {"id": 20, "chinese": "水灾", "pinyin": "shuǐzāi", "english": "flood"},
+    {"id": 21, "chinese": "受害", "pinyin": "shòuhài", "english": "be victimized"},
+    {"id": 22, "chinese": "解释", "pinyin": "jiěshì", "english": "explain; interpret"},
+    {"id": 23, "chinese": "内政", "pinyin": "nèizhèng", "english": "internal affairs"},
+    {"id": 24, "chinese": "除非", "pinyin": "chúfēi", "english": "unless"},
+    {"id": 25, "chinese": "解决", "pinyin": "jiějué", "english": "resolve"},
+    {"id": 26, "chinese": "种族歧视", "pinyin": "zhǒngzú qíshì", "english": "racial discrimination"},
+    {"id": 27, "chinese": "往来", "pinyin": "wǎnglái", "english": "contact"}
+  ]
+}
