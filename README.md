@@ -5,7 +5,7 @@
 I built this app to help with learning the vocabulary for CHI 108. It's a full-featured Chinese learning tool with flashcards, handwriting practice, games, and more! 
 
 ## ⚡️ Quick Start (TL;DR)
-1. Visit the app → Click "Import Deck"
+1. Visit the app **[https://lillianwang112.github.io/chinese-learning-app/](https://lillianwang112.github.io/chinese-learning-app/)** → Click "Import Deck"
 2. Download JSON files from the [108vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/108vocab)
 3. Import them into the app
 4. Start with **Study Mode** to learn new words
@@ -16,10 +16,11 @@ I built this app to help with learning the vocabulary for CHI 108. It's a full-f
 
 - **Flashcard Mode**: Smart spaced repetition (cards you struggle with come back sooner!)
 - **Learn Mode**: Quiz yourself actively with multiple choice, fill-in-blank, or written answer questions
-- **Writing Practice**: Handwrite/draw characters with your mouse/stylus/finger
-- **Match Game**: Fun timed matching exercise
+- **Writing Practice**: Handwrite/draw characters with your mouse/stylus/finger, with a **Test Mode** that hides characters
+- **Match Game**: Fun timed matching exercise with a live timer and personal best tracking
 - **Test Mode**: Quiz yourself with multiple choice
-- **Progress Tracking**: See your stats and which cards need review
+- **Progress Tracking**: See your stats with 3-tier mastery system (Not Started → Still Learning → Mastered)
+- **Combine Decks**: Merge multiple decks for weekly review sessions
 
 The app uses the **SM-2 spaced repetition algorithm** - the same one used by Quizlet, Anki and other popular flashcard apps!
 
@@ -55,6 +56,8 @@ All the CHI108 vocabulary JSON files are in the [108vocab folder](https://github
 1. **Import multiple decks** - Add all the topics we're covering this semester
 2. **Use writing practice** - Actually drawing characters helps with retention way more than just recognition
 3. **Try different modes** - Mix up flashcards, writing, matching, and tests to keep it interesting
+4. **Combine decks before quizzes** - Use the Combine Decks feature to merge multiple lessons into one deck for weekly review
+5. **Use Writing Test Mode** - Once you're somewhat comfortable with the characters, switch to Test Mode where the characters are hidden and you write from memory
 
 ## 📚 Available Vocabulary Decks
 
@@ -113,21 +116,27 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
 - Shows pinyin with tone marks and comprehensive word meanings
 - After flipping, choose:
   - **"I Know This" (swipe right/green button)** - Card moves further back in review queue
-  - **"Still Learning" (swipe left/red button)** - Card comes back sooner
+  - **"Still Learning" (swipe left/red button)** - Card comes back sooner for more practice
+- Cards you mark "Still Learning" are re-inserted proportionally into the deck (e.g., ~5-6 cards later in a 30-card deck) so you see them again without it feeling too soon
 - **Pro tip**: Press "g" for grammar notes on certain words
 - Smart spaced repetition tracks which cards need more practice
 
 ### ✍️ Writing Practice
-- **Two modes**: Practice 10 cards or all cards at once
+- **Four modes**:
+  - **Practice 10**: Practice 10 random cards at a time
+  - **Practice All**: Practice every card in the deck
+  - **Test 10**: 10 random cards with characters **hidden** — only pinyin and English shown. Write from memory!
+  - **Test All**: Test yourself on every card with characters hidden
 - Draw characters with your mouse/stylus/finger on the canvas
 - Scroll back up when you're done drawing to see if you got it right
 - Rate yourself honestly:
   - **"I Know This"** - You wrote it correctly → Card moves to the back of the queue
   - **"I Forgot"** - You got it wrong or needed to peek → Card comes back sooner for more practice
+- **Test Mode exclusive**: Press the **"Reveal"** button to show the hidden character and check your answer
 - Clear button to erase and try again
 - Audio pronunciation button available
 - Keep practicing! Cards you struggle with will reappear until you master them
-- **Pro tip**: Scroll slightly down to cover up the character(s) to exercise your memory (recommended)
+- **Pro tip**: In regular practice modes, scroll slightly down to cover up the character(s) to exercise your memory
 <p align="center">
   <img src="screenshots/writing-before.jpg" width="30%" />
   <img src="screenshots/writing-hidden.jpg" width="30%" />
@@ -141,17 +150,20 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
 - **Two question types** that alternate:
   - **Multiple Choice**: See the Chinese character, select correct English meaning from 4 options
   - **Fill in the Blank**: See the character, type the pinyin pronunciation
+- **Quizlet-style progression**: Cards you get wrong are re-queued within the same round so you see them again before moving on — just like Quizlet Plus Learn mode
 - **Tip for typing pinyin**: You can type with tone numbers (ni3 ha3o) OR with tone marks (nǐ hǎo) - both work!
 - Instant feedback shows if you're correct or need more practice
 - Shows correct answer with pinyin and meaning after each question
 - Progress bar tracks your completion (e.g., "2 of 15")
-- **Adaptive difficulty**: Tracks how well you know each card (0/5 scale)
+- Mastery status badge shows each card's current level: 🆕 Not Started, 📖 Still Learning, or ✅ Mastered
 
 ### 🎮 Match Game
 - 16 tiles appear: 8 Chinese characters + 8 English meanings
 - Click two tiles to match them
 - Correct matches stay revealed and fade out
-- Timer tracks how fast you complete all 8 pairs
+- **Live timer** counts up in real time (to the tenth of a second) as you play
+- **Personal best tracking**: Your best time for each deck is saved and displayed on the results screen
+- Beat your record and get a 🏆 **New Best Time!** celebration
 - Great for quick vocabulary refreshers!
 
 ### 📝 Test Mode
@@ -159,11 +171,28 @@ The CHI 103 character list is in the [103vocab folder](https://github.com/lillia
 - Immediate feedback
 - Track your score
 
-### 📊 Deck Management
-- View all your cards
-- Delete cards if you only want to study the ones listed on the study guide
-- Add cards if there are some from the 课文 you aren't familiar with but are not in the list
-- Clear deck if needed
+### 📊 3-Tier Mastery System
+Cards are tracked across all study modes with a Quizlet-style progression:
+- **🆕 Not Started** (gray) — Cards you haven't studied yet
+- **📖 Still Learning** (orange) — You've seen the card but haven't consistently gotten it right
+- **✅ Mastered** (green) — You've demonstrated solid knowledge across multiple interactions
+
+The mastery score builds up gradually: strong correct answers give +2, okay answers give +1, and wrong answers give -1. Getting one question wrong won't immediately drop a mastered card — it takes consistent mistakes to lose mastery. Progress bars on the home screen and stats page show all three tiers.
+
+### 🔀 Combine Decks
+- **Merge multiple decks** into one combined deck for weekly review or exam prep
+- Go to **Create Deck** → scroll down to **Combine Decks**
+- Select 2 or more decks to merge
+- Duplicate characters are automatically removed
+- Combined decks start with fresh mastery scores for a clean review experience
+- Original decks remain untouched
+- **Example use case**: Combine 高考 + 开放留学政策 + 家里的小皇帝 into a "Week 7-8 Review" deck before a quiz
+
+### 📋 Deck Management
+- **Edit deck name**: Click Edit → change the deck title at the top
+- **Add/delete cards**: Edit individual cards within a deck
+- **Export/Import**: Back up your decks as JSON files
+- **Delete decks**: Remove decks you no longer need
 
 ## 📱 Works on Any Device
 - **Desktop**: Use your mouse to draw characters
@@ -184,6 +213,9 @@ also works.
 **Q: Can I study multiple topics at once?**
 A: Yes! Import as many vocabulary decks as you want at a time.
 
+**Q: Can I combine decks for weekly review?**
+A: Yes! Go to Create Deck → Combine Decks. Select the decks you want to merge and give the combined deck a name. Great for quiz prep!
+
 **Q: What are the buttons at the bottom of each deck?**
 A: Blue pencil = Edit deck, Green = Export/Download, Red = Delete entire deck
 
@@ -193,8 +225,17 @@ A: The app accepts both! Type "ni3 ha3o" or "nǐ hǎo" - it checks both.
 **Q: Can I delete cards I already know?**
 A: Yes! Click the edit (pencil) button on a deck, then delete individual cards you don't need.
 
+**Q: Can I rename a deck?**
+A: Yes! Click Edit on the deck and change the name at the top of the edit page.
+
+**Q: How does the mastery system work?**
+A: Cards progress through three stages: Not Started → Still Learning → Mastered. Your mastery score builds up with correct answers and goes down with wrong ones, but it's gradual — one mistake won't reset your progress.
+
 **Q: How does the spaced repetition work?**
-A: Cards you mark "I Know This" come back less frequently. Cards you mark "Still Learning" or get wrong in quizzes come back sooner for more practice.
+A: Cards you mark "I Know This" come back less frequently. Cards you mark "Still Learning" or get wrong in quizzes come back sooner for more practice. The spacing is proportional to your deck size so it feels natural.
+
+**Q: What's the difference between Writing Practice and Writing Test Mode?**
+A: In Practice mode, you can see the Chinese characters above while you draw. In Test mode, the characters are hidden — you only see pinyin and English, so you have to write from memory. You can press "Reveal" to check your answer.
 
 **Q: My progress disappeared!?**
 A: Your progress is saved in your browser's local storage. If you clear browser data or switch browsers, you'll lose progress. Use the Export button (green) to back up your deck (especially if you added/deleted words)!
@@ -205,13 +246,16 @@ A: Your progress is saved in your browser's local storage. If you clear browser 
 |---------|----------|---------|-------|--------------|
 | **Price** | $15-20/month (~$100/year) | Free with ads / $8/month Plus | Free + paid add-ons | **100% FREE** |
 | **Ads** | No ads (paid) | ❌ Ads on free tier | No ads | ✅ **No ads ever** |
-| **Handwriting Practice** | ✅ Advanced stroke order | ❌ None | ⚠️ Recognition only | ✅ **Canvas practice** |
+| **Handwriting Practice** | ✅ Advanced stroke order | ❌ None | ⚠️ Recognition only | ✅ **Canvas practice + Test Mode** |
 | **Spaced Repetition** | ✅ Yes | ✅ Yes (paywalled) | Limited | ✅ **SM-2 algorithm** |
 | **Multiple Study Modes** | ⚠️ Writing-focused | ✅ Yes (some paywalled) | ⚠️ Dictionary-focused | ✅ **6 modes included** |
 | **Chinese-Specific Features** | ✅ Stroke order, tones | ⚠️ Basic | ✅ OCR, dictionary | ✅ **Pinyin, audio, tones** |
 | **CHI 108 Vocabulary** | ❌ Manual import | ❌ Manual import | ❌ N/A | ✅ **Pre-loaded** |
 | **Works Offline** | ✅ Yes | ⚠️ Limited | ✅ Yes | ✅ **Yes** |
 | **No Download Required** | ❌ App required | ❌ App required | ❌ App required | ✅ **Browser-based** |
+| **Mastery Tracking** | ✅ Yes | ✅ Yes (paywalled) | ⚠️ Limited | ✅ **3-tier system** |
+| **Combine Decks** | ❌ No | ⚠️ Limited | ❌ No | ✅ **Built-in** |
+| **Match Game w/ Best Times** | ❌ No | ✅ Yes (paywalled) | ❌ No | ✅ **Free** |
 
 ### 💡 Bottom Line
 If you're already paying for Skritter or Quizlet Plus and love them, keep using them! But if you're looking for a **free, comprehensive, ad-free study tool specifically made for CHI 108**, this app has you covered. **No paywalls. No subscriptions. No ads. Just learning.** 🎯
