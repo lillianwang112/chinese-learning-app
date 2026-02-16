@@ -20,7 +20,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Princeton-CHI%20108-orange?style=for-the-badge" alt="CHI 108"/>
   <img src="https://img.shields.io/badge/100%25_Free-No_Ads-brightgreen?style=for-the-badge" alt="Free & No Ads"/>
-  <img src="https://img.shields.io/badge/900+-Words-blue?style=for-the-badge" alt="900+ Words"/>
+  <img src="https://img.shields.io/badge/900+-汉字-blue?style=for-the-badge" alt="900+ 汉字"/>
   <img src="https://img.shields.io/badge/Spring-2026-red?style=for-the-badge" alt="Spring 2026"/>
 </p>
 
