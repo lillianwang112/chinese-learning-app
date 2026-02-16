@@ -31,7 +31,7 @@
 I built this app to help with learning the vocabulary for CHI 108. It's a full-featured Chinese learning tool with flashcards, handwriting practice, games, and more! 
 
 ## 📋 Table of Contents
-- [Quick Start](#️-quick-start-tldr)
+- [Quick Start](#-quick-start-tldr)
 - [What Can This App Do?](#-what-can-this-app-do)
 - [How to Use](#-how-to-use)
 - [Features at a Glance](#-features-at-a-glance)
