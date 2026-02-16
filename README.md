@@ -199,45 +199,87 @@ The mastery score builds up gradually: strong correct answers give +2, okay answ
 - **Offline**: Works without internet after the page loads
 - **All your progress is saved** in your browser automatically
 
-## ❓ Questions?
+## ❓ Frequently Asked Questions
 
-**Q: Can I use this offline?**
-A: Yes! Once the page loads, you can study without internet.
+### 🚀 Getting Started
 
-**Q: Does this work on my phone?**
-A: Absolutely! Just open it in your mobile browser. Although it may be better to use on a tablet with 
-a stylus for the handwriting practice. Rotating your phone horizontally and handwriting with your finger
-also works.
+<details>
+<summary><strong>Does this work on my phone?</strong></summary>
+<br>
+Absolutely! Just open it in your mobile browser. Although it may be better to use on a tablet with a stylus for the handwriting practice. Rotating your phone horizontally and handwriting with your finger also works.
+</details>
 
-**Q: Can I study multiple topics at once?**
-A: Yes! Import as many vocabulary decks as you want at a time.
+<details>
+<summary><strong>Can I use this offline?</strong></summary>
+<br>
+Yes! Once the page loads, you can study without internet.
+</details>
 
-**Q: Can I combine decks for weekly review?**
-A: Yes! Go to Create Deck → Combine Decks. Select the decks you want to merge and give the combined deck a name. Great for quiz prep!
+<details>
+<summary><strong>Can I study multiple topics at once?</strong></summary>
+<br>
+Yes! Import as many vocabulary decks as you want at a time.
+</details>
 
-**Q: What are the buttons at the bottom of each deck?**
-A: Blue pencil = Edit deck, Green = Export/Download, Red = Delete entire deck
+### 📚 Deck Management
 
-**Q: Do I need to enter tone marks when typing pinyin?**
-A: The app accepts both! Type "ni3 ha3o" or "nǐ hǎo" - it checks both.
+<details>
+<summary><strong>What are the buttons at the bottom of each deck?</strong></summary>
+<br>
+Blue pencil = Edit deck, Green = Export/Download, Red = Delete entire deck
+</details>
 
-**Q: Can I delete cards I already know?**
-A: Yes! Click the edit (pencil) button on a deck, then delete individual cards you don't need.
+<details>
+<summary><strong>Can I delete cards I already know?</strong></summary>
+<br>
+Yes! Click the edit (pencil) button on a deck, then delete individual cards you don't need.
+</details>
 
-**Q: Can I rename a deck?**
-A: Yes! Click Edit on the deck and change the name at the top of the edit page.
+<details>
+<summary><strong>Can I rename a deck?</strong></summary>
+<br>
+Yes! Click Edit on the deck and change the name at the top of the edit page.
+</details>
 
-**Q: How does the mastery system work?**
-A: Cards progress through three stages: Not Started → Still Learning → Mastered. Your mastery score builds up with correct answers and goes down with wrong ones, but it's gradual — one mistake won't reset your progress.
+<details>
+<summary><strong>Can I combine decks for weekly review?</strong></summary>
+<br>
+Yes! Go to Create Deck → Combine Decks. Select the decks you want to merge and give the combined deck a name. Great for quiz prep!
+</details>
 
-**Q: How does the spaced repetition work?**
-A: Cards you mark "I Know This" come back less frequently. Cards you mark "Still Learning" or get wrong in quizzes come back sooner for more practice. The spacing is proportional to your deck size so it feels natural.
+### 📖 Study Features
 
-**Q: What's the difference between Writing Practice and Writing Test Mode?**
-A: In Practice mode, you can see the Chinese characters above while you draw. In Test mode, the characters are hidden — you only see pinyin and English, so you have to write from memory. You can press "Reveal" to check your answer.
+<details>
+<summary><strong>How does the mastery system work?</strong></summary>
+<br>
+Cards progress through three stages: Not Started → Still Learning → Mastered. Your mastery score builds up with correct answers and goes down with wrong ones, but it's gradual — one mistake won't reset your progress.
+</details>
 
-**Q: My progress disappeared!?**
-A: Your progress is saved in your browser's local storage. If you clear browser data or switch browsers, you'll lose progress. Use the Export button (green) to back up your deck (especially if you added/deleted words)!
+<details>
+<summary><strong>How does the spaced repetition work?</strong></summary>
+<br>
+Cards you mark "I Know This" come back less frequently. Cards you mark "Still Learning" or get wrong in quizzes come back sooner for more practice. The spacing is proportional to your deck size so it feels natural.
+</details>
+
+<details>
+<summary><strong>Do I need to enter tone marks when typing pinyin?</strong></summary>
+<br>
+The app accepts both! Type "ni3 ha3o" or "nǐ hǎo" - it checks both.
+</details>
+
+<details>
+<summary><strong>What's the difference between Writing Practice and Writing Test Mode?</strong></summary>
+<br>
+In Practice mode, you can see the Chinese characters above while you draw. In Test mode, the characters are hidden — you only see pinyin and English, so you have to write from memory. You can press "Reveal" to check your answer.
+</details>
+
+### 🔧 Troubleshooting
+
+<details>
+<summary><strong>My progress disappeared!?</strong></summary>
+<br>
+Your progress is saved in your browser's local storage. If you clear browser data or switch browsers, you'll lose progress. Use the Export button (green) to back up your deck (especially if you added/deleted words)!
+</details>
 
 ## 🆚 How Does This Compare to Other Apps?
 
