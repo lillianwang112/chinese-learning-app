@@ -61,9 +61,15 @@ All the CHI108 vocabulary JSON files are in the [108vocab folder](https://github
 
 ## 📚 Available Vocabulary Decks
 
-We have **24 vocabulary decks** covering everything from CHI 108, listed below in the order it appears on the semester schedule!
-Note that these currently contain ALL of vocabulary from the 课本, not just the ones listed on the study guide. (If you wish to 
-delete the extra ones, you may do so by editing the deck.) 
+We have **24 vocabulary decks** covering all CHI 108 topics — that's **over 900 vocabulary words** total! 🎉
+
+All CHI 108 vocabulary files are in the [108vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/108vocab). The CHI 103 character list is in the [103vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/103vocab).
+
+**Note:** Decks contain ALL vocabulary from the 课本, not just study guide items. You can edit decks to remove extras if needed.
+
+<details>
+<summary><strong>📋 View Complete List of Decks by Week</strong></summary>
+<br>
 
 ### Week 1-2: Privacy & Social Etiquette
 - **Privacy.json** (43 cards) - Lesson 11: 隐私, 私事, 权利
@@ -103,10 +109,7 @@ delete the extra ones, you may do so by editing the deck.)
 ### CHI 103 Review
 - **CHI103-CHAR List.json** (522 characters) - Complete character review from CHI 103
 
-**Total: Over 900 vocabulary words!** 🎉
-
-All CHI 108 vocabulary files are in the [108vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/108vocab).
-The CHI 103 character list is in the [103vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/103vocab).
+</details>
 
 ## ✨ App Features
 
