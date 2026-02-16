@@ -165,7 +165,10 @@ All CHI 108 vocabulary files are in the [108vocab folder](https://github.com/lil
 
 ## ✨ App Features
 
-### 📖 Study Mode (Flashcards)
+<details>
+<summary><strong>📖 Study Mode (Flashcards)</strong></summary>
+<br>
+
 - Click the card to flip between Chinese character and detailed English definitions
 - Audio pronunciation button lets you hear the word
 - Shows pinyin with tone marks and comprehensive word meanings
@@ -175,7 +178,12 @@ All CHI 108 vocabulary files are in the [108vocab folder](https://github.com/lil
 - Cards you mark "Still Learning" are re-inserted proportionally into the deck (e.g., ~5-6 cards later in a 30-card deck) so you see them again without it feeling too soon
 - Smart spaced repetition tracks which cards need more practice
 
-### ✍️ Writing Practice
+</details>
+
+<details>
+<summary><strong>✍️ Writing Practice</strong></summary>
+<br>
+
 - **Four modes**:
   - **Practice 10**: Practice 10 random cards at a time
   - **Practice All**: Practice every card in the deck
@@ -191,6 +199,7 @@ All CHI 108 vocabulary files are in the [108vocab folder](https://github.com/lil
 - Audio pronunciation button available
 - Keep practicing! Cards you struggle with will reappear until you master them
 - **Pro tip**: In regular practice modes, scroll slightly down to cover up the character(s) to exercise your memory
+
 <p align="center">
   <img src="screenshots/writing-before.jpg" width="30%" />
   <img src="screenshots/writing-hidden.jpg" width="30%" />
@@ -200,7 +209,12 @@ All CHI 108 vocabulary files are in the [108vocab folder](https://github.com/lil
   <em>Left: Character visible | Middle: Scroll to hide character | Right: Compare your answer</em>
 </p>
 
-### 🧠 Learn Mode (Active Quizzing)
+</details>
+
+<details>
+<summary><strong>🧠 Learn Mode (Active Quizzing)</strong></summary>
+<br>
+
 - **Two question types** that alternate:
   - **Multiple Choice**: See the Chinese character, select correct English meaning from 4 options
   - **Fill in the Blank**: See the character, type the pinyin pronunciation
@@ -211,7 +225,12 @@ All CHI 108 vocabulary files are in the [108vocab folder](https://github.com/lil
 - Progress bar tracks your completion (e.g., "2 of 15")
 - Mastery status badge shows each card's current level: 🆕 Not Started, 📖 Still Learning, or ✅ Mastered
 
-### 🎮 Match Game
+</details>
+
+<details>
+<summary><strong>🎮 Match Game</strong></summary>
+<br>
+
 - 16 tiles appear: 8 Chinese characters + 8 English meanings
 - Click two tiles to match them
 - Correct matches stay revealed and fade out
@@ -220,12 +239,22 @@ All CHI 108 vocabulary files are in the [108vocab folder](https://github.com/lil
 - Beat your record and get a 🏆 **New Best Time!** celebration
 - Great for quick vocabulary refreshers!
 
-### 📝 Test Mode
+</details>
+
+<details>
+<summary><strong>📝 Test Mode</strong></summary>
+<br>
+
 - Multiple choice questions
 - Immediate feedback
 - Track your score
 
-### 📊 3-Tier Mastery System
+</details>
+
+<details>
+<summary><strong>📊 3-Tier Mastery System</strong></summary>
+<br>
+
 Cards are tracked across all study modes with a Quizlet-style progression:
 - **🆕 Not Started** (gray) — Cards you haven't studied yet
 - **📖 Still Learning** (orange) — You've seen the card but haven't consistently gotten it right
@@ -233,7 +262,12 @@ Cards are tracked across all study modes with a Quizlet-style progression:
 
 The mastery score builds up gradually: strong correct answers give +2, okay answers give +1, and wrong answers give -1. Getting one question wrong won't immediately drop a mastered card — it takes consistent mistakes to lose mastery. Progress bars on the home screen and stats page show all three tiers.
 
-### 🔀 Combine Decks
+</details>
+
+<details>
+<summary><strong>🔀 Combine Decks</strong></summary>
+<br>
+
 - **Merge multiple decks** into one combined deck for weekly review or exam prep
 - Go to **Create Deck** → scroll down to **Combine Decks**
 - Select 2 or more decks to merge
@@ -242,17 +276,18 @@ The mastery score builds up gradually: strong correct answers give +2, okay answ
 - Original decks remain untouched
 - **Example use case**: Combine 高考 + 开放留学政策 + 家里的小皇帝 into a "Week 7-8 Review" deck before a quiz
 
-### 📋 Deck Management
+</details>
+
+<details>
+<summary><strong>📋 Deck Management</strong></summary>
+<br>
+
 - **Edit deck name**: Click Edit → change the deck title at the top
 - **Add/delete cards**: Edit individual cards within a deck
 - **Export/Import**: Back up your decks as JSON files
 - **Delete decks**: Remove decks you no longer need
 
-## 📱 Works on Any Device
-- **Desktop**: Use your mouse to draw characters
-- **Tablet/Phone**: Use your stylus on tablet (recommended) or finger
-- **Offline**: Works without internet after the page loads
-- **All your progress is saved** in your browser automatically
+</details>
 
 ## ❓ Frequently Asked Questions
 
@@ -356,15 +391,56 @@ Your progress is saved in your browser's local storage. If you clear browser dat
 ### 💡 Bottom Line
 If you're already paying for Skritter or Quizlet Plus and love them, keep using them! But if you're looking for a **free, comprehensive, ad-free study tool specifically made for CHI 108**, this app has you covered. **No paywalls. No subscriptions. No ads. Just learning.** 🎯
 
+## 🛠️ Tech Stack
+
+Built with:
+- **Frontend**: HTML, CSS, JavaScript (Vanilla)
+- **UI Styling**: Tailwind CSS  
+- **Icons**: Lucide React
+- **Storage**: Browser LocalStorage
+- **Hosting**: GitHub Pages
+- **Algorithm**: SM-2 Spaced Repetition
+
+No frameworks, no dependency bloat - just clean, fast code!
+
 ## 🙏 About This Project
 
-This app was created by a CHI 108 student for a more tailored Chinese vocabulary learning experience. 
+This app was created by a CHI 108 student for a better Chinese vocabulary learning experience. 
 
 **Note:** This app is still a work in progress and may have bugs. If you find any issues or have suggestions for improvements, please let me know at **lw3319@princeton.edu**. Your feedback helps make it better for everyone!
 
 The app is open source and available for anyone to use. If you find it helpful, feel free to share it with other Chinese learners!
 
 **Good luck everyone! 加油!** 💪📚
+
+---
+
+## 🚧 Known Limitations & Future Ideas
+
+<details>
+<summary><strong>Current Limitations</strong></summary>
+<br>
+
+- **Local storage only** - Progress is saved in your browser. Clearing browser data will reset progress (use Export to back up!)
+- **No cross-device sync** - Can't access progress from different browsers/devices
+- **No stroke order guidance** - Writing practice doesn't check if you wrote strokes correctly
+- **No account system** - All data stored locally only
+
+</details>
+
+<details>
+<summary><strong>Possible Future Features (Maybe!)</strong></summary>
+<br>
+
+- ☁️ User accounts with cloud sync
+- 📱 PWA (installable as a mobile app)
+- 🎨 More customizable test options
+- 🤝 Shared decks with classmates
+- 📊 More detailed statistics and analytics
+
+*Note: This is a student project maintained during the semester. Updates may be sporadic!*
+
+</details>
 
 ---
 
