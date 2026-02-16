@@ -2,13 +2,6 @@
 ### CHI 108 - Princeton University
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Princeton-CHI%20108-orange?style=for-the-badge" alt="CHI 108"/>
-  <img src="https://img.shields.io/badge/100%25_Free-No_Ads-brightgreen?style=for-the-badge" alt="Free & No Ads"/>
-  <img src="https://img.shields.io/badge/900+-Words-blue?style=for-the-badge" alt="900+ Words"/>
-  <img src="https://img.shields.io/badge/Spring-2026-red?style=for-the-badge" alt="Spring 2026"/>
-</p>
-
-<p align="center">
   <img src="screenshots/hero.png" width="100%" alt="Chinese Learning App - Free flashcards, writing practice, and spaced repetition for CHI 108"/>
 </p>
 
@@ -22,6 +15,13 @@
   <a href="https://lillianwang112.github.io/chinese-learning-app/">🚀 Open App</a> •
   <a href="#-quick-start-tldr">📖 Quick Start</a> •
   <a href="#-frequently-asked-questions">❓ FAQ</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Princeton-CHI%20108-orange?style=for-the-badge" alt="CHI 108"/>
+  <img src="https://img.shields.io/badge/100%25_Free-No_Ads-brightgreen?style=for-the-badge" alt="Free & No Ads"/>
+  <img src="https://img.shields.io/badge/900+-Words-blue?style=for-the-badge" alt="900+ Words"/>
+  <img src="https://img.shields.io/badge/Spring-2026-red?style=for-the-badge" alt="Spring 2026"/>
 </p>
 
 ---
