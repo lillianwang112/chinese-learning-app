@@ -1,6 +1,5 @@
-# Chinese Learning App - CHI 108
-
-大家好! 👋
+# 汉语学习 Chinese Learning App
+### CHI 108 - Princeton University
 
 <p align="center">
   <img src="screenshots/hero.png" width="85%" alt="Chinese Learning App - Free flashcards, writing practice, and spaced repetition for CHI 108"/>
@@ -11,6 +10,16 @@
   <br>
   Free, ad-free, and built specifically for CHI 108
 </p>
+
+<p align="center">
+  <a href="https://lillianwang112.github.io/chinese-learning-app/">🚀 Open App</a> •
+  <a href="#-quick-start-tldr">📖 Quick Start</a> •
+  <a href="#-frequently-asked-questions">❓ FAQ</a>
+</p>
+
+---
+
+大家好! 👋
 
 I built this app to help with learning the vocabulary for CHI 108. It's a full-featured Chinese learning tool with flashcards, handwriting practice, games, and more! 
 
