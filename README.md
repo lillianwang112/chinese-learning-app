@@ -32,6 +32,7 @@ I built this app to help with learning the vocabulary for CHI 108. It's a full-f
 
 ## 📋 Table of Contents
 - [Quick Start](#%EF%B8%8F-quick-start-tldr)
+- [Install as an App](#-install-as-an-app)
 - [How to Use](#-how-to-use)
 - [Features at a Glance](#-features-at-a-glance)
 - [Study Tips](#-study-tips)
@@ -49,6 +50,27 @@ I built this app to help with learning the vocabulary for CHI 108. It's a full-f
 4. Start with **Study Mode** for flashcard learning
 5. Use **Learn Mode** for active quizzing
 6. Use **Writing** to practice handwriting characters
+
+### 📱 Install as an App (PWA)
+This app is a Progressive Web App — you can install it on your phone or computer for a native app experience!
+
+**iPhone/iPad (Safari):**
+1. Open the app in Safari
+2. Tap the **Share** button (square with arrow)
+3. Scroll down and tap **"Add to Home Screen"**
+4. Toggle **"Open as Web App"** ON
+5. Tap **Add** — the app now launches fullscreen like a real app!
+
+**Android (Chrome):**
+1. Open the app in Chrome
+2. Tap the **three-dot menu** → **"Add to Home Screen"** or **"Install App"**
+3. The app will appear on your home screen
+
+**Desktop (Chrome/Edge):**
+1. Look for the **install icon** (⊕) in the address bar
+2. Click **"Install"**
+
+Your progress saves locally even when installed — just remember to back up your decks with Export occasionally!
 
 ## ✨ Features at a Glance
 
@@ -370,7 +392,7 @@ Your progress is saved in your browser's local storage. If you clear browser dat
 | **Chinese-Specific Features** | ✅ Stroke order, tones | ⚠️ Basic | ✅ OCR, dictionary | ✅ **Pinyin, audio, tones** |
 | **CHI 108 Vocabulary** | ❌ Manual import | ❌ Manual import | ❌ N/A | ✅ **JSON Files Available to Import** |
 | **Works Offline** | ✅ Yes | ⚠️ Limited | ✅ Yes | ✅ **Yes** |
-| **No Download Required** | ❌ App required | ❌ App required | ❌ App required | ✅ **Browser-based** |
+| **No Download Required** | ❌ App required | ❌ App required | ❌ App required | ✅ **Browser-based + installable PWA** |
 | **Mastery Tracking** | ✅ Yes | ✅ Yes (paywalled) | ⚠️ Limited | ✅ **3-tier system** |
 | **Combine Decks** | ❌ No | ⚠️ Limited | ❌ No | ✅ **Built-in** |
 | **Match Game w/ Best Times** | ❌ No | ✅ Yes (paywalled) | ❌ No | ✅ **Free** |
@@ -418,7 +440,6 @@ The app is open source and available for anyone to use. If you find it helpful, 
 <br>
 
 - ☁️ User accounts with cloud sync
-- 📱 PWA (installable as a mobile app)
 - 🎨 More customizable test options
 - 🤝 Shared decks with classmates
 - 📊 More detailed statistics and analytics
