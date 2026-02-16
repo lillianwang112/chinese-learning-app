@@ -40,7 +40,7 @@ I built this app to help with learning the vocabulary for CHI 108. It's a full-f
 - [FAQ](#-frequently-asked-questions)
 - [Comparison with Other Apps](#-how-does-this-compare-to-other-apps)
 - [About This Project](#-about-this-project)
-
+- [Known Limitations & Future Ideas](#-known-limitations--future-ideas)
 
 ## ⚡️ Quick Start (TL;DR)
 1. Visit the app **[https://lillianwang112.github.io/chinese-learning-app/](https://lillianwang112.github.io/chinese-learning-app/)**
