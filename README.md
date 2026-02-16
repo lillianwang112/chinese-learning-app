@@ -2,7 +2,7 @@
 ### CHI 108 - Princeton University
 
 <p align="center">
-  <img src="screenshots/hero.png" width="85%" alt="Chinese Learning App - Free flashcards, writing practice, and spaced repetition for CHI 108"/>
+  <img src="screenshots/hero.png" width="100%" alt="Chinese Learning App - Free flashcards, writing practice, and spaced repetition for CHI 108"/>
 </p>
 
 <p align="center">
