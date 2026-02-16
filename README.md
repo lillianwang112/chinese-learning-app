@@ -195,7 +195,7 @@ The mastery score builds up gradually: strong correct answers give +2, okay answ
 
 ## 📱 Works on Any Device
 - **Desktop**: Use your mouse to draw characters
-- **Tablet/Phone**: Use your stylus (recommended) or finger
+- **Tablet/Phone**: Use your stylus on tablet (recommended) or finger
 - **Offline**: Works without internet after the page loads
 - **All your progress is saved** in your browser automatically
 
@@ -206,7 +206,7 @@ The mastery score builds up gradually: strong correct answers give +2, okay answ
 <details>
 <summary><strong>Does this work on my phone?</strong></summary>
 <br>
-Absolutely! Just open it in your mobile browser. Although it may be better to use on a tablet with a stylus for the handwriting practice. Rotating your phone horizontally and handwriting with your finger also works.
+Absolutely! Just open it in your mobile browser. Although it may be better to use on a tablet with a stylus for the handwriting practice. 
 </details>
 
 <details>
