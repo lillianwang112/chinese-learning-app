@@ -2,6 +2,16 @@
 
 大家好! 👋
 
+<p align="center">
+  <img src="screenshots/hero.png" width="85%" alt="Chinese Learning App - Free flashcards, writing practice, and spaced repetition for CHI 108"/>
+</p>
+
+<p align="center">
+  <strong>Master Chinese vocabulary with adaptive flashcards and spaced repetition</strong>
+  <br>
+  Free, ad-free, and built specifically for CHI 108
+</p>
+
 I built this app to help with learning the vocabulary for CHI 108. It's a full-featured Chinese learning tool with flashcards, handwriting practice, games, and more! 
 
 ## ⚡️ Quick Start (TL;DR)
