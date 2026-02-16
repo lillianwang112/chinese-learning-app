@@ -13,7 +13,7 @@
 
 <p align="center">
   <a href="https://lillianwang112.github.io/chinese-learning-app/">🚀 Open App</a> •
-  <a href="#-quick-start-tldr">📖 Quick Start</a> •
+  <a href="#quick-start-tldr">📖 Quick Start</a> •
   <a href="#-frequently-asked-questions">❓ FAQ</a>
 </p>
 
@@ -32,7 +32,6 @@ I built this app to help with learning the vocabulary for CHI 108. It's a full-f
 
 ## 📋 Table of Contents
 - [Quick Start](#-quick-start-tldr)
-- [What Can This App Do?](#-what-can-this-app-do)
 - [How to Use](#-how-to-use)
 - [Features at a Glance](#-features-at-a-glance)
 - [Study Tips](#-study-tips)
@@ -50,18 +49,6 @@ I built this app to help with learning the vocabulary for CHI 108. It's a full-f
 4. Start with **Study Mode** for flashcard learning
 5. Use **Learn Mode** for active quizzing
 6. Use **Writing** to practice handwriting characters
-
-## 📱 What Can This App Do?
-
-- **Flashcard Mode**: Smart spaced repetition (cards you struggle with come back sooner!)
-- **Learn Mode**: Quiz yourself actively with multiple choice, fill-in-blank, or written answer questions
-- **Writing Practice**: Handwrite/draw characters with your mouse/stylus/finger, with a **Test Mode** that hides characters
-- **Match Game**: Fun timed matching exercise with a live timer and personal best tracking
-- **Test Mode**: Quiz yourself with multiple choice
-- **Progress Tracking**: See your stats with 3-tier mastery system (Not Started → Still Learning → Mastered)
-- **Combine Decks**: Merge multiple decks for weekly review sessions
-
-The app uses the **SM-2 spaced repetition algorithm** - the same one used by Quizlet, Anki and other popular flashcard apps!
 
 ## ✨ Features at a Glance
 
