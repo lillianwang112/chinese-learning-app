@@ -5,11 +5,11 @@
 I built this app to help with learning the vocabulary for CHI 108. It's a full-featured Chinese learning tool with flashcards, handwriting practice, games, and more! 
 
 ## ⚡️ Quick Start (TL;DR)
-1. Visit the app **[https://lillianwang112.github.io/chinese-learning-app/](https://lillianwang112.github.io/chinese-learning-app/)** → Click "Import Deck"
+1. Visit the app **[https://lillianwang112.github.io/chinese-learning-app/](https://lillianwang112.github.io/chinese-learning-app/)**
 2. Download JSON files from the [108vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/108vocab)
-3. Import them into the app
-4. Start with **Study Mode** to learn new words
-5. Use **Learn Mode** to test yourself
+3. Import them into the app → Click "Import Deck"
+4. Start with **Study Mode** for flashcard learning
+5. Use **Learn Mode** for active quizzing
 6. Use **Writing** to practice handwriting characters
 
 ## 📱 What Can This App Do?
