@@ -13,7 +13,7 @@
 
 <p align="center">
   <a href="https://lillianwang112.github.io/chinese-learning-app/">🚀 Open App</a> •
-  <a href="#quick-start-tldr">📖 Quick Start</a> •
+  <a href="#%EF%B8%8F-quick-start-tldr">📖 Quick Start</a> •
   <a href="#-frequently-asked-questions">❓ FAQ</a>
 </p>
 
@@ -31,7 +31,7 @@
 I built this app to help with learning the vocabulary for CHI 108. It's a full-featured Chinese learning tool with flashcards, handwriting practice, games, and more! 
 
 ## 📋 Table of Contents
-- [Quick Start](#-quick-start-tldr)
+- [Quick Start](#%EF%B8%8F-quick-start-tldr)
 - [How to Use](#-how-to-use)
 - [Features at a Glance](#-features-at-a-glance)
 - [Study Tips](#-study-tips)
