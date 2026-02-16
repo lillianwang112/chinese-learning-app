@@ -368,7 +368,7 @@ Your progress is saved in your browser's local storage. If you clear browser dat
 | **Spaced Repetition** | ✅ Yes | ✅ Yes (paywalled) | Limited | ✅ **SM-2 algorithm** |
 | **Multiple Study Modes** | ⚠️ Writing-focused | ✅ Yes (some paywalled) | ⚠️ Dictionary-focused | ✅ **6 modes included** |
 | **Chinese-Specific Features** | ✅ Stroke order, tones | ⚠️ Basic | ✅ OCR, dictionary | ✅ **Pinyin, audio, tones** |
-| **CHI 108 Vocabulary** | ❌ Manual import | ❌ Manual import | ❌ N/A | ✅ **Pre-loaded** |
+| **CHI 108 Vocabulary** | ❌ Manual import | ❌ Manual import | ❌ N/A | ✅ **JSON Files Available to Import** |
 | **Works Offline** | ✅ Yes | ⚠️ Limited | ✅ Yes | ✅ **Yes** |
 | **No Download Required** | ❌ App required | ❌ App required | ❌ App required | ✅ **Browser-based** |
 | **Mastery Tracking** | ✅ Yes | ✅ Yes (paywalled) | ⚠️ Limited | ✅ **3-tier system** |
