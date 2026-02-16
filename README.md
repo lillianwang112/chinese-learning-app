@@ -34,6 +34,7 @@ I built this app to help with learning the vocabulary for CHI 108. It's a full-f
 - [Quick Start](#️-quick-start-tldr)
 - [What Can This App Do?](#-what-can-this-app-do)
 - [How to Use](#-how-to-use)
+- [Features at a Glance](#-features-at-a-glance)
 - [Study Tips](#-study-tips)
 - [Available Vocabulary Decks](#-available-vocabulary-decks)
 - [App Features](#-app-features)
@@ -61,6 +62,19 @@ I built this app to help with learning the vocabulary for CHI 108. It's a full-f
 - **Combine Decks**: Merge multiple decks for weekly review sessions
 
 The app uses the **SM-2 spaced repetition algorithm** - the same one used by Quizlet, Anki and other popular flashcard apps!
+
+## ✨ Features at a Glance
+
+| Feature | Description |
+|---------|-------------|
+| 🎴 **6 Study Modes** | Flashcards, Learn, Write, Match, Test, Edit |
+| 🧠 **Smart Learning** | SM-2 spaced repetition algorithm |
+| 📊 **Progress Tracking** | 3-tier mastery system (Not Started → Learning → Mastered) |
+| ✍️ **Handwriting Practice** | Canvas-based character writing with Test Mode |
+| 🎯 **Match Game** | Timed challenges with personal best tracking |
+| 🔀 **Combine Decks** | Merge decks for weekly review sessions |
+| 📱 **Works Everywhere** | Desktop, tablet, phone - no installation needed |
+| 💯 **100% Free** | No ads, no paywalls, no subscriptions |
 
 ## 🚀 How to Use
 
