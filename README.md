@@ -32,7 +32,7 @@ I built this app to help with learning the vocabulary for CHI 108. It's a full-f
 
 ## 📋 Table of Contents
 - [Quick Start](#%EF%B8%8F-quick-start-tldr)
-- [Install as an App](#-install-as-an-app)
+- [Install as an App](#-install-as-an-app-pwa)
 - [How to Use](#-how-to-use)
 - [Features at a Glance](#-features-at-a-glance)
 - [Study Tips](#-study-tips)
