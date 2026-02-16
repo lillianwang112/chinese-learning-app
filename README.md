@@ -30,6 +30,18 @@
 
 I built this app to help with learning the vocabulary for CHI 108. It's a full-featured Chinese learning tool with flashcards, handwriting practice, games, and more! 
 
+## 📋 Table of Contents
+- [Quick Start](#️-quick-start-tldr)
+- [What Can This App Do?](#-what-can-this-app-do)
+- [How to Use](#-how-to-use)
+- [Study Tips](#-study-tips)
+- [Available Vocabulary Decks](#-available-vocabulary-decks)
+- [App Features](#-app-features)
+- [FAQ](#-frequently-asked-questions)
+- [Comparison with Other Apps](#-how-does-this-compare-to-other-apps)
+- [About This Project](#-about-this-project)
+
+
 ## ⚡️ Quick Start (TL;DR)
 1. Visit the app **[https://lillianwang112.github.io/chinese-learning-app/](https://lillianwang112.github.io/chinese-learning-app/)**
 2. Download JSON files from the [108vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/108vocab)
