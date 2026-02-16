@@ -388,8 +388,6 @@ Built with:
 - **Hosting**: GitHub Pages
 - **Algorithm**: SM-2 Spaced Repetition
 
-No frameworks, no dependency bloat - just clean, fast code!
-
 ## 🙏 About This Project
 
 This app was created by a CHI 108 student for a better Chinese vocabulary learning experience. 
