@@ -217,8 +217,9 @@
         if (FIREBASE_ENABLED) {
             try {
                 firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
-                const appCheck = firebase.appCheck();
-                appCheck.activate('6LfeKIMsAAAAAKGpXiBISwSmkEiwmK3uLB55hsjo', true);
+                // App Check disabled - unenforced on server side
+                // const appCheck = firebase.appCheck();
+                // appCheck.activate('6LfeKIMsAAAAAKGpXiBISwSmkEiwmK3uLB55hsjo', true);
                 firebaseAuth = firebase.auth();
                 firebaseDb = firebase.firestore();
                 // Enable offline persistence
