@@ -338,6 +338,7 @@ const ChineseLearningApp = () => {
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [swipeHistory, setSwipeHistory] = useState([]); // undo history for flashcard study
   const [newCard, setNewCard] = useState({ chinese: '', pinyin: '', english: '' });
   const [newDeckName, setNewDeckName] = useState('');
   const [editingDeck, setEditingDeck] = useState(null);
@@ -420,6 +421,7 @@ const ChineseLearningApp = () => {
   const [writingSessionComplete, setWritingSessionComplete] = useState(false);
   const [writingMode, setWritingMode] = useState(null); // 'practice10' or 'practiceAll' or 'test'
   const [testRevealed, setTestRevealed] = useState(false); // For writing test mode - whether character is revealed
+  const [writingUndoHistory, setWritingUndoHistory] = useState([]); // undo history for writing practice
 
   // User account & sync state
   const [currentUser, setCurrentUser] = useState(null);
@@ -815,6 +817,9 @@ const ChineseLearningApp = () => {
       } else if (e.key === 'ArrowRight' || e.key === 'f' || e.key === 'F') {
         e.preventDefault();
         handleSwipe('right');
+      } else if (e.key === 'Backspace' || e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        undoLastSwipe();
       }
     };
     
@@ -899,15 +904,19 @@ const ChineseLearningApp = () => {
 
   const handleSwipe = (direction) => {
     if (!selectedDeck || currentView !== 'study') return;
-    
+
     const currentCard = shuffledCards[currentCardIndex];
     setSwipeDirection(direction);
-    
+
+    // Save state for undo before making changes
+    const snapshot = { direction, cardIndex: currentCardIndex, cards: [...shuffledCards], card: currentCard };
+
     setTimeout(() => {
       if (direction === 'right') {
         // I Know This - move on normally
         updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, 5);
-        
+        setSwipeHistory(prev => [...prev, snapshot]);
+
         if (currentCardIndex < shuffledCards.length - 1) {
           setCurrentCardIndex(currentCardIndex + 1);
           setIsFlipped(false);
@@ -918,7 +927,8 @@ const ChineseLearningApp = () => {
       } else {
         // Still Learning - re-insert the card proportionally later in the deck
         updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, 2);
-        
+        setSwipeHistory(prev => [...prev, snapshot]);
+
         const newCards = [...shuffledCards];
         // Remove from current position
         newCards.splice(currentCardIndex, 1);
@@ -934,9 +944,18 @@ const ChineseLearningApp = () => {
         // Keep the same index (since we removed current card, the next card slides into this index)
         setIsFlipped(false);
       }
-      
+
       setSwipeDirection(null);
     }, 300);
+  };
+
+  const undoLastSwipe = () => {
+    if (swipeHistory.length === 0) return;
+    const last = swipeHistory[swipeHistory.length - 1];
+    setSwipeHistory(prev => prev.slice(0, -1));
+    setShuffledCards(last.cards);
+    setCurrentCardIndex(last.cardIndex);
+    setIsFlipped(false);
   };
 
   // SM-2 Spaced Repetition Algorithm
@@ -1674,6 +1693,7 @@ const ChineseLearningApp = () => {
     setShuffledCards([...deck.cards]); // Start with original order
     setCurrentCardIndex(0);
     setIsFlipped(false);
+    setSwipeHistory([]);
     setCurrentView('study');
     updateStudyStreak();
   };
@@ -1940,6 +1960,7 @@ const ChineseLearningApp = () => {
     setSelectedDeck(deck);
     setCurrentView('writing');
     setWritingMode(null); // Show mode selection screen
+    setWritingUndoHistory([]);
   };
 
   // Start Practice 10 mode
@@ -2070,10 +2091,13 @@ const ChineseLearningApp = () => {
   // Handle "I Forgot" - re-queue the card to appear again soon
   const handleForgotCard = () => {
     const currentCard = writingCards[currentWritingIndex];
-    
+
+    // Save snapshot for undo
+    setWritingUndoHistory(prev => [...prev, { action: 'forgot', cardIndex: currentWritingIndex, cards: [...writingCards] }]);
+
     // Update the card with higher difficulty
     updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, 1);
-    
+
     // Re-insert the card proportionally later in the queue
     const newWritingCards = [...writingCards];
     const remaining = newWritingCards.length - currentWritingIndex - 1;
@@ -2082,15 +2106,15 @@ const ChineseLearningApp = () => {
       currentWritingIndex + proportionalOffset,
       writingCards.length
     );
-    
+
     // Add the card back into the queue
     newWritingCards.splice(reinsertPosition, 0, currentCard);
-    
+
     setWritingCards(newWritingCards);
     clearCanvas();
     setWritingFeedback(null);
     setTestRevealed(false);
-    
+
     // Move to next card
     if (currentWritingIndex < newWritingCards.length - 1) {
       setCurrentWritingIndex(currentWritingIndex + 1);
@@ -2109,14 +2133,17 @@ const ChineseLearningApp = () => {
   // Handle "I Know This" - move to next without re-queuing
   const handleKnowCard = () => {
     const currentCard = writingCards[currentWritingIndex];
-    
+
+    // Save snapshot for undo
+    setWritingUndoHistory(prev => [...prev, { action: 'know', cardIndex: currentWritingIndex, cards: [...writingCards] }]);
+
     // Update with good score
     updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, 5);
-    
+
     clearCanvas();
     setWritingFeedback(null);
     setTestRevealed(false);
-    
+
     // Move to next card
     if (currentWritingIndex < writingCards.length - 1) {
       setCurrentWritingIndex(currentWritingIndex + 1);
@@ -2130,6 +2157,18 @@ const ChineseLearningApp = () => {
         setCurrentView('home');
       }
     }
+  };
+
+  const undoWritingAction = () => {
+    if (writingUndoHistory.length === 0) return;
+    const last = writingUndoHistory[writingUndoHistory.length - 1];
+    setWritingUndoHistory(prev => prev.slice(0, -1));
+    setWritingCards(last.cards);
+    setCurrentWritingIndex(last.cardIndex);
+    setWritingSessionComplete(false);
+    clearCanvas();
+    setWritingFeedback(null);
+    setTestRevealed(false);
   };
 
   // Canvas drawing handlers
@@ -2250,9 +2289,8 @@ const ChineseLearningApp = () => {
   };
 
   const previousCard = () => {
-    if (currentCardIndex > 0) {
-      setCurrentCardIndex(currentCardIndex - 1);
-      setIsFlipped(false);
+    if (swipeHistory.length > 0) {
+      undoLastSwipe();
     }
   };
 
@@ -3670,10 +3708,10 @@ const ChineseLearningApp = () => {
           <div className="flex justify-between">
             <button
               onClick={previousCard}
-              disabled={currentCardIndex === 0}
-              className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={swipeHistory.length === 0}
+              className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              ← Previous
+              ↩ Undo
             </button>
             <button
               onClick={nextCard}
@@ -5004,14 +5042,21 @@ const ChineseLearningApp = () => {
                 <X size={18} />
                 I Forgot
               </button>
-              {(writingMode === 'test' || writingMode === 'testAll') && !testRevealed && (
+              {(writingMode === 'test' || writingMode === 'testAll') && (
                 <button
-                  onClick={() => setTestRevealed(true)}
-                  className="bg-orange-500 text-white px-4 py-3 rounded-lg hover:bg-orange-600 transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6"
+                  onClick={() => setTestRevealed(prev => !prev)}
+                  className={`${testRevealed ? 'bg-gray-500 hover:bg-gray-600' : 'bg-orange-500 hover:bg-orange-600'} text-white px-4 py-3 rounded-lg transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6`}
                 >
-                  👁 Reveal
+                  {testRevealed ? '🙈 Hide' : '👁 Reveal'}
                 </button>
               )}
+              <button
+                onClick={undoWritingAction}
+                disabled={writingUndoHistory.length === 0}
+                className="bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                ↩ Undo
+              </button>
             </div>
 
             <div className="mt-6 p-4 bg-blue-50 rounded-lg">
