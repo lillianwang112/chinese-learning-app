@@ -24,6 +24,11 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     
     <style>
         body { 
@@ -132,6 +137,147 @@
             </svg>
         );
         
+        // User/Account icon components
+        const UserIcon = ({size = 24, className = ''}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+        );
+
+        const LogOut = ({size = 24, className = ''}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+        );
+
+        const CloudIcon = ({size = 24, className = ''}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            </svg>
+        );
+
+        const RefreshCw = ({size = 24, className = ''}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+        );
+
+        const Mail = ({size = 24, className = ''}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+        );
+
+        // ==========================================
+        // Firebase Configuration
+        // ==========================================
+        // To enable user accounts and cloud sync:
+        // 1. Go to https://console.firebase.google.com
+        // 2. Create a new project (or use existing)
+        // 3. Enable Authentication > Email/Password and Google sign-in
+        // 4. Create a Firestore Database (start in test mode, then add security rules)
+        // 5. Go to Project Settings > General > Your apps > Web app
+        // 6. Copy your config values below
+        // ==========================================
+        const FIREBASE_CONFIG = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase only if configured
+        let firebaseApp = null;
+        let firebaseAuth = null;
+        let firebaseDb = null;
+        const FIREBASE_ENABLED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
+
+        if (FIREBASE_ENABLED) {
+            try {
+                firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
+                firebaseAuth = firebase.auth();
+                firebaseDb = firebase.firestore();
+                // Enable offline persistence
+                firebaseDb.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+                console.log('Firebase initialized successfully');
+            } catch (e) {
+                console.error('Firebase initialization failed:', e);
+            }
+        }
+
+        // Cloud sync helpers
+        const CloudSync = {
+            async saveDecks(userId, decks) {
+                if (!firebaseDb) return;
+                const batch = firebaseDb.batch();
+                const userDecksRef = firebaseDb.collection('users').doc(userId).collection('decks');
+
+                // Save each deck as its own document
+                for (const deck of decks) {
+                    const deckRef = userDecksRef.doc(deck.id);
+                    batch.set(deckRef, {
+                        ...deck,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                await batch.commit();
+            },
+
+            async loadDecks(userId) {
+                if (!firebaseDb) return null;
+                const snapshot = await firebaseDb
+                    .collection('users').doc(userId)
+                    .collection('decks')
+                    .get();
+
+                if (snapshot.empty) return null;
+                return snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    delete data.updatedAt;
+                    return data;
+                });
+            },
+
+            async deleteDeckFromCloud(userId, deckId) {
+                if (!firebaseDb) return;
+                await firebaseDb
+                    .collection('users').doc(userId)
+                    .collection('decks').doc(deckId)
+                    .delete();
+            },
+
+            async saveProgress(userId, progressData) {
+                if (!firebaseDb) return;
+                await firebaseDb.collection('users').doc(userId).set({
+                    learnProgress: progressData.learnProgress || {},
+                    studyStreak: progressData.studyStreak || {},
+                    bestMatchTimes: progressData.bestMatchTimes || {},
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            },
+
+            async loadProgress(userId) {
+                if (!firebaseDb) return null;
+                const doc = await firebaseDb.collection('users').doc(userId).get();
+                if (!doc.exists) return null;
+                const data = doc.data();
+                return {
+                    learnProgress: data.learnProgress || {},
+                    studyStreak: data.studyStreak || {},
+                    bestMatchTimes: data.bestMatchTimes || {}
+                };
+            }
+        };
+
         const { useState, useEffect, useRef } = React;
 
 
@@ -262,6 +408,19 @@ const ChineseLearningApp = () => {
   const [writingMode, setWritingMode] = useState(null); // 'practice10' or 'practiceAll' or 'test'
   const [testRevealed, setTestRevealed] = useState(false); // For writing test mode - whether character is revealed
 
+  // User account & sync state
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(FIREBASE_ENABLED);
+  const [authError, setAuthError] = useState('');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authConfirmPassword, setAuthConfirmPassword] = useState('');
+  const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
+  const [syncStatus, setSyncStatus] = useState('idle'); // 'idle', 'syncing', 'synced', 'error'
+  const [lastSyncTime, setLastSyncTime] = useState(null);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const syncTimeoutRef = useRef(null);
+
   // Delete confirmation modal
   const [deleteConfirmation, setDeleteConfirmation] = useState(null); // { deckId, deckName }
   
@@ -293,6 +452,210 @@ const ChineseLearningApp = () => {
   useEffect(() => {
     localStorage.setItem('learnProgress', JSON.stringify(learnProgress));
   }, [learnProgress]);
+
+  // Firebase auth state listener
+  useEffect(() => {
+    if (!FIREBASE_ENABLED || !firebaseAuth) {
+      setAuthLoading(false);
+      return;
+    }
+    const unsubscribe = firebaseAuth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+      setAuthLoading(false);
+      if (user) {
+        // Load cloud data on login
+        loadFromCloud(user.uid);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Debounced cloud sync when data changes (only if logged in)
+  useEffect(() => {
+    if (!currentUser || !FIREBASE_ENABLED) return;
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    syncTimeoutRef.current = setTimeout(() => {
+      saveToCloud(currentUser.uid);
+    }, 3000); // Wait 3 seconds after last change before syncing
+    return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
+  }, [decks, learnProgress, studyStreak, bestMatchTimes, currentUser]);
+
+  // Cloud sync functions
+  const saveToCloud = async (userId) => {
+    if (!FIREBASE_ENABLED) return;
+    try {
+      setSyncStatus('syncing');
+      await CloudSync.saveDecks(userId, decks);
+      await CloudSync.saveProgress(userId, { learnProgress, studyStreak, bestMatchTimes });
+      setSyncStatus('synced');
+      setLastSyncTime(new Date());
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    } catch (e) {
+      console.error('Cloud sync save error:', e);
+      setSyncStatus('error');
+      setTimeout(() => setSyncStatus('idle'), 5000);
+    }
+  };
+
+  const loadFromCloud = async (userId) => {
+    if (!FIREBASE_ENABLED) return;
+    try {
+      setSyncStatus('syncing');
+      const cloudDecks = await CloudSync.loadDecks(userId);
+      const cloudProgress = await CloudSync.loadProgress(userId);
+
+      if (cloudDecks && cloudDecks.length > 0) {
+        // Merge strategy: cloud decks take priority, but keep local-only decks
+        const cloudDeckIds = new Set(cloudDecks.map(d => d.id));
+        const localOnlyDecks = decks.filter(d => !cloudDeckIds.has(d.id));
+        const mergedDecks = [...cloudDecks, ...localOnlyDecks];
+        setDecks(mergedDecks);
+      }
+
+      if (cloudProgress) {
+        if (cloudProgress.learnProgress && Object.keys(cloudProgress.learnProgress).length > 0) {
+          setLearnProgress(prev => ({ ...prev, ...cloudProgress.learnProgress }));
+        }
+        if (cloudProgress.studyStreak && cloudProgress.studyStreak.currentStreak !== undefined) {
+          setStudyStreak(prev => {
+            // Keep the better streak data
+            const cloud = cloudProgress.studyStreak;
+            const merged = { ...prev };
+            if ((cloud.currentStreak || 0) > (prev.currentStreak || 0)) {
+              merged.currentStreak = cloud.currentStreak;
+              merged.lastStudyDate = cloud.lastStudyDate;
+            }
+            if ((cloud.longestStreak || 0) > (prev.longestStreak || 0)) {
+              merged.longestStreak = cloud.longestStreak;
+            }
+            // Merge study dates
+            const allDates = new Set([...(prev.studyDates || []), ...(cloud.studyDates || [])]);
+            merged.studyDates = Array.from(allDates).sort();
+            return merged;
+          });
+        }
+        if (cloudProgress.bestMatchTimes && Object.keys(cloudProgress.bestMatchTimes).length > 0) {
+          setBestMatchTimes(prev => {
+            const merged = { ...prev };
+            for (const [key, val] of Object.entries(cloudProgress.bestMatchTimes)) {
+              if (!merged[key] || val < merged[key]) merged[key] = val;
+            }
+            return merged;
+          });
+        }
+      }
+
+      setSyncStatus('synced');
+      setLastSyncTime(new Date());
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    } catch (e) {
+      console.error('Cloud sync load error:', e);
+      setSyncStatus('error');
+      setTimeout(() => setSyncStatus('idle'), 5000);
+    }
+  };
+
+  const forceSync = () => {
+    if (currentUser && FIREBASE_ENABLED) {
+      saveToCloud(currentUser.uid);
+    }
+  };
+
+  // Auth functions
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    if (!FIREBASE_ENABLED) {
+      setAuthError('Firebase is not configured. See setup instructions in the source code.');
+      return;
+    }
+    if (authPassword !== authConfirmPassword) {
+      setAuthError('Passwords do not match.');
+      return;
+    }
+    if (authPassword.length < 6) {
+      setAuthError('Password must be at least 6 characters.');
+      return;
+    }
+    try {
+      setAuthError('');
+      await firebaseAuth.createUserWithEmailAndPassword(authEmail, authPassword);
+      setCurrentView('home');
+      setAuthEmail('');
+      setAuthPassword('');
+      setAuthConfirmPassword('');
+    } catch (e) {
+      setAuthError(e.message.replace('Firebase: ', '').replace(/\(auth\/.*\)\.?/, '').trim());
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    if (!FIREBASE_ENABLED) {
+      setAuthError('Firebase is not configured. See setup instructions in the source code.');
+      return;
+    }
+    try {
+      setAuthError('');
+      await firebaseAuth.signInWithEmailAndPassword(authEmail, authPassword);
+      setCurrentView('home');
+      setAuthEmail('');
+      setAuthPassword('');
+    } catch (e) {
+      setAuthError(e.message.replace('Firebase: ', '').replace(/\(auth\/.*\)\.?/, '').trim());
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (!FIREBASE_ENABLED) {
+      setAuthError('Firebase is not configured. See setup instructions in the source code.');
+      return;
+    }
+    try {
+      setAuthError('');
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await firebaseAuth.signInWithPopup(provider);
+      setCurrentView('home');
+    } catch (e) {
+      setAuthError(e.message.replace('Firebase: ', '').replace(/\(auth\/.*\)\.?/, '').trim());
+    }
+  };
+
+  const handleSignOut = async () => {
+    if (!firebaseAuth) return;
+    try {
+      // Save before signing out
+      if (currentUser) await saveToCloud(currentUser.uid);
+      await firebaseAuth.signOut();
+      setShowAccountMenu(false);
+      setSyncStatus('idle');
+      setLastSyncTime(null);
+    } catch (e) {
+      console.error('Sign out error:', e);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!firebaseAuth || !currentUser) return;
+    if (!window.confirm('Are you sure you want to delete your account? This will remove all cloud-synced data. Your local data will be kept.')) return;
+    try {
+      // Delete user data from Firestore
+      const userRef = firebaseDb.collection('users').doc(currentUser.uid);
+      const decksSnapshot = await userRef.collection('decks').get();
+      const batch = firebaseDb.batch();
+      decksSnapshot.docs.forEach(doc => batch.delete(doc.ref));
+      batch.delete(userRef);
+      await batch.commit();
+      // Delete the auth account
+      await currentUser.delete();
+      setShowAccountMenu(false);
+    } catch (e) {
+      if (e.code === 'auth/requires-recent-login') {
+        setAuthError('Please sign out and sign back in before deleting your account (security requirement).');
+      } else {
+        console.error('Delete account error:', e);
+      }
+    }
+  };
 
   // Live match timer - updates every 100ms
   useEffect(() => {
@@ -1151,6 +1514,10 @@ const ChineseLearningApp = () => {
     const confirmed = window.confirm(`Are you sure you want to delete "${deckName}"?\n\nThis action cannot be undone.`);
     if (confirmed) {
       setDecks(decks.filter(deck => deck.id !== deckId));
+      // Also delete from cloud
+      if (currentUser && FIREBASE_ENABLED) {
+        CloudSync.deleteDeckFromCloud(currentUser.uid, deckId).catch(e => console.error('Cloud delete error:', e));
+      }
       setCurrentView('home');
     }
   };
@@ -1809,6 +2176,222 @@ const ChineseLearningApp = () => {
   console.log('Current view is:', currentView);
 
   // HOME VIEW
+  // ==========================================
+  // Login / Signup View
+  // ==========================================
+  if (currentView === 'login') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full border border-gray-100">
+          <button
+            onClick={() => { setCurrentView('home'); setAuthError(''); }}
+            className="text-gray-500 hover:text-gray-700 mb-4 flex items-center gap-1 text-sm"
+          >
+            ← Back to App
+          </button>
+
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              {authMode === 'login' ? 'Welcome Back' : 'Create Account'}
+            </h1>
+            <p className="text-gray-500">
+              {authMode === 'login'
+                ? 'Sign in to sync your decks across devices'
+                : 'Sign up to save and sync your progress'}
+            </p>
+          </div>
+
+          {!FIREBASE_ENABLED && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+              <p className="text-sm text-yellow-800 font-medium mb-1">Firebase Not Configured</p>
+              <p className="text-xs text-yellow-700">
+                To enable user accounts, you need to set up a Firebase project and add your config values to the source code.
+                Look for <code className="bg-yellow-100 px-1 rounded">FIREBASE_CONFIG</code> in the HTML file.
+              </p>
+            </div>
+          )}
+
+          {authError && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+              <p className="text-sm text-red-700">{authError}</p>
+            </div>
+          )}
+
+          <form onSubmit={authMode === 'login' ? handleLogin : handleSignUp} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={authEmail}
+                onChange={(e) => setAuthEmail(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input
+                type="password"
+                value={authPassword}
+                onChange={(e) => setAuthPassword(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            {authMode === 'signup' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                <input
+                  type="password"
+                  value={authConfirmPassword}
+                  onChange={(e) => setAuthConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+            )}
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl"
+            >
+              {authMode === 'login' ? 'Sign In' : 'Create Account'}
+            </button>
+          </form>
+
+          <div className="my-6 flex items-center gap-3">
+            <div className="flex-1 h-px bg-gray-200"></div>
+            <span className="text-sm text-gray-400">or</span>
+            <div className="flex-1 h-px bg-gray-200"></div>
+          </div>
+
+          <button
+            onClick={handleGoogleSignIn}
+            className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Sign in with Google
+          </button>
+
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => { setAuthMode(authMode === 'login' ? 'signup' : 'login'); setAuthError(''); }}
+              className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+            >
+              {authMode === 'login'
+                ? "Don't have an account? Sign up"
+                : 'Already have an account? Sign in'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // Account Management View
+  // ==========================================
+  if (currentView === 'account') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 p-6">
+        <div className="max-w-lg mx-auto">
+          <button
+            onClick={() => setCurrentView('home')}
+            className="text-gray-500 hover:text-gray-700 mb-6 flex items-center gap-1 text-sm"
+          >
+            ← Back to Home
+          </button>
+
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+              <UserIcon size={28} />
+              Account
+            </h2>
+
+            {currentUser ? (
+              <div className="space-y-6">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">Signed in as</p>
+                  <p className="text-lg font-semibold text-gray-800">{currentUser.email || currentUser.displayName || 'User'}</p>
+                </div>
+
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 mb-1">Cloud Sync Status</p>
+                  <div className="flex items-center gap-2">
+                    {syncStatus === 'syncing' && <><RefreshCw size={16} className="animate-spin text-blue-500" /> <span className="text-blue-600 font-medium">Syncing...</span></>}
+                    {syncStatus === 'synced' && <><CloudIcon size={16} className="text-green-500" /> <span className="text-green-600 font-medium">Synced</span></>}
+                    {syncStatus === 'error' && <><X size={16} className="text-red-500" /> <span className="text-red-600 font-medium">Sync Error</span></>}
+                    {syncStatus === 'idle' && <><CloudIcon size={16} className="text-gray-400" /> <span className="text-gray-600">Up to date</span></>}
+                  </div>
+                  {lastSyncTime && (
+                    <p className="text-xs text-gray-400 mt-1">Last synced: {lastSyncTime.toLocaleTimeString()}</p>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={forceSync}
+                    disabled={syncStatus === 'syncing'}
+                    className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white py-3 rounded-xl font-semibold hover:bg-blue-600 transition-all disabled:opacity-50"
+                  >
+                    <RefreshCw size={18} className={syncStatus === 'syncing' ? 'animate-spin' : ''} />
+                    Sync Now
+                  </button>
+
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+                  >
+                    <LogOut size={18} />
+                    Sign Out
+                  </button>
+
+                  <button
+                    onClick={handleDeleteAccount}
+                    className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-100 transition-all mt-4"
+                  >
+                    <Trash2 size={18} />
+                    Delete Account
+                  </button>
+                </div>
+
+                {authError && (
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                    <p className="text-sm text-red-700">{authError}</p>
+                  </div>
+                )}
+
+                <div className="bg-blue-50 rounded-xl p-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>How sync works:</strong> Your decks and progress automatically sync to the cloud when you're signed in.
+                    Open this app on any device, sign in with the same account, and your data will be there.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center space-y-4">
+                <p className="text-gray-500">You're not signed in. Sign in to sync your data across devices.</p>
+                <button
+                  onClick={() => setCurrentView('login')}
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg"
+                >
+                  Sign In / Sign Up
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (currentView === 'home') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
@@ -1864,6 +2447,23 @@ const ChineseLearningApp = () => {
               >
                 <TrendingUp size={20} />
                 Stats
+              </button>
+              <button
+                onClick={() => currentUser ? setCurrentView('account') : setCurrentView('login')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold ${
+                  currentUser
+                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700'
+                    : 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-indigo-700'
+                }`}
+              >
+                <UserIcon size={20} />
+                {currentUser ? 'Account' : 'Sign In'}
+                {currentUser && syncStatus === 'syncing' && (
+                  <RefreshCw size={14} className="animate-spin" />
+                )}
+                {currentUser && syncStatus === 'synced' && (
+                  <CloudIcon size={14} />
+                )}
               </button>
               {decks.length >= 2 && (
                 <button
