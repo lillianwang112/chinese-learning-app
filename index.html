@@ -690,6 +690,7 @@ const ChineseLearningApp = () => {
       setAuthError('');
       const provider = new firebase.auth.GoogleAuthProvider();
       await firebaseAuth.signInWithPopup(provider);
+      setCurrentView('home');
     } catch (e) {
       setAuthError(e.message.replace('Firebase: ', '').replace(/\(auth\/.*\)\.?/, '').trim());
     }
