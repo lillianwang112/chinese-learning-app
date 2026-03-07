@@ -443,6 +443,9 @@ const ChineseLearningApp = () => {
   // Deck reorder mode
   const [reorderMode, setReorderMode] = useState(false);
   
+  // Search
+  const [searchQuery, setSearchQuery] = useState('');
+
   // Calendar heatmap tooltip
   const [hoveredDay, setHoveredDay] = useState(null);
 
@@ -806,10 +809,10 @@ const ChineseLearningApp = () => {
       if (e.key === ' ' || e.key === 'Spacebar') {
         e.preventDefault();
         setIsFlipped(prev => !prev);
-      } else if (e.key === 'ArrowLeft') {
+      } else if (e.key === 'ArrowLeft' || e.key === 'd' || e.key === 'D') {
         e.preventDefault();
         handleSwipe('left');
-      } else if (e.key === 'ArrowRight') {
+      } else if (e.key === 'ArrowRight' || e.key === 'f' || e.key === 'F') {
         e.preventDefault();
         handleSwipe('right');
       }
@@ -2512,6 +2515,31 @@ const ChineseLearningApp = () => {
         </div>
 
         <div className="max-w-6xl mx-auto px-6 py-8">
+          {/* Search Bar */}
+          <div className="mb-6">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search decks or vocab (e.g. 你好, hello, HSK1)..."
+                className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 pl-12 text-lg focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all shadow-md placeholder-gray-400"
+              />
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Quick Actions Bar */}
           <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
             <div className="flex gap-3 justify-center flex-wrap">
@@ -2697,14 +2725,29 @@ const ChineseLearningApp = () => {
           })()}
 
           {/* Folders Grid (shown at root level) */}
-          {!currentFolderId && folders.length > 0 && (
+          {!currentFolderId && folders.length > 0 && (() => {
+            const q = searchQuery.trim().toLowerCase();
+            const filteredFolders = q ? folders.filter(folder => {
+              if (folder.name.toLowerCase().includes(q)) return true;
+              const folderDecks = decks.filter(d => folder.deckIds.includes(d.id));
+              return folderDecks.some(d =>
+                d.name.toLowerCase().includes(q) ||
+                d.cards.some(c =>
+                  (c.chinese && c.chinese.toLowerCase().includes(q)) ||
+                  (c.pinyin && c.pinyin.toLowerCase().includes(q)) ||
+                  (c.english && c.english.toLowerCase().includes(q))
+                )
+              );
+            }) : folders;
+            if (filteredFolders.length === 0) return null;
+            return (
             <div className="mb-8">
               <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <span className="text-xl">📁</span>
                 Folders
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                {folders.map(folder => {
+                {filteredFolders.map(folder => {
                   const folderDecks = decks.filter(d => folder.deckIds.includes(d.id));
                   const totalCards = folderDecks.reduce((sum, d) => sum + d.cards.length, 0);
                   return (
@@ -2756,17 +2799,39 @@ const ChineseLearningApp = () => {
                 })}
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {/* Decks Grid */}
           {(() => {
-            // Determine which decks to show based on folder context
+            // Determine which decks to show based on folder context and search
             const allFolderedDeckIds = folders.flatMap(f => f.deckIds);
+            const q = searchQuery.trim().toLowerCase();
             let visibleDecks;
             let showAddDeckButton = false;
-            if (currentFolderId) {
+            if (q && !currentFolderId) {
+              // When searching at root level, show ALL matching decks regardless of folder
+              visibleDecks = decks.filter(d =>
+                d.name.toLowerCase().includes(q) ||
+                d.cards.some(c =>
+                  (c.chinese && c.chinese.toLowerCase().includes(q)) ||
+                  (c.pinyin && c.pinyin.toLowerCase().includes(q)) ||
+                  (c.english && c.english.toLowerCase().includes(q))
+                )
+              );
+            } else if (currentFolderId) {
               const folder = folders.find(f => f.id === currentFolderId);
               visibleDecks = folder ? decks.filter(d => folder.deckIds.includes(d.id)) : [];
+              if (q) {
+                visibleDecks = visibleDecks.filter(d =>
+                  d.name.toLowerCase().includes(q) ||
+                  d.cards.some(c =>
+                    (c.chinese && c.chinese.toLowerCase().includes(q)) ||
+                    (c.pinyin && c.pinyin.toLowerCase().includes(q)) ||
+                    (c.english && c.english.toLowerCase().includes(q))
+                  )
+                );
+              }
               showAddDeckButton = true;
             } else {
               // Root level: show only unfoldered decks
@@ -2804,10 +2869,10 @@ const ChineseLearningApp = () => {
                   </div>
                 )}
 
-                {!currentFolderId && visibleDecks.length > 0 && folders.length > 0 && (
+                {!currentFolderId && visibleDecks.length > 0 && (folders.length > 0 || q) && (
                   <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <BookOpen size={20} className="text-orange-500" />
-                    Unfoldered Decks
+                    {q ? `Search Results (${visibleDecks.length})` : 'Unfoldered Decks'}
                   </h2>
                 )}
 
@@ -3009,9 +3074,16 @@ const ChineseLearningApp = () => {
                   </div>
                 )}
 
-                {visibleDecks.length === 0 && !currentFolderId && decks.length > 0 && folders.length > 0 && (
+                {visibleDecks.length === 0 && !currentFolderId && decks.length > 0 && folders.length > 0 && !q && (
                   <div className="text-center py-8">
                     <p className="text-gray-500">All decks are organized into folders above.</p>
+                  </div>
+                )}
+
+                {visibleDecks.length === 0 && q && (
+                  <div className="text-center py-12">
+                    <p className="text-4xl mb-3">🔍</p>
+                    <p className="text-gray-600 text-lg">No decks or vocab found matching "{searchQuery.trim()}"</p>
                   </div>
                 )}
               </div>
