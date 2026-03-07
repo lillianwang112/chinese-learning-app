@@ -499,6 +499,26 @@ const ChineseLearningApp = () => {
     localStorage.setItem('lastStudied', JSON.stringify(lastStudied));
   }, [lastStudied]);
 
+  // Save writing session state to localStorage
+  useEffect(() => {
+    if (currentView === 'writing' && selectedDeck && writingMode && writingCards.length > 0 && !writingSessionComplete) {
+      localStorage.setItem('writingSession', JSON.stringify({
+        deckId: selectedDeck.id,
+        writingMode,
+        cardIds: writingCards.map(c => c.id),
+        currentIndex: currentWritingIndex,
+        practicedCardIds,
+      }));
+    }
+  }, [currentView, selectedDeck, writingMode, writingCards, currentWritingIndex, practicedCardIds, writingSessionComplete]);
+
+  // Clear saved writing session when session completes
+  useEffect(() => {
+    if (writingSessionComplete) {
+      localStorage.removeItem('writingSession');
+    }
+  }, [writingSessionComplete]);
+
   // Firebase auth state listener
   useEffect(() => {
     if (!FIREBASE_ENABLED || !firebaseAuth) {
@@ -1963,8 +1983,58 @@ const ChineseLearningApp = () => {
     setWritingUndoHistory([]);
   };
 
+  // Resume a saved writing session
+  const resumeWritingSession = () => {
+    const saved = localStorage.getItem('writingSession');
+    if (!saved) return false;
+    try {
+      const session = JSON.parse(saved);
+      const deck = decks.find(d => String(d.id) === String(session.deckId));
+      if (!deck) return false;
+
+      // Reconstruct writingCards from saved card IDs
+      // Cards may have been re-queued (appear multiple times), so map each ID
+      const cards = session.cardIds.map(id => deck.cards.find(c => String(c.id) === String(id))).filter(Boolean);
+      if (cards.length === 0) return false;
+
+      const resumeIndex = Math.min(session.currentIndex, cards.length - 1);
+
+      setSelectedDeck(deck);
+      setWritingCards(cards);
+      setCurrentWritingIndex(resumeIndex);
+      setWritingMode(session.writingMode);
+      setPracticedCardIds(session.practicedCardIds || []);
+      setWritingSessionComplete(false);
+      setStrokes([]);
+      setCurrentStroke([]);
+      setWritingFeedback(null);
+      setTestRevealed(false);
+      setWritingUndoHistory([]);
+      setCurrentView('writing');
+      setLastStudied(prev => ({...prev, [deck.id]: { timestamp: Date.now(), mode: 'writing' }}));
+      return true;
+    } catch (e) {
+      localStorage.removeItem('writingSession');
+      return false;
+    }
+  };
+
+  // Check if there's a saved writing session for a given deck
+  const getSavedWritingSession = (deckId) => {
+    const saved = localStorage.getItem('writingSession');
+    if (!saved) return null;
+    try {
+      const session = JSON.parse(saved);
+      if (String(session.deckId) === String(deckId)) {
+        return session;
+      }
+    } catch (e) {}
+    return null;
+  };
+
   // Start Practice 10 mode
   const startPractice10 = () => {
+    localStorage.removeItem('writingSession');
     const numCards = Math.min(10, selectedDeck.cards.length);
     const shuffled = [...selectedDeck.cards].sort(() => Math.random() - 0.5).slice(0, numCards);
     
@@ -1981,6 +2051,7 @@ const ChineseLearningApp = () => {
 
   // Start Practice All mode
   const startPracticeAll = () => {
+    localStorage.removeItem('writingSession');
     const allCards = [...selectedDeck.cards];
     
     setWritingCards(allCards);
@@ -1996,6 +2067,7 @@ const ChineseLearningApp = () => {
 
   // Start Writing Test mode (no characters shown, only pinyin + english)
   const startWritingTest = () => {
+    localStorage.removeItem('writingSession');
     const numCards = Math.min(10, selectedDeck.cards.length);
     const shuffled = [...selectedDeck.cards].sort(() => Math.random() - 0.5).slice(0, numCards);
     
@@ -2013,6 +2085,7 @@ const ChineseLearningApp = () => {
 
   // Start Writing Test All mode (test with all cards)
   const startWritingTestAll = () => {
+    localStorage.removeItem('writingSession');
     const allCards = [...selectedDeck.cards];
     
     setWritingCards(allCards);
@@ -2124,6 +2197,7 @@ const ChineseLearningApp = () => {
         setWritingSessionComplete(true); // Show "Next 10" option
       } else {
         // practiceAll or testAll mode - just go back home
+        localStorage.removeItem('writingSession');
         alert('Great job! You\'ve completed all cards!');
         setCurrentView('home');
       }
@@ -2153,6 +2227,7 @@ const ChineseLearningApp = () => {
         setWritingSessionComplete(true); // Show "Next 10" option
       } else {
         // practiceAll or testAll mode - just go back home
+        localStorage.removeItem('writingSession');
         alert('Great job! You\'ve completed all cards!');
         setCurrentView('home');
       }
@@ -2737,6 +2812,7 @@ const ChineseLearningApp = () => {
                       return `${days}d ago`;
                     })();
                     const lastMode = modeLabels[mode] || 'Flashcards';
+                    const savedSession = getSavedWritingSession(deck.id);
                     return (
                       <div key={deck.id} className="min-w-[240px] max-w-[280px] bg-white rounded-xl shadow-md border-2 border-blue-100 overflow-hidden flex-shrink-0 hover:shadow-lg transition-all">
                         <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-3">
@@ -2747,6 +2823,14 @@ const ChineseLearningApp = () => {
                           <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden mb-3">
                             <div className="bg-gradient-to-r from-green-400 to-green-600 h-2 transition-all duration-500" style={{ width: `${masteredPct}%` }} />
                           </div>
+                          {savedSession && (
+                            <button
+                              onClick={resumeWritingSession}
+                              className="w-full mb-2 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-2 rounded-lg transition-all text-xs font-semibold flex items-center justify-center gap-1 ring-2 ring-pink-300"
+                            >
+                              📝 Resume Writing ({savedSession.currentIndex + 1}/{savedSession.cardIds.length})
+                            </button>
+                          )}
                           <div className="flex gap-2">
                             <button
                               onClick={() => startStudy(deck)}
@@ -4877,6 +4961,21 @@ const ChineseLearningApp = () => {
               How would you like to practice writing?
             </p>
             <div className="space-y-4">
+              {getSavedWritingSession(selectedDeck.id) && (() => {
+                const s = getSavedWritingSession(selectedDeck.id);
+                const modeNames = { practice10: 'Practice 10', practiceAll: 'Practice All', test: 'Test 10', testAll: 'Test All' };
+                return (
+                  <button
+                    onClick={resumeWritingSession}
+                    className="w-full bg-gradient-to-r from-pink-500 to-indigo-500 text-white px-8 py-6 rounded-lg hover:from-pink-600 hover:to-indigo-600 transition text-left ring-2 ring-pink-300"
+                  >
+                    <div className="text-2xl font-bold mb-2">▶ Resume Session</div>
+                    <div className="text-sm opacity-90">
+                      Continue your {modeNames[s.writingMode] || s.writingMode} session — card {s.currentIndex + 1} of {s.cardIds.length}
+                    </div>
+                  </button>
+                );
+              })()}
               <button
                 onClick={startPractice10}
                 className="w-full bg-pink-600 text-white px-8 py-6 rounded-lg hover:bg-pink-700 transition text-left"
