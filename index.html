@@ -230,8 +230,20 @@
         const CloudSync = {
             async saveDecks(userId, decks) {
                 if (!firebaseDb) return;
-                const batch = firebaseDb.batch();
                 const userDecksRef = firebaseDb.collection('users').doc(userId).collection('decks');
+
+                // Get existing cloud deck IDs to detect deletions
+                const existingSnapshot = await userDecksRef.get();
+                const localDeckIds = new Set(decks.map(d => d.id));
+
+                const batch = firebaseDb.batch();
+
+                // Delete cloud decks that no longer exist locally
+                for (const doc of existingSnapshot.docs) {
+                    if (!localDeckIds.has(doc.id)) {
+                        batch.delete(doc.ref);
+                    }
+                }
 
                 // Save each deck as its own document
                 for (const deck of decks) {
@@ -277,7 +289,7 @@
                     folders: progressData.folders || [],
                     lastStudied: progressData.lastStudied || {},
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+                });
             },
 
             async loadProgress(userId) {
@@ -574,64 +586,26 @@ const ChineseLearningApp = () => {
       const cloudDecks = await CloudSync.loadDecks(userId);
       const cloudProgress = await CloudSync.loadProgress(userId);
 
-      if (cloudDecks && cloudDecks.length > 0) {
-        // Merge strategy: cloud decks take priority, but keep local-only decks
-        const cloudDeckIds = new Set(cloudDecks.map(d => d.id));
-        const localOnlyDecks = decks.filter(d => !cloudDeckIds.has(d.id));
-        const mergedDecks = [...cloudDecks, ...localOnlyDecks];
-        setDecks(mergedDecks);
+      // Full replace: cloud data completely replaces local data
+      if (cloudDecks) {
+        setDecks(cloudDecks);
       }
 
       if (cloudProgress) {
-        if (cloudProgress.learnProgress && Object.keys(cloudProgress.learnProgress).length > 0) {
-          setLearnProgress(prev => ({ ...prev, ...cloudProgress.learnProgress }));
+        if (cloudProgress.learnProgress) {
+          setLearnProgress(cloudProgress.learnProgress);
         }
-        if (cloudProgress.studyStreak && cloudProgress.studyStreak.currentStreak !== undefined) {
-          setStudyStreak(prev => {
-            // Keep the better streak data
-            const cloud = cloudProgress.studyStreak;
-            const merged = { ...prev };
-            if ((cloud.currentStreak || 0) > (prev.currentStreak || 0)) {
-              merged.currentStreak = cloud.currentStreak;
-              merged.lastStudyDate = cloud.lastStudyDate;
-            }
-            if ((cloud.longestStreak || 0) > (prev.longestStreak || 0)) {
-              merged.longestStreak = cloud.longestStreak;
-            }
-            // Merge study dates
-            const allDates = new Set([...(prev.studyDates || []), ...(cloud.studyDates || [])]);
-            merged.studyDates = Array.from(allDates).sort();
-            return merged;
-          });
+        if (cloudProgress.studyStreak) {
+          setStudyStreak(cloudProgress.studyStreak);
         }
-        if (cloudProgress.bestMatchTimes && Object.keys(cloudProgress.bestMatchTimes).length > 0) {
-          setBestMatchTimes(prev => {
-            const merged = { ...prev };
-            for (const [key, val] of Object.entries(cloudProgress.bestMatchTimes)) {
-              if (!merged[key] || val < merged[key]) merged[key] = val;
-            }
-            return merged;
-          });
+        if (cloudProgress.bestMatchTimes) {
+          setBestMatchTimes(cloudProgress.bestMatchTimes);
         }
-        if (cloudProgress.folders && cloudProgress.folders.length > 0) {
-          setFolders(prev => {
-            // Merge: cloud folders take priority, keep local-only folders
-            const cloudFolderIds = new Set(cloudProgress.folders.map(f => f.id));
-            const localOnly = prev.filter(f => !cloudFolderIds.has(f.id));
-            return [...cloudProgress.folders, ...localOnly];
-          });
+        if (cloudProgress.folders) {
+          setFolders(cloudProgress.folders);
         }
-        if (cloudProgress.lastStudied && Object.keys(cloudProgress.lastStudied).length > 0) {
-          setLastStudied(prev => {
-            // Merge: keep the most recent timestamp for each deck
-            const merged = { ...prev };
-            for (const [key, val] of Object.entries(cloudProgress.lastStudied)) {
-              if (!merged[key] || (val.timestamp && (!merged[key].timestamp || val.timestamp > merged[key].timestamp))) {
-                merged[key] = val;
-              }
-            }
-            return merged;
-          });
+        if (cloudProgress.lastStudied) {
+          setLastStudied(cloudProgress.lastStudied);
         }
       }
 
@@ -648,6 +622,14 @@ const ChineseLearningApp = () => {
   const forceSync = () => {
     if (currentUser && FIREBASE_ENABLED) {
       saveToCloud(currentUser.uid);
+    }
+  };
+
+  const forcePullFromCloud = () => {
+    if (currentUser && FIREBASE_ENABLED) {
+      if (window.confirm('Replace all local data with cloud data? Any local-only changes will be lost.')) {
+        loadFromCloud(currentUser.uid);
+      }
     }
   };
 
@@ -2568,7 +2550,16 @@ const ChineseLearningApp = () => {
                     className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white py-3 rounded-xl font-semibold hover:bg-blue-600 transition-all disabled:opacity-50"
                   >
                     <RefreshCw size={18} className={syncStatus === 'syncing' ? 'animate-spin' : ''} />
-                    Sync Now
+                    Push to Cloud
+                  </button>
+
+                  <button
+                    onClick={forcePullFromCloud}
+                    disabled={syncStatus === 'syncing'}
+                    className="w-full flex items-center justify-center gap-2 bg-indigo-500 text-white py-3 rounded-xl font-semibold hover:bg-indigo-600 transition-all disabled:opacity-50"
+                  >
+                    <Download size={18} />
+                    Pull from Cloud
                   </button>
 
                   <button
