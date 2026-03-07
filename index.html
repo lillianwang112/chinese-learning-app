@@ -333,6 +333,7 @@ const ChineseLearningApp = () => {
   const [bulkSelectedCards, setBulkSelectedCards] = useState(new Set()); // Set of card IDs for bulk delete
   const [bulkSelectMode, setBulkSelectMode] = useState(false);
   const [shuffledCards, setShuffledCards] = useState([]);
+  const [swipeHistory, setSwipeHistory] = useState([]);
 
   // Learn Mode state
   const [learnMode, setLearnMode] = useState('multiple-choice'); // multiple-choice, fill-blank
@@ -855,15 +856,27 @@ const ChineseLearningApp = () => {
 
   const handleSwipe = (direction) => {
     if (!selectedDeck || currentView !== 'study') return;
-    
+
     const currentCard = shuffledCards[currentCardIndex];
     setSwipeDirection(direction);
-    
+
+    // Save snapshot before swipe so we can undo
+    const currentDeck = decks.find(d => d.id === selectedDeck.id);
+    const cardInDeck = currentDeck ? currentDeck.cards.find(c => c.id === currentCard.id) : null;
+    const snapshot = {
+      shuffledCards: [...shuffledCards],
+      cardIndex: currentCardIndex,
+      cardState: cardInDeck ? { ...cardInDeck } : null,
+      direction
+    };
+
     setTimeout(() => {
+      setSwipeHistory(prev => [...prev, snapshot]);
+
       if (direction === 'right') {
         // I Know This - move on normally
         updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, 5);
-        
+
         if (currentCardIndex < shuffledCards.length - 1) {
           setCurrentCardIndex(currentCardIndex + 1);
           setIsFlipped(false);
@@ -874,7 +887,7 @@ const ChineseLearningApp = () => {
       } else {
         // Still Learning - re-insert the card proportionally later in the deck
         updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, 2);
-        
+
         const newCards = [...shuffledCards];
         // Remove from current position
         newCards.splice(currentCardIndex, 1);
@@ -890,7 +903,7 @@ const ChineseLearningApp = () => {
         // Keep the same index (since we removed current card, the next card slides into this index)
         setIsFlipped(false);
       }
-      
+
       setSwipeDirection(null);
     }, 300);
   };
@@ -1588,6 +1601,7 @@ const ChineseLearningApp = () => {
     setShuffledCards([...deck.cards]); // Start with original order
     setCurrentCardIndex(0);
     setIsFlipped(false);
+    setSwipeHistory([]);
     setCurrentView('study');
     updateStudyStreak();
   };
@@ -1598,6 +1612,7 @@ const ChineseLearningApp = () => {
     setShuffledCards(shuffled);
     setCurrentCardIndex(0);
     setIsFlipped(false);
+    setSwipeHistory([]);
   };
 
   // Start Match Game
@@ -2161,9 +2176,31 @@ const ChineseLearningApp = () => {
   };
 
   const previousCard = () => {
-    if (currentCardIndex > 0) {
-      setCurrentCardIndex(currentCardIndex - 1);
-      setIsFlipped(false);
+    if (swipeHistory.length === 0) return;
+
+    const lastSnapshot = swipeHistory[swipeHistory.length - 1];
+    setSwipeHistory(prev => prev.slice(0, -1));
+
+    // Restore card order and position
+    setShuffledCards(lastSnapshot.shuffledCards);
+    setCurrentCardIndex(lastSnapshot.cardIndex);
+    setIsFlipped(false);
+
+    // Restore the card's spaced repetition data in the deck
+    if (lastSnapshot.cardState) {
+      const cardState = lastSnapshot.cardState;
+      const updatedDecks = decks.map(deck => {
+        if (deck.id === selectedDeck.id) {
+          return {
+            ...deck,
+            cards: deck.cards.map(card =>
+              card.id === cardState.id ? { ...cardState } : card
+            )
+          };
+        }
+        return deck;
+      });
+      setDecks(updatedDecks);
     }
   };
 
@@ -3242,10 +3279,10 @@ const ChineseLearningApp = () => {
           <div className="flex justify-between">
             <button
               onClick={previousCard}
-              disabled={currentCardIndex === 0}
+              disabled={swipeHistory.length === 0}
               className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              ← Previous
+              ← Undo
             </button>
             <button
               onClick={nextCard}
