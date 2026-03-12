@@ -28,7 +28,7 @@
 
 大家好! 👋
 
-I built this app to help with learning the vocabulary for CHI 108. It's a full-featured Chinese learning tool with flashcards, handwriting practice, games, and more! 
+I built this app to help with learning the vocabulary for CHI 108. It's a full-featured Chinese learning tool with flashcards, handwriting practice, games, and more!
 
 ## 📋 Table of Contents
 - [Quick Start](#%EF%B8%8F-quick-start-tldr)
@@ -70,19 +70,24 @@ This app is a Progressive Web App — you can install it on your phone or comput
 1. Look for the **install icon** (⊕) in the address bar
 2. Click **"Install"**
 
-Your progress saves locally even when installed — just remember to back up your decks with Export occasionally!
+Your progress saves locally even when installed — or sign in with an account to sync across devices!
 
 ## ✨ Features at a Glance
 
 | Feature | Description |
 |---------|-------------|
 | 🎴 **6 Study Modes** | Flashcards, Learn, Write, Match, Test, Edit |
-| 🧠 **Smart Learning** | SM-2 spaced repetition algorithm |
+| 🧠 **Smart Learning** | SM-2 spaced repetition algorithm with adjustable speed |
 | 📊 **Progress Tracking** | 3-tier mastery system (Not Started → Learning → Mastered) |
-| ✍️ **Handwriting Practice** | Canvas-based character writing with Test Mode |
+| ✍️ **Handwriting Practice** | Canvas-based writing with palm rejection and session resume |
 | 🎯 **Match Game** | Timed challenges with personal best tracking |
+| 📝 **Configurable Test Mode** | Choose question types, count, and answer direction |
 | 🔀 **Combine Decks** | Merge decks for weekly review sessions |
-| 📱 **Works Everywhere** | Desktop, tablet, phone - no installation needed |
+| 📁 **Folders** | Organize decks into folders, reorder and move between them |
+| ☁️ **Cloud Sync** | Sign in to sync progress and decks across all your devices |
+| 🔍 **Deck Search** | Search across all decks and vocabulary instantly |
+| 📈 **Stats & Streaks** | Study calendar heatmap, streak tracking, and unique character count |
+| 📱 **Works Everywhere** | Desktop, tablet, phone — no installation needed |
 | 💯 **100% Free** | No ads, no paywalls, no subscriptions |
 
 ## 🚀 How to Use
@@ -103,9 +108,10 @@ All the CHI108 vocabulary JSON files are in the [108vocab folder](https://github
 
 ### Step 3: Import into the App
 1. In the app, click **"Import Deck"**
-2. Select the JSON file you downloaded
-3. The vocabulary will be added to your deck!
-4. Repeat for any other topics you want to study
+2. Select one or more JSON files
+3. If you select multiple files, choose to import them as **separate decks** or **combine into one**
+4. Optionally assign them directly to a folder during import
+5. Repeat for any other topics you want to study
 
 ### Step 4: Start Learning! 🎉
 - Click **"Study"** to review with flashcards
@@ -114,11 +120,13 @@ All the CHI108 vocabulary JSON files are in the [108vocab folder](https://github
 
 ## 💡 Study Tips
 
-1. **Import multiple decks** - Add all the topics we're covering this semester
-2. **Use writing practice** - Actually drawing characters helps with retention way more than just recognition
-3. **Try different modes** - Mix up flashcards, writing, matching, and tests to keep it interesting
-4. **Combine decks before quizzes** - Use the Combine Decks feature to merge multiple lessons into one deck for weekly review
-5. **Use Writing Test Mode** - Once you're somewhat comfortable with the characters, switch to Test Mode where the characters are hidden and you write from memory
+1. **Import multiple decks** — Add all the topics we're covering this semester
+2. **Use writing practice** — Actually drawing characters helps with retention way more than just recognition
+3. **Try different modes** — Mix up flashcards, writing, matching, and tests to keep it interesting
+4. **Combine decks before quizzes** — Use the Combine Decks feature to merge multiple lessons into one deck for weekly review
+5. **Use Writing Test Mode** — Once you're comfortable, switch to Test Mode where characters are hidden and you write from memory
+6. **Adjust your SR speed** — In Account & Settings, use the spaced repetition slider to make cards come back sooner or later based on your study pace
+7. **Sign in for cloud sync** — Create a free account to keep your progress synced across your phone, tablet, and computer
 
 ## 📚 Available Vocabulary Decks
 
@@ -175,16 +183,31 @@ All CHI 108 vocabulary files are in the [108vocab folder](https://github.com/lil
 ## ✨ App Features
 
 <details>
+<summary><strong>☁️ Account & Cloud Sync (New!)</strong></summary>
+<br>
+
+- **Create a free account** with email/password to sync everything across devices
+- Your decks, progress, mastery scores, match game records, settings, and study streak all sync automatically
+- Access your decks on your phone, tablet, and computer seamlessly
+- **Push to Cloud** and **Pull from Cloud** buttons for manual sync control
+- Works offline too — changes sync next time you're connected
+- Sign in from the Account button (👤) on the home screen
+
+</details>
+
+<details>
 <summary><strong>📖 Study Mode (Flashcards)</strong></summary>
 <br>
 
 - Click the card to flip between Chinese character and detailed English definitions
 - Audio pronunciation button lets you hear the word
 - Shows pinyin with tone marks and comprehensive word meanings
+- **Swipe gestures** supported on mobile — swipe right for "I Know This", left for "Still Learning"
 - After flipping, choose:
-  - **"I Know This" (swipe right/green button)** - Card moves further back in review queue
-  - **"Still Learning" (swipe left/red button)** - Card comes back sooner for more practice
-- Cards you mark "Still Learning" are re-inserted proportionally into the deck (e.g., ~5-6 cards later in a 30-card deck) so you see them again without it feeling too soon
+  - **"I Know This" (swipe right / green button)** — Card moves further back in review queue
+  - **"Still Learning" (swipe left / red button)** — Card comes back sooner for more practice
+- Cards you mark "Still Learning" are re-inserted proportionally into the deck so you see them again without it feeling too soon
+- **Undo** button lets you take back your last swipe if you made a mistake
 - Smart spaced repetition tracks which cards need more practice
 
 </details>
@@ -198,16 +221,16 @@ All CHI 108 vocabulary files are in the [108vocab folder](https://github.com/lil
   - **Practice All**: Practice every card in the deck
   - **Test 10**: 10 random cards with characters **hidden** — only pinyin and English shown. Write from memory!
   - **Test All**: Test yourself on every card with characters hidden
-- Draw characters with your mouse/stylus/finger on the canvas
-- Scroll back up when you're done drawing to see if you got it right
+- Draw characters with your mouse, stylus, or finger on the canvas
+- **Session resume** — if you leave mid-session, you can pick up exactly where you left off
+- **Undo** button to step back one card if you rated yourself incorrectly
+- Toggle pinyin and English hints on/off independently in settings
 - Rate yourself honestly:
-  - **"I Know This"** - You wrote it correctly → Card moves to the back of the queue
-  - **"I Forgot"** - You got it wrong or needed to peek → Card comes back sooner for more practice
-- **Test Mode exclusive**: Press the **"Reveal"** button to show the hidden character and check your answer
+  - **"I Know This"** — You wrote it correctly → Card moves to the back of the queue
+  - **"I Forgot"** — You got it wrong or needed to peek → Card comes back sooner
+- **Test Mode exclusive**: Press **"Reveal"** to show the hidden character and check your answer
 - Clear button to erase and try again
 - Audio pronunciation button available
-- Keep practicing! Cards you struggle with will reappear until you master them
-- **Pro tip**: In regular practice modes, scroll slightly down to cover up the character(s) to exercise your memory
 
 <p align="center">
   <img src="screenshots/writing-before.jpg" width="30%" />
@@ -227,8 +250,8 @@ All CHI 108 vocabulary files are in the [108vocab folder](https://github.com/lil
 - **Two question types** that alternate:
   - **Multiple Choice**: See the Chinese character, select correct English meaning from 4 options
   - **Fill in the Blank**: See the character, type the pinyin pronunciation
-- **Quizlet-style progression**: Cards you get wrong are re-queued within the same round so you see them again before moving on — just like Quizlet Plus Learn mode
-- **Tip for typing pinyin**: You can type with tone numbers (ni3 ha3o) OR with tone marks (nǐ hǎo) - both work!
+- **Quizlet-style progression**: Cards you get wrong are re-queued within the same round so you see them again before moving on
+- **Tip for typing pinyin**: You can type with tone numbers (ni3 hao3) OR with tone marks (nǐ hǎo) — both work!
 - Instant feedback shows if you're correct or need more practice
 - Shows correct answer with pinyin and meaning after each question
 - Progress bar tracks your completion (e.g., "2 of 15")
@@ -251,12 +274,83 @@ All CHI 108 vocabulary files are in the [108vocab folder](https://github.com/lil
 </details>
 
 <details>
-<summary><strong>📝 Test Mode</strong></summary>
+<summary><strong>📝 Test Mode (Configurable)</strong></summary>
 <br>
 
-- Multiple choice questions
-- Immediate feedback
-- Track your score
+Before starting a test, you configure it to your liking:
+
+- **Number of questions** — set any number up to the full deck size
+- **Answer direction** — answer in English, Chinese/Pinyin, or both
+- **Question types** — toggle on/off any combination of:
+  - True/False
+  - Multiple choice
+  - Matching
+  - Type pinyin
+  - Written (type English)
+- Immediate feedback on each question
+- Score summary at the end with option to retake
+
+</details>
+
+<details>
+<summary><strong>📊 Stats & Streaks</strong></summary>
+<br>
+
+- **Study streak** — tracks your current and longest consecutive study streaks 🔥
+- **Study calendar heatmap** — GitHub-style activity grid showing your study history over the past 52 weeks, with intensity based on how many cards you reviewed
+- **Total stats** — total cards, mastered cards, learning cards, total study days, days this month
+- **Unique character count** — counts distinct Chinese characters across all your decks
+- **Per-deck progress bars** on the home screen showing mastery breakdown
+
+</details>
+
+<details>
+<summary><strong>📁 Folders</strong></summary>
+<br>
+
+- **Create folders** to organize your decks (e.g., "Week 1-2", "Midterm Review")
+- **Move decks** between folders with the Move button
+- **Reorder decks** within a folder using up/down arrows or move-to-top/bottom
+- **Bulk move** — select multiple decks at once and move them to a folder together
+- Folders and deck order sync to cloud when signed in
+
+</details>
+
+<details>
+<summary><strong>🔍 Search</strong></summary>
+<br>
+
+- **Search bar on the home screen** — instantly filters across all deck names and vocabulary
+- Search by Chinese characters, English meaning, or deck name (e.g., type "你好", "hello", or "HSK1")
+- When searching, results show across all folders simultaneously
+- Clear the search to return to your normal folder view
+
+</details>
+
+<details>
+<summary><strong>📋 Deck Management</strong></summary>
+<br>
+
+- **Edit deck name**: Click Edit → change the deck title at the top
+- **Add/delete cards**: Edit individual cards within a deck
+- **Bulk select & delete**: In edit mode, select multiple cards at once and delete them all in one go
+- **Export/Import**: Back up your decks as JSON files; import one or multiple files at once
+- **Multi-file import**: Import several JSON files at once — choose to keep them as separate decks or combine into one, and optionally assign to a folder
+- **Combine Decks**: Merge multiple existing decks into a new combined deck (duplicates removed)
+- **Delete decks**: Remove decks you no longer need (with confirmation)
+
+</details>
+
+<details>
+<summary><strong>⚙️ Settings & Customization</strong></summary>
+<br>
+
+Accessible from the Account (👤) button, settings are saved and cloud-synced:
+
+- **Spaced Repetition Speed** (separately for flashcards and writing):
+  - Slider from "Much sooner" to "Much later" — controls how quickly cards cycle back
+- **Auto-play audio** — automatically pronounce each card when it appears (flashcard and writing modes separately)
+- **Writing hints** — toggle pinyin and/or English hints on/off during writing practice (at least one must stay on)
 
 </details>
 
@@ -273,31 +367,6 @@ The mastery score builds up gradually: strong correct answers give +2, okay answ
 
 </details>
 
-<details>
-<summary><strong>🔀 Combine Decks</strong></summary>
-<br>
-
-- **Merge multiple decks** into one combined deck for weekly review or exam prep
-- Go to **Create Deck** → scroll down to **Combine Decks**
-- Select 2 or more decks to merge
-- Duplicate characters are automatically removed
-- Combined decks start with fresh mastery scores for a clean review experience
-- Original decks remain untouched
-- **Example use case**: Combine 高考 + 开放留学政策 + 家里的小皇帝 into a "Week 7-8 Review" deck before a quiz
-
-</details>
-
-<details>
-<summary><strong>📋 Deck Management</strong></summary>
-<br>
-
-- **Edit deck name**: Click Edit → change the deck title at the top
-- **Add/delete cards**: Edit individual cards within a deck
-- **Export/Import**: Back up your decks as JSON files
-- **Delete decks**: Remove decks you no longer need
-
-</details>
-
 ## ❓ Frequently Asked Questions
 
 ### 🚀 Getting Started
@@ -305,19 +374,25 @@ The mastery score builds up gradually: strong correct answers give +2, okay answ
 <details>
 <summary><strong>Does this work on my phone?</strong></summary>
 <br>
-Absolutely! Just open it in your mobile browser. Although it may be better to use on a tablet with a stylus for the handwriting practice. 
+Absolutely! Just open it in your mobile browser. A tablet with a stylus works best for handwriting practice, but finger drawing on a phone works too.
 </details>
 
 <details>
 <summary><strong>Can I use this offline?</strong></summary>
 <br>
-Yes! Once the page loads, you can study without internet.
+Yes! Once the page loads, you can study without internet. If you're signed in, changes will sync next time you reconnect.
+</details>
+
+<details>
+<summary><strong>Can I sync my progress across devices?</strong></summary>
+<br>
+Yes! Create a free account using the 👤 button on the home screen. Once signed in, your decks, progress, streaks, and settings sync automatically across all your devices.
 </details>
 
 <details>
 <summary><strong>Can I study multiple topics at once?</strong></summary>
 <br>
-Yes! Import as many vocabulary decks as you want at a time.
+Yes! Import as many vocabulary decks as you want. Use Combine Decks to merge them for a single combined review session.
 </details>
 
 ### 📚 Deck Management
@@ -325,13 +400,13 @@ Yes! Import as many vocabulary decks as you want at a time.
 <details>
 <summary><strong>What are the buttons at the bottom of each deck?</strong></summary>
 <br>
-Blue pencil = Edit deck, Green = Export/Download, Red = Delete entire deck
+Blue pencil = Edit deck, Green = Export/Download, Red = Delete entire deck.
 </details>
 
 <details>
 <summary><strong>Can I delete cards I already know?</strong></summary>
 <br>
-Yes! Click the edit (pencil) button on a deck, then delete individual cards you don't need.
+Yes! Click the edit (pencil) button on a deck, then use bulk select to remove multiple cards at once, or delete them individually.
 </details>
 
 <details>
@@ -346,6 +421,12 @@ Yes! Click Edit on the deck and change the name at the top of the edit page.
 Yes! Go to Create Deck → Combine Decks. Select the decks you want to merge and give the combined deck a name. Great for quiz prep!
 </details>
 
+<details>
+<summary><strong>Can I import multiple JSON files at once?</strong></summary>
+<br>
+Yes! Select multiple files when importing. You'll be asked whether to import them as separate decks or combine them into one, and can assign them to a folder directly.
+</details>
+
 ### 📖 Study Features
 
 <details>
@@ -357,27 +438,39 @@ Cards progress through three stages: Not Started → Still Learning → Mastered
 <details>
 <summary><strong>How does the spaced repetition work?</strong></summary>
 <br>
-Cards you mark "I Know This" come back less frequently. Cards you mark "Still Learning" or get wrong in quizzes come back sooner for more practice. The spacing is proportional to your deck size so it feels natural.
+Cards you mark "I Know This" come back less frequently over time. Cards you mark "Still Learning" or get wrong come back sooner. You can adjust the speed with the SR slider in settings — "Much sooner" drills cards more aggressively, "Much later" spaces them out more.
 </details>
 
 <details>
 <summary><strong>Do I need to enter tone marks when typing pinyin?</strong></summary>
 <br>
-The app accepts both! Type "ni3 ha3o" or "nǐ hǎo" - it checks both.
+The app accepts both! Type "ni3 hao3" or "nǐ hǎo" — it checks both formats.
 </details>
 
 <details>
 <summary><strong>What's the difference between Writing Practice and Writing Test Mode?</strong></summary>
 <br>
-In Practice mode, you can see the Chinese characters above while you draw. In Test mode, the characters are hidden — you only see pinyin and English, so you have to write from memory. You can press "Reveal" to check your answer.
+In Practice mode, you can see the Chinese characters above while you draw. In Test mode, the characters are hidden — you only see pinyin and English, so you have to write from memory. Press "Reveal" to check your answer.
+</details>
+
+<details>
+<summary><strong>Can I resume a writing session if I leave mid-way?</strong></summary>
+<br>
+Yes! Your writing session progress is saved automatically. When you return to writing practice for the same deck, you'll be offered the option to resume where you left off.
 </details>
 
 ### 🔧 Troubleshooting
 
 <details>
-<summary><strong>My progress disappeared!?</strong></summary>
+<summary><strong>My progress disappeared!</strong></summary>
 <br>
-Your progress is saved in your browser's local storage. If you clear browser data or switch browsers, you'll lose progress. Use the Export button (green) to back up your deck (especially if you added/deleted words)!
+Progress is saved in your browser's local storage by default. If you clear browser data or switch browsers/devices, local progress won't carry over. Sign in with an account to keep everything synced to the cloud, and use the Export button (green) to back up your decks as JSON files.
+</details>
+
+<details>
+<summary><strong>Cloud sync isn't working</strong></summary>
+<br>
+Check your connection, then try the "Push to Cloud" or "Pull from Cloud" buttons in Account & Settings for a manual sync. If issues persist, contact lw3319@princeton.edu.
 </details>
 
 ## 🆚 How Does This Compare to Other Apps?
@@ -387,15 +480,19 @@ Your progress is saved in your browser's local storage. If you clear browser dat
 | **Price** | $15-20/month (~$100/year) | Free with ads / $8/month Plus | Free + paid add-ons | **100% FREE** |
 | **Ads** | No ads (paid) | ❌ Ads on free tier | No ads | ✅ **No ads ever** |
 | **Handwriting Practice** | ✅ Advanced stroke order | ❌ None | ⚠️ Recognition only | ✅ **Canvas practice + Test Mode** |
-| **Spaced Repetition** | ✅ Yes | ✅ Yes (paywalled) | Limited | ✅ **SM-2 algorithm** |
+| **Spaced Repetition** | ✅ Yes | ✅ Yes (paywalled) | Limited | ✅ **SM-2 with adjustable speed** |
 | **Multiple Study Modes** | ⚠️ Writing-focused | ✅ Yes (some paywalled) | ⚠️ Dictionary-focused | ✅ **6 modes included** |
+| **Configurable Tests** | ⚠️ Limited | ✅ Yes (paywalled) | ❌ No | ✅ **Question types, count, direction** |
+| **Cross-device Sync** | ✅ Yes (paid) | ✅ Yes | ✅ Yes | ✅ **Free with account** |
 | **Chinese-Specific Features** | ✅ Stroke order, tones | ⚠️ Basic | ✅ OCR, dictionary | ✅ **Pinyin, audio, tones** |
-| **CHI 108 Vocabulary** | ❌ Manual import | ❌ Manual import | ❌ N/A | ✅ **JSON Files Available to Import** |
+| **CHI 108 Vocabulary** | ❌ Manual import | ❌ Manual import | ❌ N/A | ✅ **JSON files available** |
 | **Works Offline** | ✅ Yes | ⚠️ Limited | ✅ Yes | ✅ **Yes** |
 | **No Download Required** | ❌ App required | ❌ App required | ❌ App required | ✅ **Browser-based + installable PWA** |
 | **Mastery Tracking** | ✅ Yes | ✅ Yes (paywalled) | ⚠️ Limited | ✅ **3-tier system** |
 | **Combine Decks** | ❌ No | ⚠️ Limited | ❌ No | ✅ **Built-in** |
+| **Folder Organization** | ❌ No | ✅ Yes | ❌ No | ✅ **Free** |
 | **Match Game w/ Best Times** | ❌ No | ✅ Yes (paywalled) | ❌ No | ✅ **Free** |
+| **Study Streak & Heatmap** | ⚠️ Basic | ❌ No | ❌ No | ✅ **GitHub-style calendar** |
 
 ### 💡 Bottom Line
 If you're already paying for Skritter or Quizlet Plus and love them, keep using them! But if you're looking for a **free, comprehensive, ad-free study tool specifically made for CHI 108**, this app has you covered. **No paywalls. No subscriptions. No ads. Just learning.** 🎯
@@ -403,16 +500,17 @@ If you're already paying for Skritter or Quizlet Plus and love them, keep using 
 ## 🛠️ Tech Stack
 
 Built with:
-- **Frontend**: HTML, CSS, JavaScript (Vanilla)
-- **UI Styling**: Tailwind CSS  
+- **Frontend**: React (via CDN), Babel standalone
+- **UI Styling**: Tailwind CSS
 - **Icons**: Lucide React
-- **Storage**: Browser LocalStorage
+- **Backend/Auth**: Firebase (Authentication + Firestore)
+- **Storage**: Browser LocalStorage + Firebase cloud sync
 - **Hosting**: GitHub Pages
 - **Algorithm**: SM-2 Spaced Repetition
 
 ## 🙏 About This Project
 
-This app was created by a CHI 108 student for a better Chinese vocabulary learning experience. 
+This app was created by a CHI 108 student for a better Chinese vocabulary learning experience.
 
 **Note:** This app is still a work in progress and may have bugs. If you find any issues or have suggestions for improvements, please let me know at **lw3319@princeton.edu**. Your feedback helps make it better for everyone!
 
@@ -428,10 +526,9 @@ The app is open source and available for anyone to use. If you find it helpful, 
 <summary><strong>Current Limitations</strong></summary>
 <br>
 
-- **Local storage only** - Progress is saved in your browser. Clearing browser data will reset progress (use Export to back up!)
-- **No cross-device sync** - Can't access progress from different browsers/devices
-- **No stroke order guidance** - Writing practice doesn't check if you wrote strokes correctly
-- **No account system** - All data stored locally only
+- **No stroke order guidance** — Writing practice doesn't check if you wrote strokes in the correct order
+- **Local storage fallback** — If not signed in, progress is browser-local only; clearing browser data will reset it (use Export to back up, or sign in!)
+- **No OCR** — The app can't read back what you drew and check it automatically
 
 </details>
 
@@ -439,10 +536,10 @@ The app is open source and available for anyone to use. If you find it helpful, 
 <summary><strong>Possible Future Features (Maybe!)</strong></summary>
 <br>
 
-- ☁️ User accounts with cloud sync
 - 🎨 More customizable test options
 - 🤝 Shared decks with classmates
-- 📊 More detailed statistics and analytics
+- 📊 More detailed per-deck statistics
+- ✏️ Stroke order guidance in writing mode
 
 *Note: This is a student project maintained during the semester. Updates may be sporadic!*
 
