@@ -25,6 +25,9 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- Hanzi Writer for stroke order animations -->
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -711,6 +714,10 @@ const ChineseLearningApp = () => {
   const [writingMode, setWritingMode] = useState(null); // 'practice10' or 'practiceAll' or 'test'
   const [testRevealed, setTestRevealed] = useState(false); // For writing test mode - whether character is revealed
   const [writingUndoHistory, setWritingUndoHistory] = useState([]); // undo history for writing practice
+  const [showStrokePanel, setShowStrokePanel] = useState(false); // Hanzi Writer stroke order panel
+  const [canvasHanziChar, setCanvasHanziChar] = useState(null); // char being drawn on canvas by HanziWriter
+  const [showCanvasCharPicker, setShowCanvasCharPicker] = useState(false); // show char picker for canvas draw
+  const canvasHanziWriterRef = React.useRef(null); // active HanziWriter on canvas
 
   // User account & sync state
   const [currentUser, setCurrentUser] = useState(null);
@@ -745,6 +752,7 @@ const ChineseLearningApp = () => {
         srOffset: 0,
         showPinyin: true,
         showEnglish: true,
+        traceSpeed: 1, // 0.4=slow, 1=normal, 2=fast; also controls fade
       },
     };
   });
@@ -1964,13 +1972,149 @@ Keep it concise and practical.`,
     }
   };
 
+  // ==========================================
+  // HANZI WRITER STROKE ORDER PANEL
+  // ==========================================
+  const HanziWriterPanel = ({ chinese, onClose }) => {
+    const [speed, setSpeed] = React.useState(1);
+    const [isAnimating, setIsAnimating] = React.useState(false);
+    const speedRef = React.useRef(1);
+    const writersRef = React.useRef([]);
+    const isAnimatingRef = React.useRef(false);
+    const generationRef = React.useRef(0);
+    const containerNodeRef = React.useRef(null); // store the DOM node for recreation
+    const chars = chinese ? chinese.split('') : [];
+
+    const animateFrom = React.useCallback((i, gen) => {
+      const ws = writersRef.current;
+      if (gen !== generationRef.current || i >= ws.length) {
+        if (gen === generationRef.current) { isAnimatingRef.current = false; setIsAnimating(false); }
+        return;
+      }
+      if (!ws[i]) { animateFrom(i + 1, gen); return; }
+      ws[i].hideCharacter({ duration: 0 });
+      ws[i].animateCharacter({
+        onComplete: () => animateFrom(i + 1, gen),
+      });
+    }, []);
+
+    const startAnim = React.useCallback((from) => {
+      const gen = ++generationRef.current;
+      isAnimatingRef.current = true;
+      setIsAnimating(true);
+      writersRef.current.forEach((w, i) => { if (w && i >= from) w.hideCharacter({ duration: 0 }); });
+      animateFrom(from, gen);
+    }, [animateFrom]);
+
+    // Creates writers into a given DOM node at the current speedRef value
+    const buildWriters = React.useCallback((node) => {
+      // Clear existing writers and DOM
+      writersRef.current = [];
+      node.innerHTML = '';
+      generationRef.current++;
+
+      let loadedCount = 0;
+      const totalChars = chars.length;
+      if (totalChars === 0) return;
+      let animStarted = false;
+      const tryStart = () => { if (!animStarted) { animStarted = true; setTimeout(() => startAnim(0), 50); } };
+
+      chars.forEach((char) => {
+        const div = document.createElement('div');
+        div.style.cssText = 'display:inline-block;margin:8px;vertical-align:top;';
+        node.appendChild(div);
+        try {
+          const writer = window.HanziWriter.create(div, char, {
+            width: 150, height: 150, padding: 10,
+            showOutline: true, showCharacter: false,
+            strokeColor: '#e11d48', outlineColor: '#d1d5db',
+            strokeAnimationSpeed: speedRef.current,
+            delayBetweenStrokes: 300,
+            onLoadCharDataSuccess: () => { loadedCount++; if (loadedCount >= totalChars) tryStart(); },
+            onLoadCharDataError: ()  => { loadedCount++; if (loadedCount >= totalChars) tryStart(); },
+          });
+          writersRef.current.push(writer);
+        } catch(e) {
+          div.innerHTML = '<div style="width:150px;height:150px;display:flex;align-items:center;justify-content:center;font-size:64px;color:#9ca3af">' + char + '</div>';
+          writersRef.current.push(null);
+          loadedCount++;
+          if (loadedCount >= totalChars) tryStart();
+        }
+      });
+
+      setTimeout(tryStart, 4000); // safety fallback
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const containerRef = React.useCallback((node) => {
+      if (!node || !window.HanziWriter) return;
+      containerNodeRef.current = node;
+      buildWriters(node);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const showAll = () => {
+      generationRef.current++;
+      isAnimatingRef.current = false;
+      setIsAnimating(false);
+      writersRef.current.forEach(w => w && w.showCharacter({ duration: 0.3 }));
+    };
+    const hideAll = () => {
+      generationRef.current++;
+      isAnimatingRef.current = false;
+      setIsAnimating(false);
+      writersRef.current.forEach(w => w && w.hideCharacter({ duration: 0.3 }));
+    };
+    const handleSpeed = (v) => {
+      speedRef.current = v;
+      setSpeed(v);
+      // strokeAnimationSpeed is constructor-only — must recreate writers to apply new speed
+      if (containerNodeRef.current) buildWriters(containerNodeRef.current);
+    };
+
+    return (
+      <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.55)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'16px' }} onClick={onClose}>
+        <div style={{ background:'#fff', borderRadius:'16px', boxShadow:'0 25px 50px rgba(0,0,0,0.25)', padding:'24px', maxWidth:'520px', width:'100%', maxHeight:'90vh', overflowY:'auto' }} onClick={e => e.stopPropagation()}>
+          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'16px' }}>
+            <div>
+              <h3 style={{ margin:0, fontSize:'20px', fontWeight:700, color:'#1f2937' }}>Stroke Order</h3>
+              <p style={{ margin:'4px 0 0', fontSize:'13px', color:'#6b7280' }}>Characters animate one at a time in order</p>
+            </div>
+            <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'#9ca3af', padding:'4px' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div ref={containerRef} style={{ display:'flex', justifyContent:'center', flexWrap:'wrap', minHeight:'170px', alignItems:'center', background:'#f9fafb', borderRadius:'12px', padding:'8px', marginBottom:'16px' }} />
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', marginBottom:'14px' }}>
+            <span style={{ fontSize:'13px', color:'#6b7280', fontWeight:600 }}>Speed:</span>
+            {[{l:'🐢 Slow',v:0.5},{l:'▶ Normal',v:1},{l:'⚡ Fast',v:2}].map(s => (
+              <button key={s.v} onClick={() => handleSpeed(s.v)} style={{ padding:'6px 12px', borderRadius:'8px', border:'none', cursor:'pointer', fontSize:'13px', fontWeight:600, background: speed===s.v ? '#e11d48' : '#f3f4f6', color: speed===s.v ? '#fff' : '#374151' }}>{s.l}</button>
+            ))}
+          </div>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'8px', justifyContent:'center' }}>
+            <button onClick={() => startAnim(0)} style={{ background:'#e11d48', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 20px', fontWeight:700, fontSize:'14px', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px' }}>
+              {isAnimating ? <><span style={{ display:'inline-block', width:'14px', height:'14px', border:'2px solid #fff', borderTopColor:'transparent', borderRadius:'50%', animation:'hw-spin 0.7s linear infinite' }}/> Animating…</> : '↺ Replay'}
+            </button>
+            <button onClick={showAll} style={{ background:'#f3f4f6', color:'#374151', border:'none', borderRadius:'8px', padding:'10px 20px', fontWeight:600, fontSize:'14px', cursor:'pointer' }}>Show All</button>
+            <button onClick={hideAll} style={{ background:'#f3f4f6', color:'#374151', border:'none', borderRadius:'8px', padding:'10px 20px', fontWeight:600, fontSize:'14px', cursor:'pointer' }}>Hide All</button>
+          </div>
+          <p style={{ textAlign:'center', fontSize:'11px', color:'#9ca3af', marginTop:'16px', marginBottom:0 }}>Powered by Hanzi Writer · open-source stroke data</p>
+        </div>
+        <style>{`@keyframes hw-spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  };
+
+
+
   // Inline expandable panel for example sentences (used in study/writing/learn views)
-  const ExamplePanel = ({ card }) => {
+  const ExamplePanel = ({ card, hideButtons = false }) => {
     if (!card) return null;
 
     return (
       <React.Fragment>
-        {/* Action buttons */}
+        {/* Action buttons — hidden in writing view where they're rendered inline above */}
+        {!hideButtons && (
         <div className="flex flex-wrap gap-2 justify-center mt-4 mb-2">
           <button
             onClick={(e) => { e.stopPropagation(); fetchExamples(card, 'examples'); }}
@@ -1994,6 +2138,7 @@ Keep it concise and practical.`,
             Related Words
           </button>
         </div>
+        )}
 
         {/* Slide-up results panel */}
         {examplePanelOpen && (
@@ -3979,6 +4124,11 @@ Rules:
     clearCanvas();
     setWritingFeedback(null);
     setTestRevealed(false);
+    setShowStrokePanel(false);
+    setShowCanvasCharPicker(false);
+    setCanvasHanziChar(null);
+    if (canvasOverlayRef.current) { canvasOverlayRef.current.innerHTML = ''; canvasOverlayRef.current.style.opacity='1'; canvasOverlayRef.current.style.transition=''; }
+    if (canvasHanziWriterRef.current) { try {  } catch(e) {} canvasHanziWriterRef.current = null; }
 
     // Sync to cloud on card navigation (auto-sync is suppressed during writing mode)
     if (currentUser && FIREBASE_ENABLED) saveToCloud(currentUser.uid);
@@ -4012,6 +4162,11 @@ Rules:
     clearCanvas();
     setWritingFeedback(null);
     setTestRevealed(false);
+    setShowStrokePanel(false);
+    setShowCanvasCharPicker(false);
+    setCanvasHanziChar(null);
+    if (canvasOverlayRef.current) { canvasOverlayRef.current.innerHTML = ''; canvasOverlayRef.current.style.opacity='1'; canvasOverlayRef.current.style.transition=''; }
+    if (canvasHanziWriterRef.current) { try {  } catch(e) {} canvasHanziWriterRef.current = null; }
 
     // Sync to cloud on card navigation (auto-sync is suppressed during writing mode)
     if (currentUser && FIREBASE_ENABLED) saveToCloud(currentUser.uid);
@@ -4050,11 +4205,79 @@ Rules:
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     if (canvas) drawCtrl.current.clearCanvas(canvas);
-
+    // Also clear canvas HanziWriter overlay
+    if (canvasHanziWriterRef.current) {
+      try {  } catch(e) {}
+      canvasHanziWriterRef.current = null;
+    }
+    if (canvasOverlayRef.current) {
+      canvasOverlayRef.current.style.transition = '';
+      canvasOverlayRef.current.style.opacity = '1';
+      canvasOverlayRef.current.innerHTML = '';
+    }
+    setCanvasHanziChar(null);
     setWritingFeedback(null);
   };
 
-  const checkWriting = () => {
+  // Draw a character stroke-by-stroke on the user's practice canvas using HanziWriter
+  const canvasOverlayRef = React.useRef(null); // ref to the absolute overlay div inside canvas wrapper
+
+  const drawCharOnCanvas = (char) => {
+    const canvas = canvasRef.current;
+    const overlayDiv = canvasOverlayRef.current;
+    if (!canvas || !overlayDiv || !window.HanziWriter) return;
+
+    // Cancel any existing writer
+    if (canvasHanziWriterRef.current) {
+      try {  } catch(e) {}
+      canvasHanziWriterRef.current = null;
+    }
+
+    // Clear user drawings
+    drawCtrl.current.clearCanvas(canvas);
+    setCanvasHanziChar(char);
+    setShowCanvasCharPicker(false);
+
+    // Size the overlay to match the canvas CSS size exactly
+    const size = canvas.offsetWidth;
+    overlayDiv.style.width  = size + 'px';
+    overlayDiv.style.height = size + 'px';
+    overlayDiv.style.opacity = '1';
+    overlayDiv.style.transition = '';
+    overlayDiv.innerHTML = '';          // clear previous SVG
+
+    // Use the stable JSX id — don't set it imperatively (React will wipe it on re-render)
+    const uid = 'hw-canvas-overlay-anchor';
+
+    try {
+      const spd = (userSettings.writing.traceSpeed || 1);
+      const fadeDuration = spd >= 2 ? 0.1 : spd <= 0.4 ? 0.6 : 0.2;
+      const writer = window.HanziWriter.create(uid, char, {
+        width:  size,
+        height: size,
+        padding: Math.round(size * 0.06),
+        showOutline: false,
+        showCharacter: false,
+        strokeColor: '#e11d48',
+        radicalColor: '#be123c',
+        strokeAnimationSpeed: spd,
+        delayBetweenStrokes: spd >= 2 ? 150 : spd <= 0.4 ? 600 : 350,
+      });
+      canvasHanziWriterRef.current = writer;
+
+      writer.animateCharacter({
+        onComplete: () => {
+          overlayDiv.style.transition = 'opacity ' + fadeDuration + 's';
+          overlayDiv.style.opacity = '0.25';
+        }
+      });
+    } catch(e) {
+      overlayDiv.innerHTML = '';
+      setCanvasHanziChar(null);
+    }
+  };
+
+    const checkWriting = () => {
     if (drawCtrl.current.strokeCount === 0) {
       setWritingFeedback({ correct: false, message: 'Please draw the character first!' });
       return;
@@ -4518,6 +4741,18 @@ Rules:
                             </label>
                           </div>
                         </div>
+                        <div>
+                          <p className="text-sm text-gray-700 mb-1">Stroke trace speed</p>
+                          <div className="flex gap-2">
+                            {[{label:'🐢 Slow', val:0.4},{label:'▶ Normal', val:1},{label:'⚡ Fast', val:2}].map(opt => (
+                              <button
+                                key={opt.val}
+                                onClick={() => setUserSettings(s => ({ ...s, writing: { ...s.writing, traceSpeed: opt.val } }))}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${(userSettings.writing.traceSpeed || 1) === opt.val ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-gray-600 border-gray-300 hover:border-rose-400'}`}
+                              >{opt.label}</button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
@@ -4583,6 +4818,7 @@ Rules:
                             </label>
                           </div>
                         </div>
+
                       </div>
                     </div>
                   );
@@ -4979,7 +5215,7 @@ Rules:
               writing: 'from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700',
             };
             return (
-              <div className="mb-8">
+              <div className="mb-3">
                 <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                   <RotateCcw size={20} className="text-blue-500" />
                   Jump Back In
@@ -7990,9 +8226,9 @@ Rules:
           </div>
 
           {/* Character to Practice */}
-          <div className="bg-white rounded-xl shadow-xl p-4 sm:p-8 mb-4 sm:mb-6">
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">
+          <div className="bg-white rounded-xl shadow-xl p-3 sm:p-4 mb-1">
+            <div className="text-center mb-1">
+              <h3 className="text-xl font-bold text-gray-800 mb-1">
                 {(writingMode === 'test' || writingMode === 'testAll') ? 'Test Yourself:' : 'Practice Writing:'}
               </h3>
               {(writingMode === 'test' || writingMode === 'testAll') && !testRevealed ? (
@@ -8006,36 +8242,122 @@ Rules:
                   {currentCard.chinese}
                 </div>
               )}
-              <div className="text-2xl text-red-600 mb-2">{userSettings.writing.showPinyin ? currentCard.pinyin : ''}</div>
-              <div className="text-xl text-gray-600 mb-4">{userSettings.writing.showEnglish ? currentCard.english : ''}</div>
-              <button
-                onClick={() => speakChinese(currentCard.chinese)}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 mx-auto"
-              >
-                <Volume2 size={20} />
-                Pronounce
-              </button>
+              <div className="text-lg text-red-600 mb-0.5">{userSettings.writing.showPinyin ? currentCard.pinyin : ''}</div>
+              <div className="text-base text-gray-600 mb-1">{userSettings.writing.showEnglish ? currentCard.english : ''}</div>
+              {/* ── All 6 action buttons in one row ── */}
+              {currentCard && (() => {
+                const chars = currentCard.chinese.split('');
+                return (
+                  <div className="relative">
+                    <div className="flex flex-wrap justify-center gap-1.5 mt-3">
+                      {/* Pronounce */}
+                      <button
+                        onClick={() => speakChinese(currentCard.chinese)}
+                        className="bg-blue-600 text-white px-2.5 py-1.5 rounded-lg hover:bg-blue-700 transition flex items-center gap-1 text-xs font-semibold shadow"
+                      >
+                        <Volume2 size={12} />
+                        Pronounce
+                      </button>
+                      {/* Stroke Order */}
+                      <button
+                        onClick={() => setShowStrokePanel(true)}
+                        className="bg-rose-600 text-white px-2.5 py-1.5 rounded-lg hover:bg-rose-700 transition flex items-center gap-1 text-xs font-semibold shadow"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        Strokes
+                      </button>
+                      {/* Trace on Canvas */}
+                      <button
+                        onClick={() => { if (chars.length === 1) { drawCharOnCanvas(chars[0]); } else { setShowCanvasCharPicker(prev => !prev); } }}
+                        className={`text-white px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 text-xs font-semibold shadow ${canvasHanziChar ? 'bg-purple-700 hover:bg-purple-800' : 'bg-purple-600 hover:bg-purple-700'}`}
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        {canvasHanziChar ? `Trace: ${canvasHanziChar}` : 'Trace'}
+                      </button>
+                      {/* Example Sentences */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); fetchExamples(currentCard, 'examples'); }}
+                        className="bg-gradient-to-r from-rose-600 to-pink-600 text-white px-2.5 py-1.5 rounded-lg hover:from-rose-700 hover:to-pink-700 transition flex items-center gap-1 text-xs font-semibold shadow"
+                      >
+                        <MessageCircle size={12} />
+                        Examples
+                      </button>
+                      {/* Grammar */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); fetchExamples(currentCard, 'grammar'); }}
+                        className="bg-gradient-to-r from-violet-600 to-purple-600 text-white px-2.5 py-1.5 rounded-lg hover:from-violet-700 hover:to-purple-700 transition flex items-center gap-1 text-xs font-semibold shadow"
+                      >
+                        <Brain size={12} />
+                        Grammar
+                      </button>
+                      {/* Related Words */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); fetchExamples(currentCard, 'related'); }}
+                        className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-2.5 py-1.5 rounded-lg hover:from-amber-700 hover:to-orange-700 transition flex items-center gap-1 text-xs font-semibold shadow"
+                      >
+                        <BookOpen size={12} />
+                        Related
+                      </button>
+                    </div>
+                    {/* Character picker for multi-char trace */}
+                    {showCanvasCharPicker && chars.length > 1 && (
+                      <div className="absolute left-1/2 -translate-x-1/2 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl p-2 z-50 flex gap-2 whitespace-nowrap">
+                        <span className="text-xs text-gray-500 self-center">Pick:</span>
+                        {chars.map((ch, i) => (
+                          <button key={i} onClick={() => drawCharOnCanvas(ch)}
+                            className="text-2xl font-bold text-gray-800 w-10 h-10 rounded-lg border-2 border-gray-200 hover:border-purple-500 hover:bg-purple-50 transition flex items-center justify-center">
+                            {ch}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
-          {/* AI Example Sentences */}
-          <div className="mb-4">
-            <ExamplePanel card={currentCard} />
+          {/* AI results panel */}
+          <div className="mb-1">
+            <ExamplePanel card={currentCard} hideButtons={true} />
           </div>
 
           {/* Drawing Canvas */}
-          <div className="bg-white rounded-xl shadow-xl p-4 sm:p-8 mb-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">
+          <div className="bg-white rounded-xl shadow-xl p-3 sm:p-4 mb-3">
+            <h3 className="text-base font-bold text-gray-800 mb-1 text-center">
               Draw the character below:
             </h3>
 
             {/* Canvas */}
-            <div className="mb-4">
-              <canvas
-                ref={canvasRef}
-                className="border-4 border-gray-300 rounded-lg mx-auto cursor-crosshair touch-none bg-white block"
-                style={{ width: '100%', maxWidth: '500px', height: 'auto', aspectRatio: '1', touchAction: 'none' }}
-              />
+            <div className="mb-1">
+              {canvasHanziChar && (
+                <div className="text-center mb-2 text-sm font-semibold text-purple-700 flex items-center justify-center gap-2">
+                  <span className="inline-block w-2 h-2 rounded-full bg-purple-500 animate-pulse"/>
+                  Tracing: <span className="text-xl">{canvasHanziChar}</span>
+                  <span className="text-gray-400 font-normal">— draw over it to practice</span>
+                </div>
+              )}
+              {/* Wrapper is position:relative so the absolute overlay stays locked to canvas on scroll */}
+              <div className="relative mx-auto" style={{ width: '100%', maxWidth: '500px' }}>
+                <canvas
+                  ref={canvasRef}
+                  className={`border-4 rounded-lg cursor-crosshair touch-none bg-white block w-full ${canvasHanziChar ? 'border-purple-400' : 'border-gray-300'}`}
+                  style={{ height: 'auto', aspectRatio: '1', touchAction: 'none' }}
+                />
+                {/* HanziWriter draws into this div; position:absolute keeps it locked to canvas */}
+                <div
+                  id="hw-canvas-overlay-anchor"
+                  ref={canvasOverlayRef}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    pointerEvents: 'none',
+                    borderRadius: '6px',
+                    overflow: 'hidden',
+                  }}
+                />
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-3 justify-center mb-4">
@@ -8091,6 +8413,14 @@ Rules:
         {/* Floating Chat Button */}
         <ChatFAB />
         <ChatSidebar />
+
+        {/* Stroke Order Panel */}
+        {showStrokePanel && currentCard && (
+          <HanziWriterPanel
+            chinese={currentCard.chinese}
+            onClose={() => setShowStrokePanel(false)}
+          />
+        )}
       </div>
     );
   }
