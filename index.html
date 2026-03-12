@@ -330,6 +330,7 @@
                     folders: progressData.folders || [],
                     lastStudied: progressData.lastStudied || {},
                     userSettings: progressData.userSettings || {},
+                    studyGuides: progressData.studyGuides || [],
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             },
@@ -346,6 +347,7 @@
                     folders: data.folders || [],
                     lastStudied: data.lastStudied || {},
                     userSettings: data.userSettings || null,
+                    studyGuides: data.studyGuides || [],
                 };
             }
         };
@@ -504,6 +506,32 @@ const ChineseLearningApp = () => {
   const [aiDeckPreview, setAiDeckPreview] = useState(null); // { name, cards: [{chinese, pinyin, english}] }
   const [aiDeckError, setAiDeckError] = useState('');
   const [aiAutoSelectLoading, setAiAutoSelectLoading] = useState(false);
+
+  // Study Guides state
+  const [studyGuides, setStudyGuides] = useState(() => {
+    const saved = localStorage.getItem('studyGuides');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [studyGuideLoading, setStudyGuideLoading] = useState(false);
+  const [studyGuidePreview, setStudyGuidePreview] = useState(null);
+  const [kewenEditDeck, setKewenEditDeck] = useState(null); // deck being edited for kewen
+  const [kewenEditText, setKewenEditText] = useState('');
+
+  // AI Test Practice state
+  const [aiTestMode, setAiTestMode] = useState(null); // 'xiaokao', 'quiz', 'essay'
+  const [aiTestDecks, setAiTestDecks] = useState([]); // selected deck IDs
+  const [aiTestQuestion, setAiTestQuestion] = useState(null);
+  const [aiTestAnswer, setAiTestAnswer] = useState('');
+  const [aiTestFeedback, setAiTestFeedback] = useState(null);
+  const [aiTestLoading, setAiTestLoading] = useState(false);
+  const [aiTestScore, setAiTestScore] = useState([]);
+  const [aiTestQuestionNum, setAiTestQuestionNum] = useState(0);
+  const [aiTestSetupStep, setAiTestSetupStep] = useState('selectMode');
+  const [aiQuizType, setAiQuizType] = useState('mixed');
+  const [aiTestInputMode, setAiTestInputMode] = useState('type'); // 'type' or 'handwrite'
+  const [aiTestEraserOn, setAiTestEraserOn] = useState(false);
+  const aiTestCanvasRef = useRef(null);
+  const aiTestDrawCtrl = useRef({ isDrawing: false, isErasing: false, ctx: null, lastX: 0, lastY: 0 });
   // strokeCount state removed — it was never rendered but triggered expensive
   // full-component re-renders after every completed stroke, causing lag.
   // Single stable controller — created once, never recreated on re-render.
@@ -798,6 +826,7 @@ const ChineseLearningApp = () => {
 
   // Search
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedDecks, setExpandedDecks] = useState(new Set());
 
   // Calendar heatmap tooltip
   const [hoveredDay, setHoveredDay] = useState(null);
@@ -840,6 +869,11 @@ const ChineseLearningApp = () => {
   useEffect(() => {
     localStorage.setItem('bestMatchTimes', JSON.stringify(bestMatchTimes));
   }, [bestMatchTimes]);
+
+  // Save study guides to localStorage
+  useEffect(() => {
+    localStorage.setItem('studyGuides', JSON.stringify(studyGuides));
+  }, [studyGuides]);
 
   // Save learn progress to localStorage
   useEffect(() => {
@@ -975,7 +1009,7 @@ const ChineseLearningApp = () => {
       saveToCloud(currentUser.uid);
     }, 3000);
     return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
-  }, [decks, learnProgress, studyStreak, bestMatchTimes, folders, lastStudied, userSettings, currentUser, reorderMode, bulkReorderFolderId, currentView]);
+  }, [decks, learnProgress, studyStreak, bestMatchTimes, folders, lastStudied, userSettings, currentUser, reorderMode, bulkReorderFolderId, currentView, studyGuides]);
 
   // Skips sync-related state updates when drawing — prevents re-renders mid-stroke.
   const safeSetSyncStatus = (status) => {
@@ -996,7 +1030,7 @@ const ChineseLearningApp = () => {
       const foldersToSave = overrideFolders !== undefined ? overrideFolders : (latestFoldersRef.current || folders);
       const settingsToSave = latestSettingsRef.current || userSettings;
       await CloudSync.saveDecks(userId, decksToSave);
-      await CloudSync.saveProgress(userId, { learnProgress, studyStreak, bestMatchTimes, folders: foldersToSave, lastStudied, userSettings: settingsToSave });
+      await CloudSync.saveProgress(userId, { learnProgress, studyStreak, bestMatchTimes, folders: foldersToSave, lastStudied, userSettings: settingsToSave, studyGuides });
       safeSetSyncStatus('synced');
       safeSetLastSyncTime(new Date());
       setTimeout(() => safeSetSyncStatus('idle'), 3000);
@@ -1043,6 +1077,9 @@ const ChineseLearningApp = () => {
             flashcard: { ...prev.flashcard, ...cloudProgress.userSettings.flashcard },
             writing: { ...prev.writing, ...cloudProgress.userSettings.writing },
           }));
+        }
+        if (cloudProgress.studyGuides && cloudProgress.studyGuides.length > 0) {
+          setStudyGuides(cloudProgress.studyGuides);
         }
       }
 
@@ -2495,6 +2532,325 @@ Keep it concise and practical.`,
   };
 
   // AI auto-select vocabulary from pasted text
+  // Add/edit 课文 for a deck
+  const addKewenToDeck = (deckId, kewenText) => {
+    setDecks(prev => prev.map(d => d.id === deckId ? { ...d, kewen: kewenText } : d));
+  };
+
+  // Generate AI study guide for a deck
+  const generateStudyGuide = async (deck) => {
+    if (!deck || studyGuideLoading) return;
+    if (!window.puter || !window.puter.ai || typeof window.puter.ai.chat !== 'function') {
+      alert('AI is still loading. Please wait and try again.');
+      return;
+    }
+    setStudyGuideLoading(true);
+    setStudyGuidePreview(null);
+
+    const vocabList = deck.cards.slice(0, 50).map(c => `${c.chinese} (${c.pinyin}) - ${c.english}`).join('\n');
+    const kewenSnippet = deck.kewen ? deck.kewen.substring(0, 2000) : '';
+
+    try {
+      const response = await window.puter.ai.chat([
+        { role: 'system', content: `You are a Chinese language study guide creator. Create comprehensive, well-organized study guides that help students prepare for quizzes and exams. Format with clear sections using markdown headers and bold. Be thorough but concise.` },
+        { role: 'user', content: `Create a study guide for a Chinese language deck called "${deck.name}".
+
+${kewenSnippet ? `课文 (Text):\n${kewenSnippet}\n\n` : ''}Vocabulary (${deck.cards.length} words):\n${vocabList}
+
+Please create a study guide with these sections:
+1. **Key Vocabulary** - Group the most important words by category (nouns, verbs, adjectives, phrases) with usage notes
+2. **Grammar Structures** - Identify and explain the key grammar patterns ${kewenSnippet ? 'used in the 课文' : 'relevant to this vocabulary'}, with example sentences
+3. **Key Sentences** - ${kewenSnippet ? 'Important sentences from the 课文 with analysis' : 'Example sentences combining multiple vocabulary words'}
+4. **Common Mistakes** - Mistakes learners often make with these words/patterns
+5. **Quick Review** - A concise summary of the most important points to remember` },
+      ], { model: chatModel });
+
+      const content = response?.message?.content || (typeof response === 'string' ? response : 'Could not generate study guide.');
+      setStudyGuidePreview({
+        id: 'sg-' + Date.now(),
+        deckId: deck.id,
+        deckName: deck.name,
+        content,
+        createdAt: Date.now(),
+      });
+      if (!puterReady) setPuterReady(true);
+    } catch (err) {
+      console.error('Study guide error:', err);
+      alert('Failed to generate study guide: ' + (err.message || 'Unknown error'));
+    } finally {
+      setStudyGuideLoading(false);
+    }
+  };
+
+  const saveStudyGuide = () => {
+    if (!studyGuidePreview) return;
+    setStudyGuides(prev => [studyGuidePreview, ...prev]);
+    setStudyGuidePreview(null);
+  };
+
+  const deleteStudyGuide = (guideId) => {
+    if (confirm('Delete this study guide?')) {
+      setStudyGuides(prev => prev.filter(g => g.id !== guideId));
+    }
+  };
+
+  // ==========================================
+  // AI Test Practice Functions
+  // ==========================================
+  const getAiTestContext = () => {
+    const selectedDecksData = aiTestDecks.map(id => decks.find(d => d.id === id)).filter(Boolean);
+    const allVocab = selectedDecksData.flatMap(d => d.cards.map(c => `${c.chinese} (${c.pinyin}) - ${c.english}`));
+    const allKewen = selectedDecksData.filter(d => d.kewen).map(d => `[${d.name}]\n${d.kewen.substring(0, 1500)}`).join('\n\n');
+    return { selectedDecksData, allVocab, allKewen, deckNames: selectedDecksData.map(d => d.name).join(', ') };
+  };
+
+  const generateAiTestQuestion = async () => {
+    if (aiTestLoading) return;
+    if (!window.puter?.ai?.chat) { alert('AI still loading.'); return; }
+    setAiTestLoading(true);
+    setAiTestFeedback(null);
+    setAiTestAnswer('');
+    const { allVocab, allKewen, deckNames } = getAiTestContext();
+    const vocabSample = allVocab.sort(() => Math.random() - 0.5).slice(0, 30).join('\n');
+
+    const modePrompts = {
+      xiaokao: `You are creating a 小考 (mini quiz) question for a Chinese class.
+
+Decks: ${deckNames}
+${allKewen ? `课文:\n${allKewen.substring(0, 2000)}\n\n` : ''}Available vocabulary:\n${vocabSample}
+
+Generate a 小考 question. Pick 5 grammar structures/vocab words from the vocabulary list. Create a prompt (a question or scenario in Chinese that a student must answer). The student will pick at least 4 of the 5 items and construct ONE coherent Chinese sentence answering the prompt using all the items they picked.
+
+Respond in this EXACT JSON format only:
+{"prompt":"[question/scenario in Chinese]","promptEnglish":"[English translation of prompt]","items":["word1","word2","word3","word4","word5"],"hint":"[brief hint about expected answer]"}`,
+
+      quiz: `You are creating a quiz question for a Chinese class covering multiple lessons.
+
+Decks: ${deckNames}
+${allKewen ? `课文:\n${allKewen.substring(0, 2000)}\n\n` : ''}Available vocabulary:\n${vocabSample}
+
+Generate ONE question of ${aiQuizType === 'construction' ? 'Type A' : aiQuizType === 'translation' ? 'Type B' : 'either Type A or Type B (randomly pick)'}:
+- Type A (sentence construction): Pick 5 vocab/grammar items, give a prompt, student constructs a sentence using 4+ items
+- Type B (translation): Give an English sentence using concepts from the vocabulary, student translates to Chinese
+
+Respond in this EXACT JSON format only:
+{"type":"A or B","prompt":"[the question]","promptEnglish":"[English version if prompt is Chinese, or same if already English]","items":["word1","word2"],"hint":"[hint]"}
+For type B, items can be empty array.`,
+
+      essay: `You are creating an essay prompt for a Chinese class.
+
+Decks: ${deckNames}
+${allKewen ? `课文:\n${allKewen.substring(0, 2000)}\n\n` : ''}Available vocabulary:\n${vocabSample}
+
+Generate an essay prompt. Pick 15-20 vocabulary/grammar items from the list that the student should try to incorporate (at least 8). The essay should be ≥80 characters responding to the prompt.
+
+Respond in this EXACT JSON format only:
+{"prompt":"[essay prompt in Chinese]","promptEnglish":"[English translation]","items":["word1","word2","...15-20 items"],"minChars":80}`
+    };
+
+    try {
+      const response = await window.puter.ai.chat([
+        { role: 'system', content: 'You generate Chinese language test questions. Respond with ONLY valid JSON, no markdown, no backticks.' },
+        { role: 'user', content: modePrompts[aiTestMode] },
+      ], { model: chatModel });
+
+      const raw = response?.message?.content || '';
+      const cleaned = raw.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+      let question;
+      try { question = JSON.parse(cleaned); }
+      catch { const m = cleaned.match(/\{[\s\S]*\}/); if (m) question = JSON.parse(m[0]); else throw new Error('Parse failed'); }
+
+      setAiTestQuestion(question);
+      setAiTestQuestionNum(prev => prev + 1);
+      if (!puterReady) setPuterReady(true);
+    } catch (err) {
+      console.error('AI test question error:', err);
+      alert('Failed to generate question: ' + (err.message || 'Unknown error'));
+    } finally {
+      setAiTestLoading(false);
+    }
+  };
+
+  const gradeAiTestAnswer = async () => {
+    if (aiTestLoading || !aiTestAnswer.trim()) return;
+    if (!window.puter?.ai?.chat) return;
+    setAiTestLoading(true);
+
+    const modeContext = aiTestMode === 'essay'
+      ? `This is an essay response (should be ≥${aiTestQuestion.minChars || 80} characters). Student should incorporate at least 8 of the given items.`
+      : aiTestMode === 'xiaokao'
+      ? 'The student should use at least 4 of the 5 given items in one coherent sentence.'
+      : aiTestQuestion.type === 'B'
+      ? 'The student is translating from English to Chinese.'
+      : 'The student should use at least 4 of the given items in one coherent sentence.';
+
+    try {
+      const response = await window.puter.ai.chat([
+        { role: 'system', content: `You are a Chinese language teacher grading student work. Be encouraging but accurate. Grade on: correctness of grammar, proper use of required vocabulary/structures, natural Chinese expression, and whether the response addresses the prompt. Give a score out of 10.
+
+Respond in this EXACT JSON format:
+{"score":8,"feedback":"[detailed feedback in English]","corrected":"[corrected Chinese version if needed]","highlights":"[what the student did well]"}` },
+        { role: 'user', content: `${modeContext}
+
+Prompt: ${aiTestQuestion.prompt}${aiTestQuestion.promptEnglish ? ` (${aiTestQuestion.promptEnglish})` : ''}
+Required items: ${(aiTestQuestion.items || []).join(', ')}
+Student's answer: ${aiTestAnswer}
+
+Grade this response.` },
+      ], { model: chatModel });
+
+      const raw = response?.message?.content || '';
+      const cleaned = raw.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+      let feedback;
+      try { feedback = JSON.parse(cleaned); }
+      catch { const m = cleaned.match(/\{[\s\S]*\}/); if (m) feedback = JSON.parse(m[0]); else feedback = { score: '?', feedback: raw, corrected: '', highlights: '' }; }
+
+      setAiTestFeedback(feedback);
+      setAiTestScore(prev => [...prev, {
+        questionNum: aiTestQuestionNum,
+        mode: aiTestMode,
+        question: aiTestQuestion,
+        answer: aiTestAnswer,
+        feedback,
+      }]);
+    } catch (err) {
+      console.error('Grading error:', err);
+      setAiTestFeedback({ score: '?', feedback: 'Grading failed: ' + (err.message || 'Unknown error'), corrected: '', highlights: '' });
+    } finally {
+      setAiTestLoading(false);
+    }
+  };
+
+  // AI Test handwriting canvas functions
+  const initAiTestCanvas = () => {
+    const canvas = aiTestCanvasRef.current;
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, rect.width, rect.height);
+    // Draw lines
+    ctx.strokeStyle = '#e5e7eb';
+    ctx.lineWidth = 1;
+    const lineSpacing = 60;
+    for (let y = lineSpacing; y < rect.height; y += lineSpacing) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(rect.width, y);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    aiTestDrawCtrl.current.ctx = ctx;
+  };
+
+  useEffect(() => {
+    if (aiTestInputMode === 'handwrite' && aiTestSetupStep === 'inProgress' && aiTestQuestion && !aiTestFeedback) {
+      setTimeout(initAiTestCanvas, 100);
+    }
+  }, [aiTestInputMode, aiTestSetupStep, aiTestQuestion, aiTestFeedback, aiTestQuestionNum]);
+
+  const aiTestCanvasPointerDown = (e) => {
+    const ctrl = aiTestDrawCtrl.current;
+    if (!ctrl.ctx) return;
+    const rect = aiTestCanvasRef.current.getBoundingClientRect();
+    ctrl.isDrawing = true;
+    ctrl.lastX = e.clientX - rect.left;
+    ctrl.lastY = e.clientY - rect.top;
+    ctrl.ctx.strokeStyle = ctrl.isErasing ? '#fff' : '#000';
+    ctrl.ctx.lineWidth = ctrl.isErasing ? 20 : 3;
+    ctrl.ctx.beginPath();
+    ctrl.ctx.moveTo(ctrl.lastX, ctrl.lastY);
+  };
+
+  const aiTestCanvasPointerMove = (e) => {
+    const ctrl = aiTestDrawCtrl.current;
+    if (!ctrl.isDrawing || !ctrl.ctx) return;
+    const rect = aiTestCanvasRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    ctrl.ctx.lineTo(x, y);
+    ctrl.ctx.stroke();
+    ctrl.lastX = x;
+    ctrl.lastY = y;
+  };
+
+  const aiTestCanvasPointerUp = () => {
+    aiTestDrawCtrl.current.isDrawing = false;
+  };
+
+  const clearAiTestCanvas = () => {
+    aiTestDrawCtrl.current.isErasing = false;
+    setAiTestEraserOn(false);
+    initAiTestCanvas();
+  };
+
+  const recognizeHandwriting = async () => {
+    const canvas = aiTestCanvasRef.current;
+    if (!canvas || aiTestLoading) return;
+    if (!window.puter?.ai?.chat) { alert('AI still loading.'); return; }
+    setAiTestLoading(true);
+    try {
+      // Convert canvas to base64 image
+      const dataUrl = canvas.toDataURL('image/png');
+      // Use a vision model to read the handwriting
+      const response = await window.puter.ai.chat([
+        { role: 'system', content: 'You are a Chinese handwriting recognition system. Read the handwritten Chinese text in the image and output ONLY the recognized Chinese text. No explanation, no translation, just the Chinese characters exactly as written. If you cannot read something, use ？ as placeholder.' },
+        { role: 'user', content: [
+          { type: 'image_url', image_url: { url: dataUrl } },
+          { type: 'text', text: 'Read the handwritten Chinese text in this image. Output only the Chinese text.' }
+        ]}
+      ], { model: 'gpt-4o' });
+      const recognized = response?.message?.content || (typeof response === 'string' ? response : '');
+      const cleanText = recognized.trim();
+      if (cleanText) {
+        setAiTestAnswer(cleanText);
+      } else {
+        alert('Could not recognize any text. Try writing larger or clearer.');
+      }
+      if (!puterReady) setPuterReady(true);
+    } catch (err) {
+      console.error('Handwriting recognition error:', err);
+      // Fallback: try with a different model
+      try {
+        const dataUrl = canvas.toDataURL('image/png');
+        const response = await window.puter.ai.chat(
+          'Read the handwritten Chinese text in this image. Output ONLY the Chinese characters, nothing else.',
+          dataUrl,
+          { model: 'gpt-4o-mini' }
+        );
+        const recognized = response?.message?.content || (typeof response === 'string' ? response : '');
+        if (recognized.trim()) {
+          setAiTestAnswer(recognized.trim());
+        } else {
+          alert('Recognition failed. Try typing your answer instead.');
+        }
+      } catch (err2) {
+        console.error('Fallback recognition also failed:', err2);
+        alert('Handwriting recognition failed: ' + (err.message || 'Unknown error') + '. Try typing instead.');
+      }
+    } finally {
+      setAiTestLoading(false);
+    }
+  };
+
+  const resetAiTest = () => {
+    setAiTestMode(null);
+    setAiTestDecks([]);
+    setAiTestQuestion(null);
+    setAiTestAnswer('');
+    setAiTestFeedback(null);
+    setAiTestScore([]);
+    setAiTestQuestionNum(0);
+    setAiTestSetupStep('selectMode');
+  };
+
   const aiAutoSelectWords = async () => {
     if (aiAutoSelectLoading || !textImportInput.trim()) return;
     if (!window.puter || !window.puter.ai || typeof window.puter.ai.chat !== 'function') {
@@ -2586,6 +2942,7 @@ Rules:
       id: 'deck-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
       name: textImportDeckName.trim(),
       cards,
+      kewen: textImportInput.trim(),
     };
     setDecks(prev => [...prev, deck]);
     setShowTextImport(false);
@@ -4327,6 +4684,37 @@ Rules:
                 Stats
               </button>
               <button
+                onClick={() => setCurrentView('studyGuides')}
+                className="flex items-center gap-2 bg-gradient-to-r from-rose-500 to-pink-600 text-white px-6 py-3 rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
+              >
+                <Brain size={20} />
+                Study Guides
+                {studyGuides.length > 0 && (
+                  <span className="bg-white/30 text-white text-xs px-1.5 py-0.5 rounded-full">{studyGuides.length}</span>
+                )}
+              </button>
+              <button
+                onClick={() => { resetAiTest(); setCurrentView('aiTestPractice'); }}
+                className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-6 py-3 rounded-xl hover:from-indigo-600 hover:to-violet-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
+              >
+                <Edit2 size={20} />
+                Test Practice
+              </button>
+              {decks.length > 0 && (
+                <button
+                  onClick={() => {
+                    if (expandedDecks.size > 0) {
+                      setExpandedDecks(new Set());
+                    } else {
+                      setExpandedDecks(new Set(decks.map(d => d.id)));
+                    }
+                  }}
+                  className="flex items-center gap-2 bg-gradient-to-r from-gray-400 to-gray-500 text-white px-5 py-3 rounded-xl hover:from-gray-500 hover:to-gray-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold text-sm"
+                >
+                  {expandedDecks.size > 0 ? '▲ Collapse All' : '▼ Expand All'}
+                </button>
+              )}
+              <button
                 onClick={() => currentUser ? setCurrentView('account') : setCurrentView('login')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold ${
                   currentUser
@@ -5024,6 +5412,54 @@ Rules:
                             </div>
                           </div>
 
+                          {/* Expand/Collapse toggle */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedDecks(prev => {
+                                const next = new Set(prev);
+                                if (next.has(deck.id)) next.delete(deck.id);
+                                else next.add(deck.id);
+                                return next;
+                              });
+                            }}
+                            className="w-full text-center py-1.5 text-xs text-gray-400 hover:text-gray-600 transition"
+                          >
+                            {expandedDecks.has(deck.id) ? '▲ Collapse' : '▼ More options'}
+                          </button>
+
+                          {/* Collapsible sections */}
+                          {expandedDecks.has(deck.id) && (
+                          <React.Fragment>
+
+                          {/* 课文 & Study Guide */}
+                          <div className="space-y-2 pt-3 border-t border-gray-100">
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setKewenEditDeck(deck);
+                                  setKewenEditText(deck.kewen || '');
+                                }}
+                                className="bg-orange-50 text-orange-600 px-3 py-2 rounded-lg hover:bg-orange-100 transition-all border border-orange-200 flex items-center justify-center gap-1"
+                              >
+                                <span className="text-sm">📄</span>
+                                <span className="text-xs font-medium">{deck.kewen ? 'Edit 课文' : 'Add 课文'}</span>
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setCurrentView('studyGuides'); setTimeout(() => generateStudyGuide(deck), 100); }}
+                                disabled={studyGuideLoading || totalCards === 0}
+                                className="bg-rose-50 text-rose-600 px-3 py-2 rounded-lg hover:bg-rose-100 transition-all border border-rose-200 flex items-center justify-center gap-1 disabled:opacity-50"
+                              >
+                                <Brain size={14} />
+                                <span className="text-xs font-medium">Study Guide</span>
+                              </button>
+                            </div>
+                            {deck.kewen && (
+                              <div className="text-xs text-gray-400 text-center">课文 attached ({deck.kewen.length} chars)</div>
+                            )}
+                          </div>
+
                           {/* Utility Actions */}
                           <div className="space-y-2 pt-3 border-t border-gray-100">
                             <div className="flex gap-2">
@@ -5086,6 +5522,9 @@ Rules:
                               </button>
                             </div>
                           </div>
+
+                          </React.Fragment>
+                          )}
                         </div>
                       </div>
                     );
@@ -5254,6 +5693,52 @@ Rules:
                 <button
                   onClick={() => { setShowImportModal(false); setImportedDecks([]); setImportTargetFolder(null); }}
                   className="w-full bg-gray-100 text-gray-700 py-2.5 rounded-lg font-semibold hover:bg-gray-200 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 课文 Edit Modal */}
+        {kewenEditDeck && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+              <div className="p-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800">{kewenEditDeck.kewen ? 'Edit' : 'Add'} 课文</h3>
+                  <p className="text-sm text-gray-500 mt-0.5">{kewenEditDeck.name}</p>
+                </div>
+                <button onClick={() => setKewenEditDeck(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-5">
+                <textarea
+                  value={kewenEditText}
+                  onChange={e => setKewenEditText(e.target.value)}
+                  placeholder="在这里粘贴课文 / Paste your reading text here..."
+                  className="w-full h-64 p-4 border-2 border-gray-200 rounded-xl text-lg focus:outline-none focus:border-orange-400 resize-none"
+                  style={{ fontFamily: 'serif', lineHeight: 1.8, minHeight: '250px' }}
+                  autoFocus
+                />
+                {kewenEditText && (
+                  <p className="text-xs text-gray-400 mt-2 text-right">{kewenEditText.length} characters</p>
+                )}
+              </div>
+              <div className="p-5 border-t border-gray-100 flex gap-3 flex-shrink-0">
+                <button
+                  onClick={() => {
+                    addKewenToDeck(kewenEditDeck.id, kewenEditText.trim());
+                    setKewenEditDeck(null);
+                    setKewenEditText('');
+                  }}
+                  className="flex-1 bg-orange-600 text-white py-3 rounded-xl font-bold hover:bg-orange-700 transition"
+                >
+                  {kewenEditText.trim() ? 'Save 课文' : 'Remove 课文'}
+                </button>
+                <button
+                  onClick={() => { setKewenEditDeck(null); setKewenEditText(''); }}
+                  className="bg-gray-100 text-gray-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition"
                 >
                   Cancel
                 </button>
@@ -7604,6 +8089,497 @@ Rules:
         </div>
 
         {/* Floating Chat Button */}
+        <ChatFAB />
+        <ChatSidebar />
+      </div>
+    );
+  }
+
+  // ==========================================
+  // AI TEST PRACTICE VIEW
+  // ==========================================
+  if (currentView === 'aiTestPractice') {
+    const modeInfo = {
+      xiaokao: { name: '小考 (Mini Quiz)', desc: 'Single lesson — construct sentences from given vocab/grammar', color: 'from-amber-500 to-orange-500', emoji: '📝' },
+      quiz: { name: 'Weekly Quiz', desc: 'Multiple lessons — sentence construction + translation', color: 'from-blue-500 to-indigo-500', emoji: '📋' },
+      essay: { name: 'Essay Practice', desc: 'Write a ≥80 character response using given vocab', color: 'from-purple-500 to-pink-500', emoji: '✍️' },
+    };
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-4 sm:p-6">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <button onClick={() => { resetAiTest(); setCurrentView('home'); }} className="text-gray-600 hover:text-gray-800 flex items-center gap-2 font-semibold">← Home</button>
+            <h1 className="text-2xl font-bold text-gray-800">AI Test Practice</h1>
+            <div />
+          </div>
+
+          {/* Step 1: Select Mode */}
+          {aiTestSetupStep === 'selectMode' && (
+            <div className="space-y-3">
+              <p className="text-gray-500 text-sm mb-4">Choose a practice mode that matches your CHI108 assessments:</p>
+              {Object.entries(modeInfo).map(([mode, info]) => (
+                <button key={mode} onClick={() => { setAiTestMode(mode); setAiTestSetupStep('selectDecks'); }}
+                  className={`w-full text-left p-5 rounded-xl bg-gradient-to-r ${info.color} text-white hover:shadow-lg transition-all`}>
+                  <div className="text-xl font-bold mb-1">{info.emoji} {info.name}</div>
+                  <div className="text-sm opacity-90">{info.desc}</div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Step 2: Select Decks */}
+          {aiTestSetupStep === 'selectDecks' && (
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <button onClick={() => setAiTestSetupStep('selectMode')} className="text-gray-500 hover:text-gray-700">← Back</button>
+                <h2 className="font-bold text-gray-800">
+                  {modeInfo[aiTestMode]?.emoji} {modeInfo[aiTestMode]?.name} — Select {aiTestMode === 'xiaokao' ? 'Deck' : 'Decks'}
+                </h2>
+              </div>
+              <p className="text-sm text-gray-500 mb-4">
+                {aiTestMode === 'xiaokao' ? 'Pick the lesson deck for this 小考:' : 'Pick one or more lesson decks to include:'}
+              </p>
+              <div className="space-y-2 mb-6">
+                {decks.filter(d => d.cards.length > 0).map(deck => {
+                  const isSelected = aiTestDecks.includes(deck.id);
+                  return (
+                    <button key={deck.id}
+                      onClick={() => {
+                        if (aiTestMode === 'xiaokao') {
+                          setAiTestDecks([deck.id]);
+                        } else {
+                          setAiTestDecks(prev => isSelected ? prev.filter(id => id !== deck.id) : [...prev, deck.id]);
+                        }
+                      }}
+                      className={`w-full text-left p-4 rounded-xl border-2 transition ${isSelected ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold text-gray-800">{deck.name}</div>
+                          <div className="text-xs text-gray-400">{deck.cards.length} cards{deck.kewen ? ' · 课文 ✓' : ''}</div>
+                        </div>
+                        {isSelected && <Check size={20} className="text-indigo-600" />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Quiz type selector (only for weekly quiz) */}
+              {aiTestMode === 'quiz' && aiTestDecks.length > 0 && (
+                <div className="mb-4 p-4 bg-blue-50 rounded-xl">
+                  <div className="text-sm font-semibold text-blue-800 mb-2">Question Type</div>
+                  <div className="flex gap-2">
+                    {[
+                      { id: 'mixed', label: '🔀 Mixed' },
+                      { id: 'construction', label: '🏗️ Construction' },
+                      { id: 'translation', label: '🔄 Translation' },
+                    ].map(t => (
+                      <button key={t.id}
+                        onClick={() => setAiQuizType(t.id)}
+                        className={`flex-1 py-2 rounded-lg text-xs font-medium transition ${aiQuizType === t.id ? 'bg-blue-600 text-white' : 'bg-white text-blue-700 border border-blue-200 hover:bg-blue-100'}`}>
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={() => { setAiTestSetupStep('inProgress'); setAiTestQuestionNum(0); setAiTestScore([]); generateAiTestQuestion(); }}
+                disabled={aiTestDecks.length === 0}
+                className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-3 rounded-xl font-bold hover:from-indigo-700 hover:to-violet-700 transition disabled:opacity-40"
+              >
+                Start Practice
+              </button>
+            </div>
+          )}
+
+          {/* Step 3: In Progress */}
+          {aiTestSetupStep === 'inProgress' && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-sm text-gray-500">
+                  {modeInfo[aiTestMode]?.emoji} {modeInfo[aiTestMode]?.name} · Question {aiTestQuestionNum}
+                </div>
+                <button onClick={() => {
+                  if (aiTestScore.length > 0) { setAiTestSetupStep('results'); }
+                  else { resetAiTest(); setCurrentView('home'); }
+                }} className="text-sm text-gray-400 hover:text-gray-600">End Practice</button>
+              </div>
+
+              {/* Loading question */}
+              {aiTestLoading && !aiTestQuestion && (
+                <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+                  <div className="flex gap-1 justify-center mb-3">
+                    {[0,1,2].map(i => (<div key={i} className="w-2 h-2 rounded-full bg-indigo-500" style={{ animation: `chatBounce 1.2s ease-in-out ${i*0.15}s infinite` }} />))}
+                  </div>
+                  <p className="text-gray-500">Generating question...</p>
+                </div>
+              )}
+
+              {/* Question display */}
+              {aiTestQuestion && (
+                <div className="bg-white rounded-xl shadow-lg p-6 mb-4">
+                  {/* Prompt */}
+                  <div className="mb-4">
+                    <div className="text-lg font-bold text-gray-800 mb-2" style={{ fontFamily: 'serif', lineHeight: 1.8 }}>
+                      {aiTestQuestion.prompt}
+                    </div>
+                    {aiTestQuestion.promptEnglish && aiTestQuestion.promptEnglish !== aiTestQuestion.prompt && (
+                      <div className="text-sm text-gray-500">{aiTestQuestion.promptEnglish}</div>
+                    )}
+                  </div>
+
+                  {/* Items to use */}
+                  {aiTestQuestion.items && aiTestQuestion.items.length > 0 && (
+                    <div className="mb-4">
+                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                        {aiTestMode === 'essay' ? 'Incorporate at least 8 of these:' : aiTestMode === 'xiaokao' ? 'Pick at least 4 and use them:' : 'Use these in your answer:'}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {aiTestQuestion.items.map((item, i) => (
+                          <span key={i} className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium border border-indigo-200">{item}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {aiTestQuestion.hint && !aiTestFeedback && (
+                    <div className="text-xs text-gray-400 mb-3">💡 {aiTestQuestion.hint}</div>
+                  )}
+
+                  {/* Answer input */}
+                  {!aiTestFeedback && (
+                    <div>
+                      {/* Input mode toggle (not for essay) */}
+                      {aiTestMode !== 'essay' && (
+                        <div className="flex gap-2 mb-3">
+                          <button
+                            onClick={() => setAiTestInputMode('type')}
+                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${aiTestInputMode === 'type' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                          >
+                            ⌨️ Type
+                          </button>
+                          <button
+                            onClick={() => setAiTestInputMode('handwrite')}
+                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${aiTestInputMode === 'handwrite' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                          >
+                            ✍️ Handwrite
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Typing input */}
+                      {(aiTestInputMode === 'type' || aiTestMode === 'essay') && (
+                        <textarea
+                          value={aiTestAnswer}
+                          onChange={e => setAiTestAnswer(e.target.value)}
+                          placeholder={aiTestMode === 'essay' ? '写你的回答 (≥80 characters)...' : '写你的回答...'}
+                          className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:outline-none focus:border-indigo-400 resize-none mb-2"
+                          style={{ fontFamily: 'serif', lineHeight: 1.8, minHeight: aiTestMode === 'essay' ? '180px' : '100px', fontSize: '16px' }}
+                        />
+                      )}
+
+                      {/* Handwriting canvas */}
+                      {aiTestInputMode === 'handwrite' && aiTestMode !== 'essay' && (
+                        <div className="mb-2">
+                          <div className="border-2 border-gray-300 rounded-xl overflow-hidden bg-white mb-2" style={{ touchAction: 'none' }}>
+                            <canvas
+                              ref={aiTestCanvasRef}
+                              onPointerDown={aiTestCanvasPointerDown}
+                              onPointerMove={aiTestCanvasPointerMove}
+                              onPointerUp={aiTestCanvasPointerUp}
+                              onPointerLeave={aiTestCanvasPointerUp}
+                              style={{ width: '100%', height: '360px', cursor: aiTestEraserOn ? 'cell' : 'crosshair', touchAction: 'none' }}
+                            />
+                          </div>
+                          <div className="flex gap-2 mb-2">
+                            <button
+                              onClick={() => { aiTestDrawCtrl.current.isErasing = false; setAiTestEraserOn(false); }}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${!aiTestEraserOn ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600'}`}
+                            >
+                              ✏️ Pen
+                            </button>
+                            <button
+                              onClick={() => { aiTestDrawCtrl.current.isErasing = true; setAiTestEraserOn(true); }}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${aiTestEraserOn ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-600'}`}
+                            >
+                              🧹 Eraser
+                            </button>
+                            <button
+                              onClick={clearAiTestCanvas}
+                              className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
+                            >
+                              🗑️ Clear
+                            </button>
+                            <button
+                              onClick={recognizeHandwriting}
+                              disabled={aiTestLoading}
+                              className="flex-1 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:from-violet-700 hover:to-purple-700 transition disabled:opacity-40 flex items-center justify-center gap-1"
+                            >
+                              {aiTestLoading ? (
+                                <React.Fragment>
+                                  <div className="flex gap-1">{[0,1,2].map(i => (<div key={i} className="w-1 h-1 rounded-full bg-white" style={{ animation: `chatBounce 1.2s ease-in-out ${i*0.15}s infinite` }} />))}</div>
+                                  Reading...
+                                </React.Fragment>
+                              ) : '🔍 Recognize Text'}
+                            </button>
+                          </div>
+                          {aiTestAnswer && (
+                            <div className="p-3 bg-indigo-50 rounded-lg mb-2">
+                              <div className="text-xs font-semibold text-indigo-600 mb-1">Recognized text (editable):</div>
+                              <textarea
+                                value={aiTestAnswer}
+                                onChange={e => setAiTestAnswer(e.target.value)}
+                                className="w-full p-2 border border-indigo-200 rounded-lg text-lg focus:outline-none focus:border-indigo-400 resize-none bg-white"
+                                style={{ fontFamily: 'serif', lineHeight: 1.6, minHeight: '60px', fontSize: '16px' }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-400">{aiTestAnswer.length} characters</span>
+                        <button
+                          onClick={gradeAiTestAnswer}
+                          disabled={!aiTestAnswer.trim() || aiTestLoading}
+                          className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:from-indigo-700 hover:to-violet-700 transition disabled:opacity-40 flex items-center gap-2"
+                        >
+                          {aiTestLoading ? (
+                            <React.Fragment>
+                              <div className="flex gap-1">{[0,1,2].map(i => (<div key={i} className="w-1.5 h-1.5 rounded-full bg-white" style={{ animation: `chatBounce 1.2s ease-in-out ${i*0.15}s infinite` }} />))}</div>
+                              Grading...
+                            </React.Fragment>
+                          ) : 'Submit Answer'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Feedback */}
+                  {aiTestFeedback && (
+                    <div className="mt-4 space-y-3">
+                      <div className={`text-center p-4 rounded-xl ${
+                        (aiTestFeedback.score >= 8) ? 'bg-green-50 border border-green-200' :
+                        (aiTestFeedback.score >= 5) ? 'bg-yellow-50 border border-yellow-200' :
+                        'bg-red-50 border border-red-200'
+                      }`}>
+                        <div className="text-3xl font-bold mb-1">{aiTestFeedback.score}/10</div>
+                        <div className="text-sm text-gray-600">
+                          {aiTestFeedback.score >= 8 ? '🎉 Excellent!' : aiTestFeedback.score >= 5 ? '👍 Good effort!' : '💪 Keep practicing!'}
+                        </div>
+                      </div>
+
+                      {aiTestFeedback.highlights && (
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <div className="text-xs font-semibold text-green-700 mb-1">✅ What you did well:</div>
+                          <div className="text-sm text-green-800">{aiTestFeedback.highlights}</div>
+                        </div>
+                      )}
+
+                      {aiTestFeedback.feedback && (
+                        <div className="p-3 bg-blue-50 rounded-lg">
+                          <div className="text-xs font-semibold text-blue-700 mb-1">📝 Feedback:</div>
+                          <div className="text-sm text-blue-800">{aiTestFeedback.feedback}</div>
+                        </div>
+                      )}
+
+                      {aiTestFeedback.corrected && (
+                        <div className="p-3 bg-purple-50 rounded-lg">
+                          <div className="text-xs font-semibold text-purple-700 mb-1">✍️ Corrected version:</div>
+                          <div className="text-lg text-purple-900" style={{ fontFamily: 'serif', lineHeight: 1.8 }}>{aiTestFeedback.corrected}</div>
+                        </div>
+                      )}
+
+                      <div className="flex gap-3 pt-2">
+                        <button
+                          onClick={() => { setAiTestQuestion(null); setAiTestFeedback(null); setAiTestAnswer(''); generateAiTestQuestion(); }}
+                          className="flex-1 bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-violet-700 transition"
+                        >
+                          Next Question →
+                        </button>
+                        <button
+                          onClick={() => setAiTestSetupStep('results')}
+                          className="bg-gray-200 text-gray-700 px-4 py-3 rounded-xl font-semibold hover:bg-gray-300 transition"
+                        >
+                          Finish
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 4: Results */}
+          {aiTestSetupStep === 'results' && (
+            <div>
+              <div className="bg-white rounded-xl shadow-lg p-6 mb-6 text-center">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Practice Complete!</h2>
+                <div className="text-4xl font-bold text-indigo-600 mb-1">
+                  {aiTestScore.length > 0 ? (aiTestScore.reduce((sum, s) => sum + (Number(s.feedback?.score) || 0), 0) / aiTestScore.length).toFixed(1) : '—'}/10
+                </div>
+                <div className="text-sm text-gray-500">Average across {aiTestScore.length} question{aiTestScore.length !== 1 ? 's' : ''}</div>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                {aiTestScore.map((item, i) => (
+                  <details key={i} className="bg-white rounded-xl shadow overflow-hidden">
+                    <summary className="p-4 cursor-pointer hover:bg-gray-50 flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">Q{item.questionNum}: {item.question?.prompt?.substring(0, 50)}...</span>
+                      <span className={`font-bold ${(item.feedback?.score >= 8) ? 'text-green-600' : (item.feedback?.score >= 5) ? 'text-yellow-600' : 'text-red-600'}`}>
+                        {item.feedback?.score}/10
+                      </span>
+                    </summary>
+                    <div className="px-4 pb-4 border-t border-gray-100 pt-3 text-sm space-y-2">
+                      <div><strong>Your answer:</strong> <span style={{ fontFamily: 'serif' }}>{item.answer}</span></div>
+                      {item.feedback?.corrected && <div><strong>Corrected:</strong> <span style={{ fontFamily: 'serif' }}>{item.feedback.corrected}</span></div>}
+                      {item.feedback?.feedback && <div className="text-gray-600">{item.feedback.feedback}</div>}
+                    </div>
+                  </details>
+                ))}
+              </div>
+
+              <div className="flex gap-3">
+                <button onClick={() => { setAiTestSetupStep('inProgress'); setAiTestQuestion(null); setAiTestFeedback(null); setAiTestAnswer(''); generateAiTestQuestion(); }}
+                  className="flex-1 bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-3 rounded-xl font-bold transition">
+                  Continue Practicing
+                </button>
+                <button onClick={() => { resetAiTest(); setCurrentView('home'); }}
+                  className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition">
+                  Back to Home
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <style>{`
+          @keyframes chatBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-6px); opacity: 1; } }
+        `}</style>
+        <ChatFAB />
+        <ChatSidebar />
+      </div>
+    );
+  }
+
+  // ==========================================
+  // STUDY GUIDES VIEW
+  // ==========================================
+  if (currentView === 'studyGuides') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 p-4 sm:p-6">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <button onClick={() => setCurrentView('home')} className="text-gray-600 hover:text-gray-800 flex items-center gap-2 font-semibold">← Home</button>
+            <h1 className="text-2xl font-bold text-gray-800">Study Guides</h1>
+            <div />
+          </div>
+
+          {/* Generate new study guide */}
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 className="font-bold text-gray-800 mb-3">Generate Study Guide</h2>
+            <p className="text-sm text-gray-500 mb-4">Pick a deck and AI will create a comprehensive study guide based on its vocabulary{' '}and 课文 (if attached).</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {decks.filter(d => d.cards.length > 0).map(deck => (
+                <button
+                  key={deck.id}
+                  onClick={() => generateStudyGuide(deck)}
+                  disabled={studyGuideLoading}
+                  className="text-left p-3 rounded-lg border border-gray-200 hover:border-rose-300 hover:bg-rose-50 transition disabled:opacity-50"
+                >
+                  <div className="font-semibold text-gray-800 text-sm">{deck.name}</div>
+                  <div className="text-xs text-gray-400">{deck.cards.length} cards{deck.kewen ? ' · 课文 ✓' : ''}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Loading */}
+          {studyGuideLoading && (
+            <div className="bg-white rounded-xl shadow-lg p-8 mb-6 text-center">
+              <div className="flex gap-1 justify-center mb-3">
+                {[0,1,2].map(i => (
+                  <div key={i} className="w-2 h-2 rounded-full bg-rose-500" style={{ animation: `chatBounce 1.2s ease-in-out ${i * 0.15}s infinite` }} />
+                ))}
+              </div>
+              <p className="text-gray-500">AI is generating your study guide...</p>
+              <p className="text-gray-400 text-xs mt-1">This may take 10-20 seconds</p>
+            </div>
+          )}
+
+          {/* Preview unsaved guide */}
+          {studyGuidePreview && (
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border-2 border-rose-200">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-bold text-gray-800">{studyGuidePreview.deckName}</h3>
+                  <div className="text-xs text-rose-500">New — not yet saved</div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={saveStudyGuide} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-medium flex items-center gap-1">
+                    <Check size={14} /> Save
+                  </button>
+                  <button onClick={() => setStudyGuidePreview(null)} className="bg-gray-200 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-300 transition text-sm">
+                    Discard
+                  </button>
+                </div>
+              </div>
+              <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed">
+                {renderMarkdown(studyGuidePreview.content)}
+              </div>
+            </div>
+          )}
+
+          {/* Saved study guides */}
+          {studyGuides.length > 0 ? (
+            <div className="space-y-4">
+              <h2 className="font-bold text-gray-800">Saved Guides ({studyGuides.length})</h2>
+              {studyGuides.map(guide => (
+                <details key={guide.id} className="bg-white rounded-xl shadow-lg overflow-hidden group">
+                  <summary className="p-4 cursor-pointer hover:bg-gray-50 transition flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold text-gray-800">{guide.deckName}</div>
+                      <div className="text-xs text-gray-400">{new Date(guide.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); deleteStudyGuide(guide.id); }}
+                        className="text-gray-300 hover:text-red-500 transition p-1"
+                        title="Delete"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                      <ChevronRight size={16} className="text-gray-400 group-open:rotate-90 transition-transform" />
+                    </div>
+                  </summary>
+                  <div className="px-4 pb-4 border-t border-gray-100 pt-4">
+                    <div className="text-sm text-gray-700 leading-relaxed">
+                      {renderMarkdown(guide.content)}
+                    </div>
+                  </div>
+                </details>
+              ))}
+            </div>
+          ) : !studyGuideLoading && !studyGuidePreview && (
+            <div className="text-center text-gray-400 py-12">
+              <Brain size={40} className="mx-auto mb-3 opacity-30" />
+              <p>No saved study guides yet.</p>
+              <p className="text-sm mt-1">Generate one from a deck above!</p>
+            </div>
+          )}
+        </div>
+
+        <style>{`
+          @keyframes chatBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-6px); opacity: 1; }
+          }
+        `}</style>
+
         <ChatFAB />
         <ChatSidebar />
       </div>
