@@ -404,6 +404,9 @@ const ChineseLearningApp = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [swipeHistory, setSwipeHistory] = useState([]); // undo history for flashcard study
   const [newCard, setNewCard] = useState({ chinese: '', pinyin: '', english: '' });
+  const [aiAutofillLoading, setAiAutofillLoading] = useState(false);
+  const [bulkInput, setBulkInput] = useState('');
+  const [bulkAutofillLoading, setBulkAutofillLoading] = useState(false);
   const [newDeckName, setNewDeckName] = useState('');
   // Text-to-deck (paste Chinese text, select words, auto-lookup)
   const [showTextImport, setShowTextImport] = useState(false);
@@ -2876,22 +2879,12 @@ Grade this response.` },
     canvas.height = rect.height * dpr;
     const ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, rect.width, rect.height);
-    // Draw lines
-    ctx.strokeStyle = '#e5e7eb';
-    ctx.lineWidth = 1;
-    const lineSpacing = 60;
-    for (let y = lineSpacing; y < rect.height; y += lineSpacing) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(rect.width, y);
-      ctx.stroke();
-    }
+    // Canvas is transparent — grid lines are drawn via CSS background on the wrapper div
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+    ctx.globalCompositeOperation = 'source-over';
     aiTestDrawCtrl.current.ctx = ctx;
   };
 
@@ -2908,7 +2901,8 @@ Grade this response.` },
     ctrl.isDrawing = true;
     ctrl.lastX = e.clientX - rect.left;
     ctrl.lastY = e.clientY - rect.top;
-    ctrl.ctx.strokeStyle = ctrl.isErasing ? '#fff' : '#000';
+    ctrl.ctx.globalCompositeOperation = ctrl.isErasing ? 'destination-out' : 'source-over';
+    ctrl.ctx.strokeStyle = ctrl.isErasing ? 'rgba(0,0,0,1)' : '#000';
     ctrl.ctx.lineWidth = ctrl.isErasing ? 20 : 3;
     ctrl.ctx.beginPath();
     ctrl.ctx.moveTo(ctrl.lastX, ctrl.lastY);
@@ -2927,7 +2921,9 @@ Grade this response.` },
   };
 
   const aiTestCanvasPointerUp = () => {
-    aiTestDrawCtrl.current.isDrawing = false;
+    const ctrl = aiTestDrawCtrl.current;
+    ctrl.isDrawing = false;
+    if (ctrl.ctx) ctrl.ctx.globalCompositeOperation = 'source-over';
   };
 
   const clearAiTestCanvas = () => {
@@ -3197,6 +3193,61 @@ Rules:
     if (updatedEditingDeck && editingDeck && editingDeck.id === deckId) {
       setEditingDeck(updatedEditingDeck);
     }
+  };
+
+  // AI autofill pinyin + english for a single Chinese input
+  const aiAutofillCard = async () => {
+    if (!newCard.chinese.trim()) { alert('Enter a Chinese character or phrase first.'); return; }
+    if (!window.puter?.ai?.chat) { alert('AI is still loading, please wait a moment.'); return; }
+    setAiAutofillLoading(true);
+    try {
+      const response = await window.puter.ai.chat([
+        { role: 'system', content: 'You are a Chinese language expert. Given a Chinese word or phrase, respond with ONLY a JSON object with keys "pinyin" (with tone marks, no numbers) and "english" (concise English definition). No explanation, no markdown, just the raw JSON.' },
+        { role: 'user', content: newCard.chinese.trim() }
+      ]);
+      const text = (response?.message?.content || (typeof response === 'string' ? response : '')).trim();
+      const clean = text.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+      if (parsed.pinyin && parsed.english) {
+        setNewCard(prev => ({ ...prev, pinyin: parsed.pinyin, english: parsed.english }));
+      }
+    } catch(e) {
+      alert('AI autofill failed. Please fill in pinyin and English manually.');
+    }
+    setAiAutofillLoading(false);
+  };
+
+  // AI bulk autofill - takes comma-separated Chinese phrases, generates cards for all
+  const aiBulkAutofill = async (deckId) => {
+    if (!bulkInput.trim()) { alert('Enter some Chinese phrases separated by commas.'); return; }
+    if (!window.puter?.ai?.chat) { alert('AI is still loading, please wait a moment.'); return; }
+    const phrases = bulkInput.split(/[、，,]/).map(s => s.trim()).filter(Boolean);
+    if (phrases.length === 0) return;
+    setBulkAutofillLoading(true);
+    try {
+      const response = await window.puter.ai.chat([
+        { role: 'system', content: 'You are a Chinese language expert. Given a list of Chinese words or phrases, respond with ONLY a JSON array. Each element should be an object with keys: "chinese" (the original phrase), "pinyin" (with tone marks, no numbers), and "english" (concise English definition). No explanation, no markdown, just the raw JSON array.' },
+        { role: 'user', content: phrases.join('\n') }
+      ]);
+      const text = (response?.message?.content || (typeof response === 'string' ? response : '')).trim();
+      const clean = text.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+      if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('bad response');
+      const makeCard = (c) => ({ id: Date.now() + Math.random(), chinese: c.chinese, pinyin: c.pinyin, english: c.english, known: false, lastReviewed: null, difficulty: 0, easeFactor: 2.5, interval: 0, repetitions: 0 });
+      const newCards = parsed.filter(c => c.chinese && c.pinyin && c.english).map(makeCard);
+      const updatedDecks = decks.map(deck => {
+        if (deck.id !== deckId) return deck;
+        return { ...deck, cards: [...deck.cards, ...newCards] };
+      });
+      setDecks(updatedDecks);
+      const updated = updatedDecks.find(d => d.id === deckId);
+      if (updated && editingDeck?.id === deckId) setEditingDeck(updated);
+      setBulkInput('');
+      alert('Added ' + newCards.length + ' card' + (newCards.length !== 1 ? 's' : '') + '!');
+    } catch(e) {
+      alert('AI bulk autofill failed. Check that your input is valid Chinese phrases.');
+    }
+    setBulkAutofillLoading(false);
   };
 
   // Delete card
@@ -4216,6 +4267,13 @@ Rules:
       canvasOverlayRef.current.innerHTML = '';
     }
     setCanvasHanziChar(null);
+    setWritingFeedback(null);
+  };
+
+  // Clears only the user's drawn strokes — keeps the HanziWriter tracing overlay intact
+  const clearTracesOnly = () => {
+    const canvas = canvasRef.current;
+    if (canvas) drawCtrl.current.clearCanvas(canvas);
     setWritingFeedback(null);
   };
 
@@ -6502,10 +6560,11 @@ Rules:
             </div>
             
             {/* Add New Card Form */}
-            <div className="mb-8 p-6 bg-gray-50 rounded-lg">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Add New Card</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="mb-6 p-6 bg-gray-50 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-800 mb-1">Add New Card</h3>
+              <p className="text-sm text-gray-500 mb-4">Type the Chinese, then click <strong>AI Autofill</strong> to generate pinyin &amp; English automatically.</p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">Chinese Character</label>
                   <input
@@ -6516,7 +6575,6 @@ Rules:
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
                   />
                 </div>
-                
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">Pinyin</label>
                   <input
@@ -6527,7 +6585,6 @@ Rules:
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
                   />
                 </div>
-                
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">English Translation</label>
                   <input
@@ -6540,12 +6597,41 @@ Rules:
                 </div>
               </div>
 
-              <button
-                onClick={() => addCard(editingDeck.id)}
-                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium"
-              >
-                Add Card
-              </button>
+              <div className="flex gap-3 mb-6">
+                <button
+                  onClick={aiAutofillCard}
+                  disabled={aiAutofillLoading || !newCard.chinese.trim()}
+                  className="flex-1 bg-rose-600 text-white py-2 rounded-lg hover:bg-rose-700 transition font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {aiAutofillLoading ? <><span style={{display:'inline-block',width:14,height:14,border:'2px solid #fff',borderTopColor:'transparent',borderRadius:'50%',animation:'hw-spin 0.7s linear infinite'}}/> Filling...</> : '✨ AI Autofill'}
+                </button>
+                <button
+                  onClick={() => addCard(editingDeck.id)}
+                  className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium"
+                >
+                  + Add Card
+                </button>
+              </div>
+
+              {/* Bulk add section */}
+              <div className="border-t border-gray-200 pt-5">
+                <h4 className="text-sm font-semibold text-gray-700 mb-1">Bulk Add with AI</h4>
+                <p className="text-xs text-gray-500 mb-3">Paste multiple Chinese phrases separated by commas. AI will generate pinyin and English for all of them at once.</p>
+                <textarea
+                  value={bulkInput}
+                  onChange={(e) => setBulkInput(e.target.value)}
+                  placeholder="你好，再见，欢迎，谢谢，对不起"
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400 text-sm mb-3 resize-none"
+                />
+                <button
+                  onClick={() => aiBulkAutofill(editingDeck.id)}
+                  disabled={bulkAutofillLoading || !bulkInput.trim()}
+                  className="w-full bg-gradient-to-r from-rose-500 to-pink-600 text-white py-2 rounded-lg hover:from-rose-600 hover:to-pink-700 transition font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {bulkAutofillLoading ? <><span style={{display:'inline-block',width:14,height:14,border:'2px solid #fff',borderTopColor:'transparent',borderRadius:'50%',animation:'hw-spin 0.7s linear infinite'}}/> Generating cards...</> : '✨ AI Generate Deck'}
+                </button>
+              </div>
             </div>
 
             {/* Cards List */}
@@ -8365,8 +8451,16 @@ Rules:
                 onClick={clearCanvas}
                 className="bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition text-sm sm:text-base sm:px-6"
               >
-                Clear
+                Clear All
               </button>
+              {canvasHanziChar && (
+                <button
+                  onClick={clearTracesOnly}
+                  className="bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 transition text-sm sm:text-base sm:px-6"
+                >
+                  Clear Traces
+                </button>
+              )}
               <button
                 onClick={handleKnowCard}
                 className="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6"
@@ -8614,7 +8708,7 @@ Rules:
                       {/* Handwriting canvas */}
                       {aiTestInputMode === 'handwrite' && aiTestMode !== 'essay' && (
                         <div className="mb-2">
-                          <div className="border-2 border-gray-300 rounded-xl overflow-hidden bg-white mb-2" style={{ touchAction: 'none' }}>
+                          <div className="border-2 border-gray-300 rounded-xl overflow-hidden mb-2" style={{ touchAction: 'none', background: 'white repeating-linear-gradient(to bottom, transparent, transparent 59px, #e5e7eb 59px, #e5e7eb 60px)' }}>
                             <canvas
                               ref={aiTestCanvasRef}
                               onPointerDown={aiTestCanvasPointerDown}
