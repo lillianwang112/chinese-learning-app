@@ -3003,14 +3003,29 @@ Grade this response.` },
     initAiTestCanvas();
   };
 
+  // Helper: export canvas as a white-background PNG data URL.
+  // The AI test canvas uses a transparent background (grid lines come from CSS),
+  // so a raw toDataURL() sends black-on-black (or invisible) strokes to the vision
+  // model, causing hallucinations. This composites the strokes onto white first.
+  const getCanvasDataUrlWithWhiteBg = (canvas) => {
+    const offscreen = document.createElement('canvas');
+    offscreen.width = canvas.width;
+    offscreen.height = canvas.height;
+    const offCtx = offscreen.getContext('2d');
+    offCtx.fillStyle = '#ffffff';
+    offCtx.fillRect(0, 0, offscreen.width, offscreen.height);
+    offCtx.drawImage(canvas, 0, 0);
+    return offscreen.toDataURL('image/png');
+  };
+
   const recognizeHandwriting = async () => {
     const canvas = aiTestCanvasRef.current;
     if (!canvas || aiTestLoading) return;
     if (!window.puter?.ai?.chat) { alert('AI still loading.'); return; }
     setAiTestLoading(true);
     try {
-      // Convert canvas to base64 image
-      const dataUrl = canvas.toDataURL('image/png');
+      // Convert canvas to base64 image with white background so the model can see the strokes
+      const dataUrl = getCanvasDataUrlWithWhiteBg(canvas);
       // Use a vision model to read the handwriting
       const response = await window.puter.ai.chat([
         { role: 'system', content: 'You are a Chinese handwriting recognition system. Read the handwritten Chinese text in the image and output ONLY the recognized Chinese text. No explanation, no translation, just the Chinese characters exactly as written. If you cannot read something, use ？ as placeholder.' },
@@ -3031,7 +3046,7 @@ Grade this response.` },
       console.error('Handwriting recognition error:', err);
       // Fallback: try with a different model
       try {
-        const dataUrl = canvas.toDataURL('image/png');
+        const dataUrl = getCanvasDataUrlWithWhiteBg(canvas);
         const response = await window.puter.ai.chat(
           'Read the handwritten Chinese text in this image. Output ONLY the Chinese characters, nothing else.',
           dataUrl,
