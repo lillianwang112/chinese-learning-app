@@ -560,6 +560,7 @@ const ChineseLearningApp = () => {
   const [aiTestInputMode, setAiTestInputMode] = useState('type'); // 'type' or 'handwrite'
   const [aiTestEraserOn, setAiTestEraserOn] = useState(false);
   const aiTestCanvasRef = useRef(null);
+  const aiTestBgCanvasRef = useRef(null);
   const aiTestDrawCtrl = useRef({ isDrawing: false, isErasing: false, ctx: null, lastX: 0, lastY: 0 });
   // strokeCount state removed — it was never rendered but triggered expensive
   // full-component re-renders after every completed stroke, causing lag.
@@ -2943,14 +2944,32 @@ Grade this response.` },
   // AI Test handwriting canvas functions
   const initAiTestCanvas = () => {
     const canvas = aiTestCanvasRef.current;
-    if (!canvas) return;
+    const bgCanvas = aiTestBgCanvasRef.current;
+    if (!canvas || !bgCanvas) return;
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
+    // Size both canvases identically
+    [canvas, bgCanvas].forEach(c => {
+      c.width = rect.width * dpr;
+      c.height = rect.height * dpr;
+    });
+    // Background canvas: white fill + horizontal lines only (90px spacing)
+    const bgCtx = bgCanvas.getContext('2d');
+    bgCtx.scale(dpr, dpr);
+    bgCtx.fillStyle = '#ffffff';
+    bgCtx.fillRect(0, 0, rect.width, rect.height);
+    bgCtx.strokeStyle = '#e5e7eb';
+    bgCtx.lineWidth = 1;
+    bgCtx.beginPath();
+    const gridSize = 90;
+    for (let y = gridSize; y < rect.height; y += gridSize) {
+      bgCtx.moveTo(0, y); bgCtx.lineTo(rect.width, y);
+    }
+    bgCtx.stroke();
+    // Foreground canvas: fully transparent, destination-out eraser works here
     const ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
-    // Canvas is transparent — grid lines are drawn via CSS background on the wrapper div
+    ctx.clearRect(0, 0, rect.width, rect.height);
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
@@ -2968,6 +2987,8 @@ Grade this response.` },
   const aiTestCanvasPointerDown = (e) => {
     const ctrl = aiTestDrawCtrl.current;
     if (!ctrl.ctx) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
     const rect = aiTestCanvasRef.current.getBoundingClientRect();
     ctrl.isDrawing = true;
     ctrl.lastX = e.clientX - rect.left;
@@ -2994,7 +3015,6 @@ Grade this response.` },
   const aiTestCanvasPointerUp = () => {
     const ctrl = aiTestDrawCtrl.current;
     ctrl.isDrawing = false;
-    if (ctrl.ctx) ctrl.ctx.globalCompositeOperation = 'source-over';
   };
 
   const clearAiTestCanvas = () => {
@@ -3012,8 +3032,10 @@ Grade this response.` },
     offscreen.width = canvas.width;
     offscreen.height = canvas.height;
     const offCtx = offscreen.getContext('2d');
-    offCtx.fillStyle = '#ffffff';
-    offCtx.fillRect(0, 0, offscreen.width, offscreen.height);
+    // Draw bg (white) then fg strokes — gives OCR clean black-on-white image
+    const bgCanvas = aiTestBgCanvasRef.current;
+    if (bgCanvas) offCtx.drawImage(bgCanvas, 0, 0);
+    else { offCtx.fillStyle = '#ffffff'; offCtx.fillRect(0, 0, offscreen.width, offscreen.height); }
     offCtx.drawImage(canvas, 0, 0);
     return offscreen.toDataURL('image/png');
   };
@@ -3108,8 +3130,9 @@ Grade this response.` },
     ctrl.isDrawing = true;
     ctrl.lastX = e.clientX - rect.left;
     ctrl.lastY = e.clientY - rect.top;
-    ctrl.ctx.globalCompositeOperation = ctrl.isErasing ? 'destination-out' : 'source-over';
-    ctrl.ctx.strokeStyle = ctrl.isErasing ? 'rgba(0,0,0,1)' : '#1a1a1a';
+    // Always use source-over; eraser paints white so grid lines never show through
+    ctrl.ctx.globalCompositeOperation = 'source-over';
+    ctrl.ctx.strokeStyle = ctrl.isErasing ? '#ffffff' : '#1a1a1a';
     ctrl.ctx.lineWidth = ctrl.isErasing ? 24 : 4;
     ctrl.ctx.beginPath();
     ctrl.ctx.moveTo(ctrl.lastX, ctrl.lastY);
@@ -3129,7 +3152,6 @@ Grade this response.` },
 
   const hwrPointerUp = () => {
     hwrDrawCtrl.current.isDrawing = false;
-    if (hwrDrawCtrl.current.ctx) hwrDrawCtrl.current.ctx.globalCompositeOperation = 'source-over';
   };
 
   const clearHwrCanvas = () => {
@@ -9631,14 +9653,22 @@ Rules:
                       {/* Handwriting canvas */}
                       {aiTestInputMode === 'handwrite' && aiTestMode !== 'essay' && (
                         <div className="mb-2">
-                          <div className="border-2 border-gray-300 rounded-xl overflow-hidden mb-2" style={{ touchAction: 'none', background: 'white repeating-linear-gradient(to bottom, transparent, transparent 59px, #e5e7eb 59px, #e5e7eb 60px)' }}>
+                          <div className="border-2 border-gray-300 rounded-xl overflow-hidden mb-2" style={{ touchAction: 'none', position: 'relative', height: '480px' }}>
+                            {/* Background canvas: white + horizontal grid lines, never touched by drawing */}
+                            <canvas
+                              ref={aiTestBgCanvasRef}
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', pointerEvents: 'none' }}
+                            />
+                            {/* Foreground canvas: transparent, receives all strokes and erasing */}
                             <canvas
                               ref={aiTestCanvasRef}
                               onPointerDown={aiTestCanvasPointerDown}
                               onPointerMove={aiTestCanvasPointerMove}
                               onPointerUp={aiTestCanvasPointerUp}
                               onPointerLeave={aiTestCanvasPointerUp}
-                              style={{ width: '100%', height: '360px', cursor: aiTestEraserOn ? 'cell' : 'crosshair', touchAction: 'none' }}
+                              onSelectStart={e => e.preventDefault()}
+                              onDragStart={e => e.preventDefault()}
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: aiTestEraserOn ? 'cell' : 'crosshair', touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none', display: 'block' }}
                             />
                           </div>
                           <div className="flex gap-2 mb-2">
