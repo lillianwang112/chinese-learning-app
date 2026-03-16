@@ -610,10 +610,10 @@ The AI status indicator in the chat shows green when ready and yellow when still
 | **Price** | $15-20/month (~$100/year) | Free with ads / $8/month Plus | Free + paid add-ons | **100% FREE** |
 | **Ads** | No ads (paid) | ❌ Ads on free tier | No ads | ✅ **No ads ever** |
 | **Handwriting Practice** | ✅ Advanced stroke order | ❌ None | ⚠️ Recognition only | ✅ **Canvas + tracing overlay + stroke order animation** |
-| **AI Tutor / Chat** | ❌ No | ❌ No | ❌ No | ✅ **Built-in, free, multiple models** |
-| **AI Deck Generation** | ❌ No | ❌ No | ❌ No | ✅ **Topic, autofill, bulk, or from pasted text** |
+| **AI Tutor / Chat** | ❌ No | ✅ Yes | ❌ No | ✅ **Built-in, free, multiple models** |
+| **AI Deck Generation** | ❌ No | ✅ Yes | ❌ No | ✅ **Topic, autofill, bulk, or from pasted text** |
 | **AI-Graded Practice Tests** | ❌ No | ❌ No | ❌ No | ✅ **小考, quiz, and essay modes** |
-| **AI Study Guides** | ❌ No | ❌ No | ❌ No | ✅ **Per-deck, with 课文 analysis** |
+| **AI Study Guides** | ❌ No | ✅ Yes (paywalled) | ❌ No | ✅ **Per-deck, with 课文 analysis** |
 | **Spaced Repetition** | ✅ Yes | ✅ Yes (paywalled) | Limited | ✅ **SM-2 with adjustable speed** |
 | **Multiple Study Modes** | ⚠️ Writing-focused | ✅ Yes (some paywalled) | ⚠️ Dictionary-focused | ✅ **6 modes + AI practice** |
 | **Configurable Tests** | ⚠️ Limited | ✅ Yes (paywalled) | ❌ No | ✅ **Question types, count, direction** |
