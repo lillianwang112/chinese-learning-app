@@ -4622,9 +4622,9 @@ Rules:
   };
 
   // Navigate cards
+
   const nextCard = () => {
     if (currentCardIndex < shuffledCards.length - 1) {
-      // Save snapshot for undo
       const currentCard = shuffledCards[currentCardIndex];
       const snapshot = { direction: 'next', cardIndex: currentCardIndex, cards: [...shuffledCards], card: currentCard };
       setSwipeHistory(prev => [...prev, snapshot]);
@@ -7860,6 +7860,7 @@ Rules:
               style={{ height: '500px', width: '100%' }}
             >
               <div
+                key={currentCardIndex}
                 onClick={() => setIsFlipped(!isFlipped)}
                 className={`flip-card-inner ${isFlipped ? 'flipped' : ''}`}
                 style={{ cursor: 'pointer', height: '100%' }}
