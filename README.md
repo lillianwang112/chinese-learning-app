@@ -137,7 +137,7 @@ Visit: **[https://lillianwang112.github.io/chinese-learning-app/](https://lillia
 
 ## 📚 Available Vocabulary Decks
 
-**25 vocabulary decks** covering all CHI 108 topics — **over 900 vocabulary words** total! 🎉
+**25 (23 CHI 108 + 2 CHI 103) vocabulary decks** covering all CHI 108 topics — **over 900 vocabulary words** total! 🎉
 
 The easiest way to get these is the **Browse Decks** button in the app. All files are also in the [108vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/108vocab) and [103vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/103vocab) on GitHub.
 
