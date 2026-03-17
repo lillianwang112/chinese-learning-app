@@ -2989,32 +2989,65 @@ Grade this response.` },
     if (!ctrl.ctx) return;
     e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
-    const rect = aiTestCanvasRef.current.getBoundingClientRect();
+    const canvas = aiTestCanvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    // Map client coords into the canvas buffer's CSS-pixel space
+    const x = (e.clientX - rect.left) * (canvas.width / dpr / rect.width);
+    const y = (e.clientY - rect.top)  * (canvas.height / dpr / rect.height);
     ctrl.isDrawing = true;
-    ctrl.lastX = e.clientX - rect.left;
-    ctrl.lastY = e.clientY - rect.top;
+    ctrl.hasMoved = false; // track whether any move happened (for dot-on-tap)
+    ctrl.lastX = x;
+    ctrl.lastY = y;
+    ctrl.rect = rect;
     ctrl.ctx.globalCompositeOperation = ctrl.isErasing ? 'destination-out' : 'source-over';
-    ctrl.ctx.strokeStyle = ctrl.isErasing ? 'rgba(0,0,0,1)' : '#000';
-    ctrl.ctx.lineWidth = ctrl.isErasing ? 20 : 3;
+    ctrl.ctx.strokeStyle = ctrl.isErasing ? 'rgba(0,0,0,1)' : '#1a1a1a';
+    ctrl.ctx.fillStyle = ctrl.isErasing ? 'rgba(0,0,0,1)' : '#1a1a1a';
+    ctrl.ctx.lineWidth = ctrl.isErasing ? 24 : 3;
     ctrl.ctx.beginPath();
-    ctrl.ctx.moveTo(ctrl.lastX, ctrl.lastY);
+    ctrl.ctx.moveTo(x, y);
   };
 
   const aiTestCanvasPointerMove = (e) => {
     const ctrl = aiTestDrawCtrl.current;
     if (!ctrl.isDrawing || !ctrl.ctx) return;
-    const rect = aiTestCanvasRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    ctrl.ctx.lineTo(x, y);
-    ctrl.ctx.stroke();
-    ctrl.lastX = x;
-    ctrl.lastY = y;
+    const canvas = aiTestCanvasRef.current;
+    const rect = ctrl.rect;
+    const dpr = window.devicePixelRatio || 1;
+
+    // Use coalesced events to capture all intermediate OS-level points between frames
+    const coalesced = e.getCoalescedEvents ? e.getCoalescedEvents() : null;
+    const events = (coalesced && coalesced.length > 0) ? coalesced : [e];
+
+    for (const ce of events) {
+      const x = (ce.clientX - rect.left) * (canvas.width / dpr / rect.width);
+      const y = (ce.clientY - rect.top)  * (canvas.height / dpr / rect.height);
+      const dx = x - ctrl.lastX, dy = y - ctrl.lastY;
+      const distSq = dx * dx + dy * dy;
+      // Accept points >= 1px apart; drop corrupt coalesced jumps > 300px
+      if (distSq < 1 || distSq > 90000) continue;
+      ctrl.ctx.lineTo(x, y);
+      ctrl.ctx.stroke();
+      ctrl.ctx.beginPath();
+      ctrl.ctx.moveTo(x, y);
+      ctrl.lastX = x;
+      ctrl.lastY = y;
+      ctrl.hasMoved = true;
+    }
   };
 
-  const aiTestCanvasPointerUp = () => {
+  const aiTestCanvasPointerUp = (e) => {
     const ctrl = aiTestDrawCtrl.current;
+    if (!ctrl.isDrawing) return;
+    // If no move happened, draw a dot so taps (like 、· dots in Chinese characters) are visible
+    if (!ctrl.hasMoved && ctrl.ctx) {
+      const r = ctrl.ctx.lineWidth / 2;
+      ctrl.ctx.beginPath();
+      ctrl.ctx.arc(ctrl.lastX, ctrl.lastY, r, 0, Math.PI * 2);
+      ctrl.ctx.fill();
+    }
     ctrl.isDrawing = false;
+    ctrl.hasMoved = false;
   };
 
   const clearAiTestCanvas = () => {
@@ -9673,22 +9706,25 @@ Rules:
                               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: aiTestEraserOn ? 'cell' : 'crosshair', touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none', display: 'block' }}
                             />
                           </div>
-                          <div className="flex gap-2 mb-2">
+                          <div className="flex gap-2 mb-2" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
                             <button
                               onClick={() => { aiTestDrawCtrl.current.isErasing = false; setAiTestEraserOn(false); }}
                               className={`px-4 py-2 rounded-lg text-sm font-medium transition ${!aiTestEraserOn ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600'}`}
+                              style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                             >
                               ✏️ Pen
                             </button>
                             <button
                               onClick={() => { aiTestDrawCtrl.current.isErasing = true; setAiTestEraserOn(true); }}
                               className={`px-4 py-2 rounded-lg text-sm font-medium transition ${aiTestEraserOn ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-600'}`}
+                              style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                             >
                               🧹 Eraser
                             </button>
                             <button
                               onClick={clearAiTestCanvas}
                               className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
+                              style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                             >
                               🗑️ Clear
                             </button>
@@ -9696,6 +9732,7 @@ Rules:
                               onClick={recognizeHandwriting}
                               disabled={aiTestLoading}
                               className="flex-1 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:from-violet-700 hover:to-purple-700 transition disabled:opacity-40 flex items-center justify-center gap-1"
+                              style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                             >
                               {aiTestLoading ? (
                                 <React.Fragment>
