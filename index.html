@@ -9623,16 +9623,18 @@ Rules:
                     <div>
                       {/* Input mode toggle (not for essay) */}
                       {aiTestMode !== 'essay' && (
-                        <div className="flex gap-2 mb-3">
+                        <div className="flex gap-2 mb-3" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
                           <button
                             onClick={() => setAiTestInputMode('type')}
                             className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${aiTestInputMode === 'type' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                            style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                           >
                             ⌨️ Type
                           </button>
                           <button
                             onClick={() => setAiTestInputMode('handwrite')}
                             className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${aiTestInputMode === 'handwrite' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                            style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                           >
                             ✍️ Handwrite
                           </button>
