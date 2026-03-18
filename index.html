@@ -259,9 +259,18 @@
                 if (!firebaseDb) return;
                 const userDecksRef = firebaseDb.collection('users').doc(userId).collection('decks');
 
-                // Get existing cloud deck IDs to detect deletions
+                // Get existing cloud deck IDs to detect deletions, and to preserve
+                // kewen that exists in cloud but is absent locally (e.g. on a device
+                // that never had kewen loaded into localStorage).
                 const existingSnapshot = await userDecksRef.get();
                 const localDeckIds = new Set(decks.map(d => d.id));
+
+                // Build a map of cloud kewen by deck id
+                const cloudKewenMap = {};
+                for (const doc of existingSnapshot.docs) {
+                    const data = doc.data();
+                    if (data.kewen) cloudKewenMap[data.id] = data.kewen;
+                }
 
                 const batch = firebaseDb.batch();
 
@@ -272,11 +281,17 @@
                     }
                 }
 
-                // Save each deck as its own document
+                // Save each deck as its own document.
+                // If the local deck has no kewen but the cloud copy does, preserve
+                // the cloud kewen — this prevents a kewen-less device from clobbering
+                // kewen that was saved from another device.
                 for (const deck of decks) {
                     const deckRef = userDecksRef.doc(deck.id);
+                    const deckToSave = (!deck.kewen && cloudKewenMap[deck.id])
+                        ? { ...deck, kewen: cloudKewenMap[deck.id] }
+                        : deck;
                     batch.set(deckRef, {
-                        ...deck,
+                        ...deckToSave,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 }
@@ -1151,13 +1166,16 @@ const ChineseLearningApp = () => {
         }
       }
 
-      // Mark initial cloud load as complete - now auto-sync can proceed
-      // Use a small delay so React can flush all the setState calls above
-      // before the auto-sync effect sees cloudLoadedRef = true
+      // Mark initial cloud load as complete - now auto-sync can proceed.
+      // Delay must exceed the auto-sync debounce (3000ms) so the state changes
+      // from setDecks/setFolders/etc. above cannot trigger a re-upload of the
+      // just-downloaded cloud data before React has committed the new state.
+      // Previously 500ms was too short: the auto-sync effect could fire within
+      // the debounce window and push stale local (kewen-less) decks back to cloud.
       setTimeout(() => {
         isLoadingFromCloudRef.current = false;
         cloudLoadedRef.current = true;
-      }, 500);
+      }, 4000);
 
       safeSetSyncStatus('synced');
       safeSetLastSyncTime(new Date());
