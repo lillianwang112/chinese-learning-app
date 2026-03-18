@@ -51,6 +51,13 @@
         textarea {
             font-size: 16px;
         }
+        /* Prevent iOS tap highlight (blue flash) on canvas elements used for drawing */
+        canvas {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
@@ -9688,7 +9695,7 @@ Rules:
                       {/* Handwriting canvas */}
                       {aiTestInputMode === 'handwrite' && aiTestMode !== 'essay' && (
                         <div className="mb-2">
-                          <div className="border-2 border-gray-300 rounded-xl overflow-hidden mb-2" style={{ touchAction: 'none', position: 'relative', height: '480px' }}>
+                          <div className="border-2 border-gray-300 rounded-xl overflow-hidden mb-2" style={{ touchAction: 'none', position: 'relative', height: '480px', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none', WebkitTapHighlightColor: 'transparent' }}>
                             {/* Background canvas: white + horizontal grid lines, never touched by drawing */}
                             <canvas
                               ref={aiTestBgCanvasRef}
@@ -9703,7 +9710,7 @@ Rules:
                               onPointerLeave={aiTestCanvasPointerUp}
                               onSelectStart={e => e.preventDefault()}
                               onDragStart={e => e.preventDefault()}
-                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: aiTestEraserOn ? 'cell' : 'crosshair', touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none', display: 'block' }}
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: aiTestEraserOn ? 'cell' : 'crosshair', touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none', WebkitTapHighlightColor: 'transparent', display: 'block' }}
                             />
                           </div>
                           <div className="flex gap-2 mb-2" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
