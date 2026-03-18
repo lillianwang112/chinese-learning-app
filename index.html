@@ -911,8 +911,11 @@ const ChineseLearningApp = () => {
     }
     localStorage.setItem('chineseDecks', JSON.stringify(latestDecksRef.current));
   };
+  // IMPORTANT: Keep latestDecksRef in sync via useMemo-style assignment so it is always
+  // current *before* any useEffect depending on [decks] reads it. React runs ref assignments
+  // during render, guaranteeing they precede all effects fired in the same commit.
+  latestDecksRef.current = decks;
   useEffect(() => {
-    latestDecksRef.current = decks;
     if (currentViewRef.current === 'writing') {
       // Defer the heavy synchronous write until after drawing is done
       if (decksLocalSaveTimer.current) clearTimeout(decksLocalSaveTimer.current);
@@ -2761,7 +2764,14 @@ Keep it concise and practical.`,
   // AI auto-select vocabulary from pasted text
   // Add/edit 课文 for a deck
   const addKewenToDeck = (deckId, kewenText) => {
-    setDecks(prev => prev.map(d => d.id === deckId ? { ...d, kewen: kewenText } : d));
+    setDecks(prev => {
+      const updated = prev.map(d => d.id === deckId ? { ...d, kewen: kewenText || undefined } : d);
+      // Immediately flush to cloud so kewen is never lost on reload.
+      if (currentUser && FIREBASE_ENABLED && cloudLoadedRef.current) {
+        setTimeout(() => saveToCloud(currentUser.uid, updated), 0);
+      }
+      return updated;
+    });
   };
 
   // Generate AI study guide for a deck
@@ -3423,7 +3433,7 @@ Rules:
       id: 'deck-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
       name: textImportDeckName.trim(),
       cards,
-      kewen: textImportInput.trim(),
+      kewen: textImportInput.trim() || undefined,
     };
     setDecks(prev => [...prev, deck]);
     setShowTextImport(false);
