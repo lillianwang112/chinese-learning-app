@@ -644,6 +644,39 @@ If you're already paying for Skritter or Quizlet Plus and love them, keep using 
 - **Hosting**: GitHub Pages
 - **Algorithm**: SM-2 Spaced Repetition
 
+## 🏗️ Architecture
+
+The app is a single-page React application rendered entirely client-side, with Firebase handling auth and persistence. There is no traditional backend — all business logic runs in the browser.
+
+### Data flow
+```
+User action (swipe, draw, type)
+    │
+    ▼
+React state (decks, cards, session)
+    │
+    ├─► LocalStorage  ← immediate, offline-safe persistence
+    │
+    └─► Firebase Firestore  ← synced on push/pull or account login
+```
+
+### Core logical modules
+
+| Module | Responsibility |
+|--------|----------------|
+| **SM-2 scheduler** | Computes next review interval and ease factor after each card rating. Unit tested in `tests/sm2.test.js`. |
+| **Mastery tracker** | Maintains a 3-tier score (not started / learning / mastered) across all study modes from a shared card state. |
+| **Deck manager** | Handles import, export, combine, folder organization, and cloud sync for vocabulary decks. |
+| **Writing engine** | Canvas drawing with palm rejection, stroke-order animation via Hanzi Writer, and tracing overlay. |
+| **AI layer** | Routes prompts to Puter.js (Gemini 2.5 Flash primary, with GPT-5 Nano, GLM-5, Llama 4, DeepSeek R1 as alternatives) for the tutor, deck generation, study guides, and AI-graded practice tests. |
+| **PWA layer** | Service worker caches static assets for offline use; `manifest.json` enables installability on iOS, Android, and desktop. |
+
+### Key design decisions
+
+- **No build step** — The app loads React and Babel via CDN, keeping deployment as simple as pushing files to GitHub Pages and making the codebase accessible without a local dev environment.
+- **User-pays AI model** — AI features run through Puter.js, meaning each user's requests count against their own free-tier quota rather than a centralized API key. This keeps the app free to host at any scale.
+- **Offline-first storage** — All study progress writes to LocalStorage synchronously, so the app is fully functional without a network connection. Firebase sync is additive, not required.
+
 ## 🙏 About This Project
 
 This app was created by a CHI 108 student who wanted a better vocabulary learning experience — one built around the actual class, not a generic flashcard app, and free for everyone.
