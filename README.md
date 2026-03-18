@@ -600,7 +600,7 @@ Check your connection, then try "Push to Cloud" or "Pull from Cloud" in Account 
 <details>
 <summary><strong>The AI features aren't responding</strong></summary>
 <br>
-The AI status indicator in the chat shows green when ready and yellow when still loading. Wait a moment after the page loads before using AI features. If it stays yellow, try refreshing the page.
+If you are on eduroam, you may need to try using a VPN or manually configuring the DNS. You also need to authenticate first through puter.js (you may need to create an account). The AI status indicator in the chat shows green when ready and yellow when still loading. Wait a moment after the page loads before using AI features. If it stays yellow, try refreshing the page.
 </details>
 
 ## 🆚 How Does This Compare to Other Apps?
