@@ -2985,10 +2985,39 @@ Grade this response.` },
     aiTestDrawCtrl.current.ctx = ctx;
   };
 
+  // Ref holds the cleanup fn for imperative touch listeners so we never leak them
+  const aiTestTouchCleanupRef = useRef(null);
+
   useEffect(() => {
-    if (aiTestInputMode === 'handwrite' && aiTestSetupStep === 'inProgress' && aiTestQuestion && !aiTestFeedback) {
-      setTimeout(initAiTestCanvas, 100);
+    if (!(aiTestInputMode === 'handwrite' && aiTestSetupStep === 'inProgress' && aiTestQuestion && !aiTestFeedback)) {
+      return;
     }
+    const t = setTimeout(() => {
+      initAiTestCanvas();
+      const canvas = aiTestCanvasRef.current;
+      if (!canvas) return;
+      // iOS Safari fires touchstart even with touch-action:none and won't suppress the
+      // selection highlight unless we explicitly preventDefault (passive:false required).
+      const block = (e) => e.preventDefault();
+      const opts  = { passive: false };
+      canvas.addEventListener('touchstart',  block, opts);
+      canvas.addEventListener('touchmove',   block, opts);
+      canvas.addEventListener('touchend',    block, opts);
+      canvas.addEventListener('selectstart', block);
+      canvas.addEventListener('contextmenu', block);
+      aiTestTouchCleanupRef.current = () => {
+        canvas.removeEventListener('touchstart',  block, opts);
+        canvas.removeEventListener('touchmove',   block, opts);
+        canvas.removeEventListener('touchend',    block, opts);
+        canvas.removeEventListener('selectstart', block);
+        canvas.removeEventListener('contextmenu', block);
+      };
+    }, 100);
+    return () => {
+      clearTimeout(t);
+      aiTestTouchCleanupRef.current?.();
+      aiTestTouchCleanupRef.current = null;
+    };
   }, [aiTestInputMode, aiTestSetupStep, aiTestQuestion, aiTestFeedback, aiTestQuestionNum]);
 
   const aiTestCanvasPointerDown = (e) => {
@@ -2999,18 +3028,21 @@ Grade this response.` },
     const canvas = aiTestCanvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
-    // Map client coords into the canvas buffer's CSS-pixel space
-    const x = (e.clientX - rect.left) * (canvas.width / dpr / rect.width);
-    const y = (e.clientY - rect.top)  * (canvas.height / dpr / rect.height);
+    const scaleX = canvas.width  / dpr / rect.width;
+    const scaleY = canvas.height / dpr / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top)  * scaleY;
     ctrl.isDrawing = true;
-    ctrl.hasMoved = false; // track whether any move happened (for dot-on-tap)
+    ctrl.hasMoved  = false;
     ctrl.lastX = x;
     ctrl.lastY = y;
+    ctrl.scaleX = scaleX;
+    ctrl.scaleY = scaleY;
     ctrl.rect = rect;
     ctrl.ctx.globalCompositeOperation = ctrl.isErasing ? 'destination-out' : 'source-over';
     ctrl.ctx.strokeStyle = ctrl.isErasing ? 'rgba(0,0,0,1)' : '#1a1a1a';
-    ctrl.ctx.fillStyle = ctrl.isErasing ? 'rgba(0,0,0,1)' : '#1a1a1a';
-    ctrl.ctx.lineWidth = ctrl.isErasing ? 24 : 3;
+    ctrl.ctx.fillStyle   = ctrl.isErasing ? 'rgba(0,0,0,1)' : '#1a1a1a';
+    ctrl.ctx.lineWidth   = ctrl.isErasing ? 24 : 3;
     ctrl.ctx.beginPath();
     ctrl.ctx.moveTo(x, y);
   };
@@ -3018,27 +3050,31 @@ Grade this response.` },
   const aiTestCanvasPointerMove = (e) => {
     const ctrl = aiTestDrawCtrl.current;
     if (!ctrl.isDrawing || !ctrl.ctx) return;
-    const canvas = aiTestCanvasRef.current;
-    const rect = ctrl.rect;
-    const dpr = window.devicePixelRatio || 1;
 
-    // Use coalesced events to capture all intermediate OS-level points between frames
+    // Collect all OS-level intermediate points via coalesced events for smooth, gap-free strokes.
     const coalesced = e.getCoalescedEvents ? e.getCoalescedEvents() : null;
     const events = (coalesced && coalesced.length > 0) ? coalesced : [e];
 
+    // Accumulate the entire batch into one continuous path, then stroke once.
+    // Stroking once per batch (not per point) eliminates visual gaps between segments
+    // that appear when fast strokes produce many coalesced points per frame.
+    let moved = false;
     for (const ce of events) {
-      const x = (ce.clientX - rect.left) * (canvas.width / dpr / rect.width);
-      const y = (ce.clientY - rect.top)  * (canvas.height / dpr / rect.height);
+      const x = (ce.clientX - ctrl.rect.left) * ctrl.scaleX;
+      const y = (ce.clientY - ctrl.rect.top)  * ctrl.scaleY;
       const dx = x - ctrl.lastX, dy = y - ctrl.lastY;
-      const distSq = dx * dx + dy * dy;
-      // Accept points >= 1px apart; drop corrupt coalesced jumps > 300px
-      if (distSq < 1 || distSq > 90000) continue;
+      // Drop only impossibly large jumps (corrupt iOS coalesced artifact, > ~300px)
+      if (dx * dx + dy * dy > 90000) continue;
       ctrl.ctx.lineTo(x, y);
-      ctrl.ctx.stroke();
-      ctrl.ctx.beginPath();
-      ctrl.ctx.moveTo(x, y);
       ctrl.lastX = x;
       ctrl.lastY = y;
+      moved = true;
+    }
+    if (moved) {
+      ctrl.ctx.stroke();
+      // Continue the path from the current tip — no beginPath so the line stays connected
+      ctrl.ctx.beginPath();
+      ctrl.ctx.moveTo(ctrl.lastX, ctrl.lastY);
       ctrl.hasMoved = true;
     }
   };
@@ -3046,7 +3082,7 @@ Grade this response.` },
   const aiTestCanvasPointerUp = (e) => {
     const ctrl = aiTestDrawCtrl.current;
     if (!ctrl.isDrawing) return;
-    // If no move happened, draw a dot so taps (like 、· dots in Chinese characters) are visible
+    // Draw a dot for pure taps (no move) — handles strokes like 丶 in Chinese characters
     if (!ctrl.hasMoved && ctrl.ctx) {
       const r = ctrl.ctx.lineWidth / 2;
       ctrl.ctx.beginPath();
@@ -3054,7 +3090,7 @@ Grade this response.` },
       ctrl.ctx.fill();
     }
     ctrl.isDrawing = false;
-    ctrl.hasMoved = false;
+    ctrl.hasMoved  = false;
   };
 
   const clearAiTestCanvas = () => {
@@ -9763,8 +9799,8 @@ Rules:
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-400">{aiTestAnswer.length} characters</span>
+                      <div className="flex items-center justify-between" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
+                        <span className="text-xs text-gray-400" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>{aiTestAnswer.length} characters</span>
                         <button
                           onClick={gradeAiTestAnswer}
                           disabled={!aiTestAnswer.trim() || aiTestLoading}
