@@ -46,10 +46,11 @@ I built this app to help with learning vocabulary for CHI 108. It's a full-featu
 ## ⚡️ Quick Start (TL;DR)
 1. Visit **[https://lillianwang112.github.io/chinese-learning-app/](https://lillianwang112.github.io/chinese-learning-app/)**
 2. Click **"Browse Decks"** and tap "+ Add" on the decks you want — instant, no download needed
-3. Start with **Study Mode** for flashcard review
-4. Use **Learn Mode** for active quizzing (multiple choice + fill-in-the-blank)
-5. Use **Writing** to practice drawing characters — with animated stroke order and a tracing overlay
-6. Use the **AI Tutor** to chat, simulate practice tests, generate custom decks, or build a study guide
+3. Princeton CHI 108 students: tap **"Download Decks + 课文 (Princeton Only)"** on the home screen banner to grab all 23 CHI 108 decks with 课文 reading texts pre-attached, then import via **"Import / Export"**
+4. Start with **Study Mode** for flashcard review
+5. Use **Learn Mode** for active quizzing (multiple choice + fill-in-the-blank)
+6. Use **Writing** to practice drawing characters — with animated stroke order and a tracing overlay
+7. Use the **AI Tutor** to chat, simulate practice tests, generate custom decks, or build a study guide
 
 ### 📱 Install as an App (PWA)
 This app is a Progressive Web App — install it for a native app feel and offline access.
@@ -139,7 +140,7 @@ Visit: **[https://lillianwang112.github.io/chinese-learning-app/](https://lillia
 
 **25 (23 CHI 108 + 2 CHI 103) vocabulary decks** covering all CHI 108 topics — **over 900 vocabulary words** total! 🎉
 
-The easiest way to get these is the **Browse Decks** button in the app. All files are also in the [108vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/108vocab) and [103vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/103vocab) on GitHub.
+The easiest way to get these is the **Browse Decks** button in the app. All files are also in the [108vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/108vocab) and [103vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/103vocab) on GitHub. Princeton students can also grab all 23 CHI 108 decks in one go — with 课文 reading texts pre-attached — via the **"Download Decks + 课文 (Princeton Only)"** button on the home screen (requires a Princeton Google account).
 
 **Note:** Decks contain all vocabulary from the 课本, not just study guide items. You can edit decks to remove cards you don't need.
 
@@ -427,7 +428,7 @@ Select one or multiple decks to pull vocabulary from (and their attached 课文 
 - **Add cards manually** — type Chinese, pinyin, and English; or use AI Autofill / Bulk Add
 - **Bulk select & delete** — select multiple cards at once in edit mode and delete in one go
 - **Browse Decks** — one-tap import of any CHI 108 / CHI 103 deck
-- **Export / Import** — back up and restore decks as JSON files
+- **Export / Import** — back up and restore decks as JSON files; use **"Import / Export"** on the home screen to access both options. **Multi-deck export** lets you select which decks to include and choose whether to bundle 课文 texts
 - **Multi-file import** — import several JSON files at once; keep as separate decks or combine; assign to a folder
 - **Combine Decks** — merge existing decks into one (duplicates removed)
 - **Attach 课文** — paste a lesson reading onto any deck for use by AI Study Guides and AI Test Practice
