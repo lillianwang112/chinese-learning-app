@@ -828,6 +828,12 @@ const ChineseLearningApp = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importCombineTitle, setImportCombineTitle] = useState('');
   const [importTargetFolder, setImportTargetFolder] = useState(null); // folder id to import directly into
+
+  // Import/Export entry modal + bulk export state
+  const [showImportExportModal, setShowImportExportModal] = useState(false);
+  const [showBulkExportModal, setShowBulkExportModal] = useState(false);
+  const [bulkExportSelected, setBulkExportSelected] = useState({}); // { [deckId]: true }
+  const [bulkExportIncludeKewen, setBulkExportIncludeKewen] = useState(true);
   
   // Browse built-in decks
   const [showBrowseDecks, setShowBrowseDecks] = useState(false);
@@ -3943,6 +3949,26 @@ Rules:
     URL.revokeObjectURL(url);
   };
 
+  // Bulk export selected decks as a single JSON array file
+  const handleBulkExport = () => {
+    const selectedDecks = decks.filter(d => bulkExportSelected[d.id]);
+    if (selectedDecks.length === 0) return;
+    const cleaned = selectedDecks.map(deck => {
+      const d = bulkExportIncludeKewen ? deck : { ...deck, kewen: undefined };
+      return JSON.parse(JSON.stringify(d));
+    });
+    const dataStr = JSON.stringify(cleaned.length === 1 ? cleaned[0] : cleaned, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = cleaned.length === 1 ? `${cleaned[0].name}.json` : `decks-export-${Date.now()}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setShowBulkExportModal(false);
+    setBulkExportSelected({});
+  };
+
   // Route through modal only when deck has kewen
   const handleExportClick = (deck) => {
     if (deck.kewen) {
@@ -5365,11 +5391,13 @@ Rules:
                 <Plus size={20} />
                 Create Deck
               </button>
-              <label className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer font-semibold">
+              <button
+                onClick={() => setShowImportExportModal(true)}
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer font-semibold"
+              >
                 <Upload size={20} />
-                Import Deck(s)
-                <input type="file" accept=".json" onChange={importDeck} multiple className="hidden" />
-              </label>
+                Import / Export
+              </button>
               <button
                 onClick={() => setShowBrowseDecks(true)}
                 className="flex items-center gap-2 bg-gradient-to-r from-rose-500 to-rose-600 text-white px-6 py-3 rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
@@ -5489,7 +5517,7 @@ Rules:
                   onChange={(e) => setNewFolderName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && createFolder()}
                   placeholder="Folder name..."
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-gray-800"
                   autoFocus
                 />
                 <div className="flex gap-3">
@@ -6396,6 +6424,133 @@ Rules:
         )}
 
         {/* Multi-Import Modal */}
+        {/* Hidden file input for import (triggered by Import/Export modal) */}
+        <input
+          id="deck-import-file-input"
+          type="file"
+          accept=".json"
+          onChange={(e) => { importDeck(e); setShowImportExportModal(false); }}
+          multiple
+          className="hidden"
+        />
+
+        {/* Import / Export entry modal */}
+        {showImportExportModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setShowImportExportModal(false)}>
+            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">Import / Export</h3>
+              <p className="text-sm text-gray-500 mb-5">Add decks to the app, or save your decks to a file.</p>
+              <div className="space-y-3">
+                <label
+                  htmlFor="deck-import-file-input"
+                  className="flex items-center gap-3 w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-3.5 rounded-xl font-semibold cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all"
+                >
+                  <Upload size={18} />
+                  Import Decks from File (.json)
+                </label>
+                <button
+                  onClick={() => {
+                    setShowImportExportModal(false);
+                    const allSelected = {};
+                    decks.forEach(d => { allSelected[d.id] = true; });
+                    setBulkExportSelected(allSelected);
+                    setBulkExportIncludeKewen(true);
+                    setShowBulkExportModal(true);
+                  }}
+                  className="flex items-center gap-3 w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-3.5 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all"
+                >
+                  <Download size={18} />
+                  Export Decks to File
+                </button>
+                <button
+                  onClick={() => setShowImportExportModal(false)}
+                  className="w-full bg-gray-100 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Bulk Export modal */}
+        {showBulkExportModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setShowBulkExportModal(false)}>
+            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full" onClick={e => e.stopPropagation()}>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">Export Decks</h3>
+              <p className="text-sm text-gray-500 mb-4">Select the decks you want to export.</p>
+
+              {/* Select all / none */}
+              <div className="flex gap-3 mb-3">
+                <button
+                  onClick={() => { const all = {}; decks.forEach(d => { all[d.id] = true; }); setBulkExportSelected(all); }}
+                  className="text-xs text-blue-600 hover:underline font-medium"
+                >Select all</button>
+                <span className="text-gray-300">|</span>
+                <button
+                  onClick={() => setBulkExportSelected({})}
+                  className="text-xs text-blue-600 hover:underline font-medium"
+                >Deselect all</button>
+              </div>
+
+              {/* Deck list */}
+              <div className="border border-gray-200 rounded-xl overflow-hidden mb-4 max-h-52 overflow-y-auto">
+                {decks.map((deck, i) => (
+                  <label
+                    key={deck.id}
+                    className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition ${i > 0 ? 'border-t border-gray-100' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={!!bulkExportSelected[deck.id]}
+                      onChange={e => setBulkExportSelected(prev => ({ ...prev, [deck.id]: e.target.checked }))}
+                      className="w-4 h-4 accent-orange-500 flex-shrink-0"
+                    />
+                    <span className="flex-1 text-sm font-medium text-gray-800">{deck.name}</span>
+                    <span className="text-xs text-gray-400 flex-shrink-0">
+                      {deck.cards.length} cards{deck.kewen ? ' · 课文' : ''}
+                    </span>
+                  </label>
+                ))}
+              </div>
+
+              {/* Include 课文 toggle — only shown if any selected deck has kewen */}
+              {decks.some(d => bulkExportSelected[d.id] && d.kewen) && (
+                <label className="flex items-center gap-3 mb-5 cursor-pointer select-none">
+                  <div
+                    onClick={() => setBulkExportIncludeKewen(v => !v)}
+                    className={`w-10 h-6 rounded-full flex-shrink-0 transition-colors ${bulkExportIncludeKewen ? 'bg-orange-500' : 'bg-gray-300'}`}
+                    style={{position:'relative'}}
+                  >
+                    <div style={{
+                      position:'absolute', top:2, left: bulkExportIncludeKewen ? 18 : 2,
+                      width:20, height:20, borderRadius:'50%', background:'white',
+                      boxShadow:'0 1px 3px rgba(0,0,0,0.2)', transition:'left 0.15s'
+                    }}/>
+                  </div>
+                  <span className="text-sm text-gray-700">Include <span className="font-semibold text-orange-600">课文</span> reading text in export</span>
+                </label>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowBulkExportModal(false)}
+                  className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+                >Cancel</button>
+                <button
+                  onClick={handleBulkExport}
+                  disabled={Object.values(bulkExportSelected).filter(Boolean).length === 0}
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-2.5 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed"
+                >
+                  Export {Object.values(bulkExportSelected).filter(Boolean).length > 0
+                    ? `(${Object.values(bulkExportSelected).filter(Boolean).length} deck${Object.values(bulkExportSelected).filter(Boolean).length > 1 ? 's' : ''})`
+                    : ''}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {showImportModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => { setShowImportModal(false); setImportedDecks([]); setImportTargetFolder(null); }}>
             <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md mx-4 w-full" onClick={(e) => e.stopPropagation()}>
@@ -6439,7 +6594,7 @@ Rules:
                     onChange={(e) => setImportCombineTitle(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleImportCombine()}
                     placeholder="Enter combined deck title..."
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-800"
                   />
                   <button
                     onClick={handleImportCombine}
@@ -6851,7 +7006,7 @@ Rules:
                       value={kewenEditText}
                       onChange={e => setKewenEditText(e.target.value)}
                       placeholder="在这里粘贴课文 / Paste your reading text here..."
-                      className="w-full h-64 p-4 border-2 border-gray-200 rounded-xl text-lg focus:outline-none focus:border-orange-400 resize-none"
+                      className="w-full h-64 p-4 border-2 border-gray-200 rounded-xl text-lg focus:outline-none focus:border-orange-400 resize-none text-gray-800"
                       style={{ fontFamily: 'serif', lineHeight: 1.8, minHeight: '250px' }}
                       autoFocus
                     />
@@ -7390,7 +7545,7 @@ Rules:
                       value={textImportInput}
                       onChange={e => setTextImportInput(e.target.value)}
                       placeholder="在这里粘贴中文文章..."
-                      className="w-full h-48 p-4 border-2 border-gray-200 rounded-xl text-xl focus:outline-none focus:border-purple-400 resize-none"
+                      className="w-full h-48 p-4 border-2 border-gray-200 rounded-xl text-xl focus:outline-none focus:border-purple-400 resize-none text-gray-800"
                       style={{ fontFamily: 'serif', lineHeight: 1.8 }}
                       autoFocus
                     />
@@ -7567,7 +7722,7 @@ Rules:
                     value={textImportDeckName}
                     onChange={e => setTextImportDeckName(e.target.value)}
                     placeholder="Deck name…"
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl mb-3 focus:outline-none focus:border-purple-400"
+                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl mb-3 focus:outline-none focus:border-purple-400 text-gray-800"
                   />
                   <button
                     onClick={createDeckFromText}
