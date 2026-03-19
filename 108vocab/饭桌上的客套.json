@@ -1,5 +1,5 @@
 {
-  "name": "Dining Table Etiquette Vocabulary",
+  "name": "饭桌上的客套",
   "cards": [
     {"id": 1, "chinese": "饭桌", "pinyin": "fànzhuō", "english": "dining table"},
     {"id": 2, "chinese": "客套", "pinyin": "kètào", "english": "conventional politeness"},
