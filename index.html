@@ -516,6 +516,10 @@ const ChineseLearningApp = () => {
   const [chatModel, setChatModel] = useState('google/gemini-2.5-flash');
   const [chatShowSettings, setChatShowSettings] = useState(false);
   const [puterReady, setPuterReady] = useState(false);
+  const eduroamToastTimer = React.useRef(null);
+  const showEduroamToast = () => {
+    if (typeof window.__showEduroamToast === 'function') window.__showEduroamToast();
+  };
   const [chatReturnView, setChatReturnView] = useState('home');
   const chatMessagesEndRef = useRef(null);
   const chatInputRef = useRef(null);
@@ -1864,6 +1868,12 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
               </div>
             )}
 
+            {!puterReady && (
+              <div style={{ margin: '0 0 10px 0', padding: '9px 12px', borderRadius: 10, background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)', fontSize: 12, color: '#fbbf24', lineHeight: 1.5 }}>
+                ⚠️ <strong>AI is still loading.</strong> On eduroam? It may be blocked — try switching to <strong>hotspot</strong>, using a <strong>VPN</strong>, or changing your <strong>DNS</strong>.
+              </div>
+            )}
+
             {chatMessages.map((msg, i) => (
               <div key={i} style={{ display: 'flex', marginBottom: 10, justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                 {msg.role === 'assistant' && (
@@ -1995,6 +2005,7 @@ Example response format:
     } catch (err) {
       console.error('AI deck generation error:', err);
       setAiDeckError(err.message || 'Something went wrong. Try again.');
+      showEduroamToast();
     } finally {
       setAiDeckLoading(false);
     }
@@ -2076,6 +2087,7 @@ Keep it concise and practical.`,
     } catch (err) {
       console.error('Example fetch error:', err);
       setExampleContent(`⚠️ ${err.message || 'Something went wrong'}. Try again.`);
+      showEduroamToast();
     } finally {
       setExampleLoading(false);
     }
@@ -2338,6 +2350,7 @@ Keep it concise and practical.`,
     } catch (err) {
       console.error('Chat error:', err);
       setChatMessages(prev => [...prev, { role: 'assistant', content: `⚠️ Error: ${err.message || 'Something went wrong'}. Try again or switch models in settings.` }]);
+      showEduroamToast();
     } finally {
       setChatLoading(false);
       chatInputRef.current?.focus();
@@ -2838,6 +2851,7 @@ Please create a study guide with these sections:
     } catch (err) {
       console.error('Study guide error:', err);
       alert('Failed to generate study guide: ' + (err.message || 'Unknown error'));
+      showEduroamToast();
     } finally {
       setStudyGuideLoading(false);
     }
@@ -2927,6 +2941,7 @@ Respond in this EXACT JSON format only:
     } catch (err) {
       console.error('AI test question error:', err);
       alert('Failed to generate question: ' + (err.message || 'Unknown error'));
+      showEduroamToast();
     } finally {
       setAiTestLoading(false);
     }
@@ -2977,6 +2992,7 @@ Grade this response.` },
     } catch (err) {
       console.error('Grading error:', err);
       setAiTestFeedback({ score: '?', feedback: 'Grading failed: ' + (err.message || 'Unknown error'), corrected: '', highlights: '' });
+      showEduroamToast();
     } finally {
       setAiTestLoading(false);
     }
@@ -3418,6 +3434,7 @@ Rules:
     } catch (err) {
       console.error('AI auto-select error:', err);
       alert('AI word extraction failed: ' + (err.message || 'Unknown error') + '. Try again.');
+      showEduroamToast();
     } finally {
       setAiAutoSelectLoading(false);
     }
@@ -10277,7 +10294,58 @@ Rules:
 
         // Render the app
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<ChineseLearningApp />);
+
+        const AppWithToast = () => {
+          const [toast, setToast] = React.useState(false);
+          const timerRef = React.useRef(null);
+
+          // Expose a global trigger so ChineseLearningApp can fire it
+          React.useEffect(() => {
+            window.__showEduroamToast = () => {
+              setToast(true);
+              if (timerRef.current) clearTimeout(timerRef.current);
+              timerRef.current = setTimeout(() => setToast(false), 9000);
+            };
+            return () => { delete window.__showEduroamToast; };
+          }, []);
+
+          return (
+            <React.Fragment>
+              <ChineseLearningApp />
+              {toast && (
+                <div style={{
+                  position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+                  zIndex: 9999, maxWidth: 420, width: 'calc(100% - 32px)',
+                  background: '#1c1a0e', border: '1px solid rgba(251,191,36,0.5)',
+                  borderRadius: 14, padding: '12px 16px',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                  display: 'flex', alignItems: 'flex-start', gap: 10,
+                  animation: 'toastSlideUp 0.25s ease',
+                }}>
+                  <span style={{ fontSize: 18, flexShrink: 0, marginTop: 1 }}>⚠️</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ color: '#fbbf24', fontWeight: 700, fontSize: 13, marginBottom: 3 }}>
+                      AI unavailable — on eduroam?
+                    </div>
+                    <div style={{ color: '#d4b96a', fontSize: 12, lineHeight: 1.5 }}>
+                      eduroam blocks Puter.js. Fix: switch to <strong style={{color:'#fde68a'}}>hotspot</strong>, use a <strong style={{color:'#fde68a'}}>VPN</strong>, or change your <strong style={{color:'#fde68a'}}>DNS</strong> (e.g. 8.8.8.8).
+                    </div>
+                  </div>
+                  <button onClick={() => setToast(false)}
+                    style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: 16, padding: '0 0 0 4px', flexShrink: 0, lineHeight: 1 }}>✕</button>
+                </div>
+              )}
+              <style>{`
+                @keyframes toastSlideUp {
+                  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+                  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+                }
+              `}</style>
+            </React.Fragment>
+          );
+        };
+
+        root.render(<AppWithToast />);
     </script>
     
     <!-- Puter.js for free AI chatbot -->
