@@ -634,15 +634,16 @@ If you're already paying for Skritter or Quizlet Plus and love them, keep using 
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 18 (via CDN), Babel standalone
-- **UI Styling**: Tailwind CSS
+- **Frontend**: React 18 + JSX (pre-compiled by Vite)
+- **Build Tool**: Vite with `@vitejs/plugin-react`
+- **UI Styling**: Tailwind CSS (PostCSS plugin)
 - **Icons**: Lucide React (inline SVG)
-- **Stroke Order Animations**: Hanzi Writer 3.5
+- **Stroke Order Animations**: Hanzi Writer 3.5 (deferred load)
 - **Dictionary Lookups**: CC-CEDICT (loaded on demand)
 - **AI Features**: Puter.js (Gemini 2.5 Flash, GPT-5 Nano, GLM-5, Llama 4, DeepSeek R1)
 - **Backend / Auth**: Firebase (Authentication + Firestore)
 - **Storage**: Browser LocalStorage + Firebase cloud sync
-- **Hosting**: GitHub Pages
+- **Hosting**: GitHub Pages (deployed via GitHub Actions on push)
 - **Algorithm**: SM-2 Spaced Repetition
 
 ## 🏗️ Architecture
@@ -674,9 +675,22 @@ React state (decks, cards, session)
 
 ### Key design decisions
 
-- **No build step** — The app loads React and Babel via CDN, keeping deployment as simple as pushing files to GitHub Pages and making the codebase accessible without a local dev environment.
+- **Vite build pipeline** — JSX is pre-compiled at build time by Vite rather than transpiled in the browser at runtime (previously Babel standalone). A GitHub Actions workflow runs `npm run build` on every push and deploys the output to GitHub Pages automatically, so the workflow stays as simple as `git push`.
 - **User-pays AI model** — AI features run through Puter.js, meaning each user's requests count against their own free-tier quota rather than a centralized API key. This keeps the app free to host at any scale.
 - **Offline-first storage** — All study progress writes to LocalStorage synchronously, so the app is fully functional without a network connection. Firebase sync is additive, not required.
+
+## 🧑‍💻 Local Development
+
+```bash
+git clone https://github.com/lillianwang112/chinese-learning-app.git
+cd chinese-learning-app
+npm install
+npm run dev        # → http://localhost:5173
+```
+
+`npm run build` produces a production build in `dist/`. Deployment to GitHub Pages is automatic on every push to `main` via the included GitHub Actions workflow.
+
+> **Note:** Puter.js AI features may not work on localhost due to origin restrictions — test those on the live GitHub Pages URL after deploying.
 
 ## 🙏 About This Project
 
