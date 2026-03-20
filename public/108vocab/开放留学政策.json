@@ -1,0 +1,33 @@
+{
+  "name": "开放留学政策",
+  "cards": [
+    {"id": 1, "chinese": "布告栏", "pinyin": "bùgàolán", "english": "bulletin board"},
+    {"id": 2, "chinese": "贴", "pinyin": "tiē", "english": "paste; stick; glue"},
+    {"id": 3, "chinese": "托福", "pinyin": "tuōfú", "english": "TOEFL; Test of English as a Foreign Language"},
+    {"id": 4, "chinese": "补习班", "pinyin": "bǔxíbān", "english": "cram school"},
+    {"id": 5, "chinese": "预备", "pinyin": "yùbèi", "english": "prepare"},
+    {"id": 6, "chinese": "几十万", "pinyin": "jǐshíwàn", "english": "hundreds of thousands"},
+    {"id": 7, "chinese": "本科生", "pinyin": "běnkēshēng", "english": "undergraduate student"},
+    {"id": 8, "chinese": "研究生", "pinyin": "yánjiūshēng", "english": "graduate student"},
+    {"id": 9, "chinese": "申请", "pinyin": "shēnqǐng", "english": "apply for"},
+    {"id": 10, "chinese": "研究生院", "pinyin": "yánjiūshēng yuàn", "english": "graduate school"},
+    {"id": 11, "chinese": "参加", "pinyin": "cānjiā", "english": "participate; attend (an event)"},
+    {"id": 12, "chinese": "继续", "pinyin": "jìxù", "english": "continue"},
+    {"id": 13, "chinese": "优秀", "pinyin": "yōuxiù", "english": "outstanding; excellent"},
+    {"id": 14, "chinese": "人才", "pinyin": "réncái", "english": "person of ability; talented person"},
+    {"id": 15, "chinese": "不利", "pinyin": "búlì", "english": "disadvantageous; harmful (The positive form is 有利)"},
+    {"id": 16, "chinese": "主张", "pinyin": "zhǔzhāng", "english": "advocate; maintain"},
+    {"id": 17, "chinese": "限制", "pinyin": "xiànzhì", "english": "limit"},
+    {"id": 18, "chinese": "出国", "pinyin": "chūguó", "english": "go abroad"},
+    {"id": 19, "chinese": "留", "pinyin": "liú", "english": "stay; remain; keep"},
+    {"id": 20, "chinese": "面临", "pinyin": "miànlín", "english": "be faced with; be confronted with"},
+    {"id": 21, "chinese": "外流", "pinyin": "wàiliú", "english": "outflow; drain"},
+    {"id": 22, "chinese": "新加坡", "pinyin": "Xīnjiāpō", "english": "Singapore"},
+    {"id": 23, "chinese": "家乡", "pinyin": "jiāxiāng", "english": "hometown"},
+    {"id": 24, "chinese": "暂时", "pinyin": "zànshí", "english": "temporary; transient; for the time being"},
+    {"id": 25, "chinese": "流失", "pinyin": "liúshī", "english": "run off; to be washed away"},
+    {"id": 26, "chinese": "永远", "pinyin": "yǒngyuǎn", "english": "forever (永远 followed by negation means 'never')"},
+    {"id": 27, "chinese": "吸引", "pinyin": "xīyǐn", "english": "attract"},
+    {"id": 28, "chinese": "回国", "pinyin": "huíguó", "english": "return to one's country"}
+  ]
+}
