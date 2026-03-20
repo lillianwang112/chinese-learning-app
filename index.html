@@ -590,6 +590,22 @@ const ChineseLearningApp = () => {
   const [aiQuizType, setAiQuizType] = useState('mixed');
   const [aiTestInputMode, setAiTestInputMode] = useState('type'); // 'type' or 'handwrite'
   const [aiTestEraserOn, setAiTestEraserOn] = useState(false);
+
+  // ── Sentence Writing Practice state ───────────────────────────────────────
+  const [sentencePracticeDeck, setSentencePracticeDeck] = useState(null);
+  const [sentenceQueue, setSentenceQueue] = useState([]); // current ordered queue
+  const [sentenceIndex, setSentenceIndex] = useState(0);
+  const [sentenceTranslations, setSentenceTranslations] = useState({}); // { sentence: englishTranslation }
+  const [sentenceTransLoading, setSentenceTransLoading] = useState(false);
+  const [sentenceRevealed, setSentenceRevealed] = useState(false);
+  const [sentenceResumeModal, setSentenceResumeModal] = useState(null); // { deck } | null
+  const [sentenceAnswer, setSentenceAnswer] = useState('');
+  const [sentenceInputMode, setSentenceInputMode] = useState('type'); // 'type' | 'handwrite'
+  const [sentenceEraserOn, setSentenceEraserOn] = useState(false);
+  const sentenceCanvasRef = useRef(null);
+  const sentenceBgCanvasRef = useRef(null);
+  const sentenceDrawCtrl = useRef({ isDrawing: false, isErasing: false, ctx: null, lastX: 0, lastY: 0, hasMoved: false });
+  const sentenceTouchCleanupRef = useRef(null);
   const aiTestCanvasRef = useRef(null);
   const aiTestBgCanvasRef = useRef(null);
   const aiTestDrawCtrl = useRef({ isDrawing: false, isErasing: false, ctx: null, lastX: 0, lastY: 0 });
@@ -812,6 +828,10 @@ const ChineseLearningApp = () => {
         showEnglish: true,
         traceSpeed: 1, // 0.4=slow, 1=normal, 2=fast; also controls fade
       },
+      // Trouble words
+      troubleWords: {
+        topN: 20, // how many top trouble words to show cross-deck
+      },
     };
   });
   const latestSettingsRef = useRef(null); // always-current copy for saveToCloud
@@ -840,6 +860,10 @@ const ChineseLearningApp = () => {
 
   // Import/Export entry modal + bulk export state
   const [showImportExportModal, setShowImportExportModal] = useState(false);
+
+  // Trouble words modal: { cards: [...], deckId: id|null, deckName: str|null }
+  // deckId null = cross-deck mode
+  const [troubleModal, setTroubleModal] = useState(null);
   const [showBulkExportModal, setShowBulkExportModal] = useState(false);
   const [bulkExportSelected, setBulkExportSelected] = useState({}); // { [deckId]: true }
   const [bulkExportIncludeKewen, setBulkExportIncludeKewen] = useState(true);
@@ -1073,6 +1097,17 @@ const ChineseLearningApp = () => {
     }
   }, [writingSessionComplete]);
 
+  // Save sentence session to localStorage on every navigation
+  useEffect(() => {
+    if (currentView === 'sentencePractice' && sentencePracticeDeck && !sentencePracticeDeck.noKewen && sentenceQueue.length > 0) {
+      localStorage.setItem('sentenceSession', JSON.stringify({
+        deckId: sentencePracticeDeck.deck.id,
+        queue: sentenceQueue,
+        currentIndex: sentenceIndex,
+      }));
+    }
+  }, [currentView, sentencePracticeDeck, sentenceQueue, sentenceIndex]);
+
   // Firebase auth state listener
   useEffect(() => {
     if (!FIREBASE_ENABLED || !firebaseAuth) {
@@ -1174,6 +1209,7 @@ const ChineseLearningApp = () => {
           setUserSettings(prev => ({
             flashcard: { ...prev.flashcard, ...cloudProgress.userSettings.flashcard },
             writing: { ...prev.writing, ...cloudProgress.userSettings.writing },
+            troubleWords: { ...{ topN: 20 }, ...(prev.troubleWords || {}), ...(cloudProgress.userSettings.troubleWords || {}) },
           }));
         }
         if (cloudProgress.studyGuides && cloudProgress.studyGuides.length > 0) {
@@ -1590,6 +1626,31 @@ const ChineseLearningApp = () => {
     setIsFlipped(false);
   };
 
+  // ── Trouble Words ──────────────────────────────────────────────────────────
+  // Each wrong answer appends a timestamp to card.struggleLog[].
+  // Score uses exponential decay with 7-day half-life so recent struggles
+  // outweigh old ones. A card needs score >= 0.5 to appear in trouble list.
+  const TROUBLE_HALF_LIFE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+  const TROUBLE_THRESHOLD = 0.5;
+  const getTroubleScore = (card) => {
+    if (!card.struggleLog || card.struggleLog.length === 0) return 0;
+    const now = Date.now();
+    return card.struggleLog.reduce((sum, t) => {
+      return sum + Math.pow(0.5, (now - t) / TROUBLE_HALF_LIFE_MS);
+    }, 0);
+  };
+  // Get trouble cards for a single deck, sorted by score desc
+  const getTroubleCardsForDeck = (deck) =>
+    deck.cards
+      .map(c => ({ ...c, _deckId: deck.id, _deckName: deck.name, _score: getTroubleScore(c) }))
+      .filter(c => c._score >= TROUBLE_THRESHOLD)
+      .sort((a, b) => b._score - a._score);
+  // Get top-N trouble cards across all decks
+  const getTopTroubleCards = (n) =>
+    decks.flatMap(deck => getTroubleCardsForDeck(deck))
+      .sort((a, b) => b._score - a._score)
+      .slice(0, n);
+
   // SM-2 Spaced Repetition Algorithm
   const updateCardWithSpacedRepetition = (deckId, cardId, quality, srOffset = 0) => {
     // quality: 0-5 (0 = total blackout, 5 = perfect response)
@@ -1644,18 +1705,27 @@ const ChineseLearningApp = () => {
               }
               
               const masteryStatus = masteryScore === 0 ? 'not_started' : masteryScore < 3 ? 'learning' : 'mastered';
-              
+
+              // Track struggle history for Trouble Words feature
+              // Append timestamp on wrong answers; trim log to last 50 entries to cap storage
+              const now = Date.now();
+              let struggleLog = card.struggleLog ? [...card.struggleLog] : [];
+              if (quality < 3) {
+                struggleLog = [...struggleLog, now].slice(-50);
+              }
+
               return {
                 ...card,
                 known: masteryStatus === 'mastered',
                 masteryScore,
                 masteryStatus,
-                lastReviewed: Date.now(),
+                lastReviewed: now,
                 difficulty: 5 - quality,
                 easeFactor,
                 interval,
                 repetitions,
-                nextReview
+                nextReview,
+                struggleLog,
               };
             }
             return card;
@@ -3075,6 +3145,35 @@ Grade this response.` },
     };
   }, [aiTestInputMode, aiTestSetupStep, aiTestQuestion, aiTestFeedback, aiTestQuestionNum]);
 
+  // Sentence canvas init — same pattern as aiTest
+  useEffect(() => {
+    if (!(currentView === 'sentencePractice' && sentencePracticeDeck && !sentencePracticeDeck.noKewen && sentenceInputMode === 'handwrite')) return;
+    const t = setTimeout(() => {
+      initSentenceCanvas();
+      const canvas = sentenceCanvasRef.current;
+      if (!canvas) return;
+      const block = (e) => e.preventDefault();
+      const opts = { passive: false };
+      canvas.addEventListener('touchstart',  block, opts);
+      canvas.addEventListener('touchmove',   block, opts);
+      canvas.addEventListener('touchend',    block, opts);
+      canvas.addEventListener('selectstart', block);
+      canvas.addEventListener('contextmenu', block);
+      sentenceTouchCleanupRef.current = () => {
+        canvas.removeEventListener('touchstart',  block, opts);
+        canvas.removeEventListener('touchmove',   block, opts);
+        canvas.removeEventListener('touchend',    block, opts);
+        canvas.removeEventListener('selectstart', block);
+        canvas.removeEventListener('contextmenu', block);
+      };
+    }, 100);
+    return () => {
+      clearTimeout(t);
+      sentenceTouchCleanupRef.current?.();
+      sentenceTouchCleanupRef.current = null;
+    };
+  }, [currentView, sentencePracticeDeck, sentenceInputMode, sentenceIndex]);
+
   const aiTestCanvasPointerDown = (e) => {
     const ctrl = aiTestDrawCtrl.current;
     if (!ctrl.ctx) return;
@@ -3165,6 +3264,248 @@ Grade this response.` },
     const offCtx = offscreen.getContext('2d');
     // Draw bg (white) then fg strokes — gives OCR clean black-on-white image
     const bgCanvas = aiTestBgCanvasRef.current;
+    if (bgCanvas) offCtx.drawImage(bgCanvas, 0, 0);
+    else { offCtx.fillStyle = '#ffffff'; offCtx.fillRect(0, 0, offscreen.width, offscreen.height); }
+    offCtx.drawImage(canvas, 0, 0);
+    return offscreen.toDataURL('image/png');
+  };
+
+  // ── Sentence Writing Practice helpers ─────────────────────────────────────
+  const splitKewen = (text) => {
+    if (!text) return [];
+    // Split on sentence-ending punctuation, keep delimiter attached to the sentence
+    const raw = text.split(/(?<=[。！？…]+)/).map(s => s.trim()).filter(s => s.length > 1);
+    // Remove footnote markers like (1)(2) at start/end, collapse whitespace
+    return raw.map(s => s.replace(/^\(\d+\)\s*/, '').replace(/\s*\(\d+\)\s*$/, '').trim()).filter(s => s.length > 1);
+  };
+
+  const getSavedSentenceSession = (deckId) => {
+    try {
+      const saved = localStorage.getItem('sentenceSession');
+      if (!saved) return null;
+      const session = JSON.parse(saved);
+      return String(session.deckId) === String(deckId) ? session : null;
+    } catch (e) { return null; }
+  };
+
+  const resumeSentenceSession = (deck) => {
+    try {
+      const session = JSON.parse(localStorage.getItem('sentenceSession'));
+      if (!session || String(session.deckId) !== String(deck.id)) return;
+      setSentenceResumeModal(null);
+      setSentencePracticeDeck({ deck, noKewen: false });
+      setSentenceQueue(session.queue);
+      setSentenceIndex(Math.min(session.currentIndex, session.queue.length - 1));
+      setSentenceRevealed(false);
+      setSentenceAnswer('');
+      setSentenceInputMode('type');
+      setSentenceEraserOn(false);
+      setCurrentView('sentencePractice');
+      setLastStudied(prev => ({ ...prev, [deck.id]: { timestamp: Date.now(), mode: 'sentences' } }));
+      // Load cached translations (no AI call needed)
+      fetchSentenceTranslations(session.queue, deck.id, deck.kewen);
+    } catch (e) { localStorage.removeItem('sentenceSession'); }
+  };
+
+  const startSentencePractice = (deck) => {
+    if (!deck.kewen) {
+      setSentencePracticeDeck({ deck, noKewen: true });
+      setCurrentView('sentencePractice');
+      return;
+    }
+    // If there's a saved session for this deck, show resume modal
+    const saved = getSavedSentenceSession(deck.id);
+    if (saved && saved.queue && saved.queue.length > 0) {
+      setSentenceResumeModal({ deck, session: saved });
+      return;
+    }
+    launchFreshSentencePractice(deck);
+  };
+
+  const launchFreshSentencePractice = (deck) => {
+    setSentenceResumeModal(null);
+    const sentences = splitKewen(deck.kewen);
+    if (sentences.length === 0) { alert('No sentences found in 课文.'); return; }
+    localStorage.removeItem('sentenceSession');
+    setSentencePracticeDeck({ deck, noKewen: false });
+    setSentenceQueue(sentences);
+    setSentenceIndex(0);
+    setSentenceRevealed(false);
+    setSentenceAnswer('');
+    setSentenceInputMode('type');
+    setSentenceEraserOn(false);
+    setCurrentView('sentencePractice');
+    setLastStudied(prev => ({ ...prev, [deck.id]: { timestamp: Date.now(), mode: 'sentences' } }));
+    fetchSentenceTranslations(sentences, deck.id, deck.kewen);
+  };
+
+  const fetchSentenceTranslations = async (sentences, deckId, kewen) => {
+    // Simple hash: sum of char codes of the kewen string, fast and good enough for cache invalidation
+    const kewenHash = kewen ? String(kewen.split('').reduce((acc, c) => (acc + c.charCodeAt(0)) & 0xfffffff, 0)) : '0';
+    const cacheKey = `sentenceTrans_${deckId}`;
+
+    // Check localStorage cache first
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const { hash, translations } = JSON.parse(cached);
+        if (hash === kewenHash) {
+          setSentenceTranslations(translations);
+          setSentenceTransLoading(false);
+          return; // cache hit — no AI call needed
+        }
+      }
+    } catch (e) { /* ignore parse errors, fall through to fetch */ }
+
+    // Cache miss or stale — fetch from AI
+    setSentenceTransLoading(true);
+    setSentenceTranslations({});
+    try {
+      if (!window.puter || !window.puter.ai) throw new Error('Puter not ready');
+      const list = sentences.map((s, i) => `${i+1}. ${s}`).join('\n');
+      const response = await window.puter.ai.chat([
+        { role: 'system', content: 'You are a Chinese-English translator. The user will send a numbered list of Chinese sentences. Respond ONLY with a JSON object where each key is the sentence number (as a string) and each value is the English translation. No markdown, no extra text, just the raw JSON.' },
+        { role: 'user', content: `Translate each sentence into natural English:\n${list}` }
+      ], { model: 'claude-sonnet-4-20250514' });
+      const raw = response?.message?.content?.[0]?.text || response?.message?.content || '';
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+      const map = {};
+      sentences.forEach((s, i) => { map[s] = parsed[String(i+1)] || ''; });
+      setSentenceTranslations(map);
+      // Save to localStorage cache
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify({ hash: kewenHash, translations: map }));
+      } catch (e) { /* storage full — not fatal */ }
+    } catch (err) {
+      console.error('Sentence translation error:', err);
+      showEduroamToast();
+      const fallback = {};
+      sentences.forEach(s => { fallback[s] = '(Translation unavailable — check AI connection)'; });
+      setSentenceTranslations(fallback);
+      // Don't cache failures so next open retries
+    } finally {
+      setSentenceTransLoading(false);
+    }
+  };
+
+  const shuffleSentences = () => {
+    setSentenceQueue(q => [...q].sort(() => Math.random() - 0.5));
+    setSentenceIndex(0);
+    setSentenceRevealed(false);
+    setSentenceAnswer('');
+    clearSentenceCanvas();
+  };
+
+  const sentenceForgot = () => {
+    setSentenceQueue(q => {
+      const next = [...q];
+      const current = next[sentenceIndex];
+      const remaining = next.length - sentenceIndex - 1;
+      const offset = Math.max(3, Math.floor(remaining * 0.25) + Math.floor(Math.random() * 2));
+      const insertAt = Math.min(sentenceIndex + offset, next.length);
+      next.splice(insertAt, 0, current);
+      return next;
+    });
+    advanceSentence();
+  };
+
+  const advanceSentence = () => {
+    setSentenceIndex(i => {
+      const next = i + 1;
+      return next >= sentenceQueue.length ? 0 : next;
+    });
+    setSentenceRevealed(false);
+    setSentenceAnswer('');
+    clearSentenceCanvas();
+  };
+
+  // Sentence canvas — mirrors aiTest canvas exactly
+  const initSentenceCanvas = () => {
+    const canvas = sentenceCanvasRef.current;
+    const bgCanvas = sentenceBgCanvasRef.current;
+    if (!canvas || !bgCanvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    [canvas, bgCanvas].forEach(c => { c.width = rect.width * dpr; c.height = rect.height * dpr; });
+    const bgCtx = bgCanvas.getContext('2d');
+    bgCtx.scale(dpr, dpr);
+    bgCtx.fillStyle = '#ffffff';
+    bgCtx.fillRect(0, 0, rect.width, rect.height);
+    bgCtx.strokeStyle = '#e5e7eb';
+    bgCtx.lineWidth = 1;
+    bgCtx.beginPath();
+    for (let y = 90; y < rect.height; y += 90) { bgCtx.moveTo(0, y); bgCtx.lineTo(rect.width, y); }
+    bgCtx.stroke();
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.globalCompositeOperation = 'source-over';
+    sentenceDrawCtrl.current.ctx = ctx;
+  };
+
+  const clearSentenceCanvas = () => {
+    sentenceDrawCtrl.current.isErasing = false;
+    setSentenceEraserOn(false);
+    initSentenceCanvas();
+  };
+
+  const sentenceCanvasPointerDown = (e) => {
+    const ctrl = sentenceDrawCtrl.current;
+    if (!ctrl.ctx) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const canvas = sentenceCanvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const scaleX = canvas.width / dpr / rect.width;
+    const scaleY = canvas.height / dpr / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top)  * scaleY;
+    ctrl.isDrawing = true; ctrl.hasMoved = false;
+    ctrl.lastX = x; ctrl.lastY = y;
+    ctrl.scaleX = scaleX; ctrl.scaleY = scaleY; ctrl.rect = rect;
+    ctrl.ctx.globalCompositeOperation = ctrl.isErasing ? 'destination-out' : 'source-over';
+    ctrl.ctx.strokeStyle = ctrl.isErasing ? 'rgba(0,0,0,1)' : '#1a1a1a';
+    ctrl.ctx.fillStyle   = ctrl.isErasing ? 'rgba(0,0,0,1)' : '#1a1a1a';
+    ctrl.ctx.lineWidth   = ctrl.isErasing ? 24 : 3;
+    ctrl.ctx.beginPath(); ctrl.ctx.moveTo(x, y);
+  };
+
+  const sentenceCanvasPointerMove = (e) => {
+    const ctrl = sentenceDrawCtrl.current;
+    if (!ctrl.isDrawing || !ctrl.ctx) return;
+    const coalesced = e.getCoalescedEvents ? e.getCoalescedEvents() : null;
+    const events = (coalesced && coalesced.length > 0) ? coalesced : [e];
+    let moved = false;
+    for (const ce of events) {
+      const x = (ce.clientX - ctrl.rect.left) * ctrl.scaleX;
+      const y = (ce.clientY - ctrl.rect.top)  * ctrl.scaleY;
+      const dx = x - ctrl.lastX, dy = y - ctrl.lastY;
+      if (dx*dx + dy*dy > 90000) continue;
+      ctrl.ctx.lineTo(x, y); ctrl.lastX = x; ctrl.lastY = y; moved = true;
+    }
+    if (moved) { ctrl.ctx.stroke(); ctrl.ctx.beginPath(); ctrl.ctx.moveTo(ctrl.lastX, ctrl.lastY); ctrl.hasMoved = true; }
+  };
+
+  const sentenceCanvasPointerUp = (e) => {
+    const ctrl = sentenceDrawCtrl.current;
+    if (!ctrl.isDrawing) return;
+    if (!ctrl.hasMoved && ctrl.ctx) {
+      const r = ctrl.ctx.lineWidth / 2;
+      ctrl.ctx.beginPath(); ctrl.ctx.arc(ctrl.lastX, ctrl.lastY, r, 0, Math.PI * 2); ctrl.ctx.fill();
+    }
+    ctrl.isDrawing = false; ctrl.hasMoved = false;
+  };
+
+  const getSentenceCanvasDataUrl = () => {
+    const canvas = sentenceCanvasRef.current;
+    if (!canvas) return null;
+    const offscreen = document.createElement('canvas');
+    offscreen.width = canvas.width; offscreen.height = canvas.height;
+    const offCtx = offscreen.getContext('2d');
+    const bgCanvas = sentenceBgCanvasRef.current;
     if (bgCanvas) offCtx.drawImage(bgCanvas, 0, 0);
     else { offCtx.fillStyle = '#ffffff'; offCtx.fillRect(0, 0, offscreen.width, offscreen.height); }
     offCtx.drawImage(canvas, 0, 0);
@@ -4388,7 +4729,93 @@ Rules:
     setWritingUndoHistory([]);
   };
 
-  // Resume a saved writing session
+  // ── Trouble Words launchers ────────────────────────────────────────────────
+  // Each receives the pre-filtered sorted trouble cards (with _deckId/_deckName).
+  // For cross-deck mode we use a synthetic deck object so existing modes work unchanged.
+  const makeTroubleDeck = (troubleCards, deckId, deckName) => {
+    // Strip internal _* fields before handing to study modes
+    const clean = troubleCards.map(({ _deckId, _deckName, _score, ...rest }) => rest);
+    // If single-deck, find the real deck (needed for SR updates to work correctly)
+    const realDeck = deckId ? decks.find(d => d.id === deckId) : null;
+    return realDeck
+      ? { ...realDeck, cards: clean }
+      : { id: 'trouble-cross', name: '🔥 Trouble Words', cards: clean };
+  };
+
+  const startTroubleStudy = (troubleCards, deckId, deckName) => {
+    const deck = makeTroubleDeck(troubleCards, deckId, deckName);
+    setTroubleModal(null);
+    setSelectedDeck(deck);
+    setShuffledCards([...deck.cards]);
+    setCurrentCardIndex(0);
+    setIsFlipped(false);
+    setSwipeHistory([]);
+    setCurrentView('study');
+    updateStudyStreak();
+  };
+
+  const startTroubleLearn = (troubleCards, deckId, deckName) => {
+    const deck = makeTroubleDeck(troubleCards, deckId, deckName);
+    setTroubleModal(null);
+    const cards = [...deck.cards];
+    setSelectedDeck(deck);
+    setAllLearnCards(cards);
+    const roundCards = cards.slice(0, Math.min(10, cards.length));
+    const progress = {};
+    roundCards.forEach(c => { progress[c.id] = 'mc'; });
+    setLearnCards(roundCards);
+    setCardProgress(progress);
+    setCurrentLearnIndex(0);
+    setCurrentRound(1);
+    setRoundComplete(false);
+    setLearnMode('multiple-choice');
+    setSelectedOption(null);
+    setUserAnswer('');
+    setAnswerResult(null);
+    setShowAnswer(false);
+    if (roundCards.length > 0) generateMultipleChoiceOptions(roundCards[0], cards);
+    setCurrentView('learn');
+    updateStudyStreak();
+  };
+
+  const startTroubleWritePractice = (troubleCards, deckId, deckName) => {
+    const deck = makeTroubleDeck(troubleCards, deckId, deckName);
+    setTroubleModal(null);
+    setSelectedDeck(deck);
+    localStorage.removeItem('writingSession');
+    setWritingCards([...deck.cards]);
+    setPracticedCardIds([]);
+    setCurrentWritingIndex(0);
+    drawCtrl.current.strokeCount = 0;
+    canvasReadyRef.current = false;
+    drawCtrl.current.currentStroke = null;
+    setWritingFeedback(null);
+    setWritingSessionComplete(false);
+    setWritingMode('practiceAll');
+    setWritingUndoHistory([]);
+    setCurrentView('writing');
+    updateStudyStreak();
+  };
+
+  const startTroubleWriteTest = (troubleCards, deckId, deckName) => {
+    const deck = makeTroubleDeck(troubleCards, deckId, deckName);
+    setTroubleModal(null);
+    setSelectedDeck(deck);
+    localStorage.removeItem('writingSession');
+    setWritingCards([...deck.cards]);
+    setPracticedCardIds([]);
+    setCurrentWritingIndex(0);
+    drawCtrl.current.strokeCount = 0;
+    canvasReadyRef.current = false;
+    drawCtrl.current.currentStroke = null;
+    setWritingFeedback(null);
+    setWritingSessionComplete(false);
+    setTestRevealed(false);
+    setWritingMode('testAll');
+    setWritingUndoHistory([]);
+    setCurrentView('writing');
+    updateStudyStreak();
+  };
   const resumeWritingSession = () => {
     const saved = localStorage.getItem('writingSession');
     if (!saved) return false;
@@ -5237,6 +5664,23 @@ Rules:
                           </div>
                         </div>
                       </div>
+                      {/* Trouble Words Settings */}
+                      <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                        <h3 className="font-bold text-gray-800 flex items-center gap-2">🔥 Trouble Words</h3>
+                        <div>
+                          <p className="text-sm text-gray-700 mb-1">Cross-deck practice size</p>
+                          <p className="text-xs text-gray-400 mb-2">How many of your top trouble words to show in the home screen banner</p>
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="range" min="5" max="50" step="5"
+                              value={(userSettings.troubleWords || {}).topN || 20}
+                              onChange={e => setUserSettings(s => ({ ...s, troubleWords: { ...(s.troubleWords || {}), topN: parseInt(e.target.value) } }))}
+                              className="flex-1 accent-red-500"
+                            />
+                            <span className="text-sm font-semibold text-red-600 w-8 text-right">{(userSettings.troubleWords || {}).topN || 20}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   );
                 })()}
@@ -5302,6 +5746,23 @@ Rules:
                           </div>
                         </div>
 
+                      </div>
+                      {/* Trouble Words Settings */}
+                      <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                        <h3 className="font-bold text-gray-800">🔥 Trouble Words</h3>
+                        <div>
+                          <p className="text-sm text-gray-700 mb-1">Cross-deck practice size</p>
+                          <p className="text-xs text-gray-400 mb-2">How many of your top trouble words to show in the home screen banner</p>
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="range" min="5" max="50" step="5"
+                              value={(userSettings.troubleWords || {}).topN || 20}
+                              onChange={e => setUserSettings(s => ({ ...s, troubleWords: { ...(s.troubleWords || {}), topN: parseInt(e.target.value) } }))}
+                              className="flex-1 accent-red-500"
+                            />
+                            <span className="text-sm font-semibold text-red-600 w-8 text-right">{(userSettings.troubleWords || {}).topN || 20}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
@@ -5392,6 +5853,37 @@ Rules:
         </div>
 
         <div className="max-w-6xl mx-auto px-6 py-8">
+          {/* Cross-deck Trouble Words banner */}
+          {(() => {
+            const topN = (userSettings.troubleWords || {}).topN || 20;
+            const topCards = getTopTroubleCards(topN);
+            if (topCards.length === 0) return null;
+            return (
+              <div className="mb-6 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">🔥</span>
+                    <span className="font-bold text-gray-800">Trouble Words</span>
+                    <span className="bg-orange-100 text-orange-700 text-xs font-semibold px-2 py-0.5 rounded-full">{topCards.length} cards</span>
+                  </div>
+                  <p className="text-xs text-gray-500">Your most-missed words across all decks — practice them now</p>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {topCards.slice(0, 5).map((c, i) => (
+                      <span key={i} className="bg-white border border-orange-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">{c.chinese}</span>
+                    ))}
+                    {topCards.length > 5 && <span className="text-xs text-gray-400 self-center">+{topCards.length - 5} more</span>}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setTroubleModal({ cards: topCards, deckId: null, deckName: null })}
+                  className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:from-orange-600 hover:to-red-600 transition-all shadow-md flex-shrink-0"
+                >
+                  Practice All →
+                </button>
+              </div>
+            );
+          })()}
+
           {/* Search Bar */}
           <div className="mb-6">
             <div className="relative">
@@ -5741,7 +6233,7 @@ Rules:
               .sort((a, b) => b.timestamp - a.timestamp)
               .slice(0, 3);
             if (recentDecks.length === 0) return null;
-            const modeLabels = { study: 'Flashcards', learn: 'Learn', match: 'Match', test: 'Test', writing: 'Writing' };
+            const modeLabels = { study: 'Flashcards', learn: 'Learn', match: 'Match', test: 'Test', writing: 'Writing', sentences: '课文 Sentences' };
             const modeColors = {
               study: 'from-red-500 to-red-600 hover:from-red-600 hover:to-red-700',
               learn: 'from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700',
@@ -5772,6 +6264,7 @@ Rules:
                     })();
                     const lastMode = modeLabels[mode] || 'Flashcards';
                     const savedSession = getSavedWritingSession(deck.id);
+                    const savedSentenceSession = getSavedSentenceSession(deck.id);
                     return (
                       <div key={deck.id} className="min-w-[240px] max-w-[280px] bg-white rounded-xl shadow-md border-2 border-blue-100 overflow-hidden flex-shrink-0 hover:shadow-lg transition-all">
                         <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-3">
@@ -5790,27 +6283,50 @@ Rules:
                               📝 Resume Writing ({savedSession.currentIndex + 1}/{savedSession.cardIds.length})
                             </button>
                           )}
+                          {savedSentenceSession && (
+                            <button
+                              onClick={() => resumeSentenceSession(deck)}
+                              className="w-full mb-2 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white py-2 rounded-lg transition-all text-xs font-semibold flex items-center justify-center gap-1 ring-2 ring-teal-300"
+                            >
+                              📖 Resume 课文 ({savedSentenceSession.currentIndex + 1}/{savedSentenceSession.queue?.length || '?'})
+                            </button>
+                          )}
                           <div className="flex gap-2">
                             <button
                               onClick={() => startStudy(deck)}
-                              className={`flex-1 bg-gradient-to-r ${modeColors.study} text-white py-2 rounded-lg transition-all text-xs font-semibold flex items-center justify-center gap-1`}
+                              className={`flex-1 bg-gradient-to-r ${modeColors.study} text-white py-2.5 rounded-lg transition-all text-xs font-semibold flex flex-col items-center justify-center gap-0.5`}
                             >
-                              <Play size={12} />
+                              <Play size={14} />
                               Study
                             </button>
                             <button
                               onClick={() => startWritingPractice(deck)}
-                              className={`flex-1 bg-gradient-to-r ${modeColors.writing} text-white py-2 rounded-lg transition-all text-xs font-semibold flex items-center justify-center gap-1`}
+                              className={`flex-1 bg-gradient-to-r ${modeColors.writing} text-white py-2.5 rounded-lg transition-all text-xs font-semibold flex flex-col items-center justify-center gap-0.5`}
                             >
-                              📝 Write
+                              <span className="text-sm leading-none">📝</span>
+                              Write
                             </button>
                             <button
                               onClick={() => startLearnMode(deck)}
-                              className={`flex-1 bg-gradient-to-r ${modeColors.learn} text-white py-2 rounded-lg transition-all text-xs font-semibold flex items-center justify-center gap-1`}
+                              className={`flex-1 bg-gradient-to-r ${modeColors.learn} text-white py-2.5 rounded-lg transition-all text-xs font-semibold flex flex-col items-center justify-center gap-0.5`}
                             >
-                              <Brain size={12} />
+                              <Brain size={14} />
                               Learn
                             </button>
+                            {(() => {
+                              const tc = getTroubleCardsForDeck(deck);
+                              if (tc.length === 0) return null;
+                              return (
+                                <button
+                                  onClick={() => setTroubleModal({ cards: tc, deckId: deck.id, deckName: deck.name })}
+                                  className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2.5 rounded-lg transition-all text-xs font-semibold flex flex-col items-center justify-center gap-0.5"
+                                  title={`${tc.length} trouble word${tc.length > 1 ? 's' : ''}`}
+                                >
+                                  <span className="text-sm leading-none">🔥</span>
+                                  {tc.length}
+                                </button>
+                              );
+                            })()}
                           </div>
                         </div>
                       </div>
@@ -6181,6 +6697,19 @@ Rules:
                                 Write
                               </button>
                             </div>
+                            {/* Trouble Words */}
+                            {(() => {
+                              const tc = getTroubleCardsForDeck(deck);
+                              if (tc.length === 0) return null;
+                              return (
+                                <button
+                                  onClick={() => setTroubleModal({ cards: tc, deckId: deck.id, deckName: deck.name })}
+                                  className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all shadow-sm text-xs font-semibold flex items-center justify-center gap-1.5"
+                                >
+                                  🔥 Trouble Words ({tc.length})
+                                </button>
+                              );
+                            })()}
                           </div>
 
                           {/* Expand/Collapse toggle */}
@@ -6227,6 +6756,14 @@ Rules:
                                 <span className="text-xs font-medium">Study Guide</span>
                               </button>
                             </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); startSentencePractice(deck); }}
+                              className="w-full bg-teal-50 text-teal-700 px-3 py-2 rounded-lg hover:bg-teal-100 transition-all border border-teal-200 flex items-center justify-center gap-2"
+                            >
+                              <span className="text-sm">📝</span>
+                              <span className="text-xs font-medium">课文 Sentence Writing</span>
+                              {!deck.kewen && <span className="text-xs text-teal-400">(no 课文)</span>}
+                            </button>
                             {deck.kewen && (
                               <div className="text-xs text-gray-400 text-center">课文 attached ({deck.kewen.length} chars)</div>
                             )}
@@ -6460,6 +6997,108 @@ Rules:
         )}
 
         {/* Multi-Import Modal */}
+        {/* Sentence session resume modal */}
+        {sentenceResumeModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setSentenceResumeModal(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-2xl">📝</span>
+                <h3 className="text-lg font-bold text-gray-800">Resume Session?</h3>
+              </div>
+              <p className="text-sm text-gray-500 mb-5">
+                You have a saved 课文 sentence session for <strong>{sentenceResumeModal.deck.name}</strong> — sentence {(sentenceResumeModal.session.currentIndex || 0) + 1} of {sentenceResumeModal.session.queue?.length || 0}.
+              </p>
+              <div className="space-y-2">
+                <button
+                  onClick={() => resumeSentenceSession(sentenceResumeModal.deck)}
+                  className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-3 rounded-xl font-semibold hover:from-teal-600 hover:to-teal-700 transition-all ring-2 ring-teal-300"
+                >
+                  ▶ Resume (sentence {(sentenceResumeModal.session.currentIndex || 0) + 1}/{sentenceResumeModal.session.queue?.length || 0})
+                </button>
+                <button
+                  onClick={() => launchFreshSentencePractice(sentenceResumeModal.deck)}
+                  className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+                >
+                  🔄 Start Fresh
+                </button>
+                <button
+                  onClick={() => setSentenceResumeModal(null)}
+                  className="w-full bg-white text-gray-400 py-2 rounded-xl font-medium hover:text-gray-600 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Trouble Words modal */}
+        {troubleModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setTroubleModal(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-2xl">🔥</span>
+                <h3 className="text-lg font-bold text-gray-800">Trouble Words</h3>
+              </div>
+              <p className="text-sm text-gray-500 mb-1">
+                {troubleModal.deckName ? `From: ${troubleModal.deckName}` : 'Across all your decks'}
+              </p>
+              <p className="text-xs text-gray-400 mb-4">{troubleModal.cards.length} word{troubleModal.cards.length !== 1 ? 's' : ''} sorted by how recently and how often you've missed them</p>
+
+              {/* Preview top 6 */}
+              <div className="bg-orange-50 rounded-xl p-3 mb-5 max-h-36 overflow-y-auto space-y-1">
+                {troubleModal.cards.slice(0, 6).map((c, i) => (
+                  <div key={i} className="flex items-center justify-between text-sm">
+                    <span className="font-semibold text-gray-800">{c.chinese}</span>
+                    <span className="text-gray-400 text-xs truncate max-w-[55%] text-right">{c.english}</span>
+                  </div>
+                ))}
+                {troubleModal.cards.length > 6 && (
+                  <p className="text-xs text-gray-400 text-center pt-1">+{troubleModal.cards.length - 6} more</p>
+                )}
+              </div>
+
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Practice with:</p>
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <button
+                  onClick={() => startTroubleStudy(troubleModal.cards, troubleModal.deckId, troubleModal.deckName)}
+                  className="bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-xl font-semibold hover:from-red-600 hover:to-red-700 transition-all flex flex-col items-center justify-center gap-1"
+                >
+                  <Play size={18} />
+                  <span className="text-xs">Flashcards</span>
+                </button>
+                <button
+                  onClick={() => startTroubleLearn(troubleModal.cards, troubleModal.deckId, troubleModal.deckName)}
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transition-all flex flex-col items-center justify-center gap-1"
+                >
+                  <Brain size={18} />
+                  <span className="text-xs">Learn</span>
+                </button>
+                <button
+                  onClick={() => startTroubleWritePractice(troubleModal.cards, troubleModal.deckId, troubleModal.deckName)}
+                  className="bg-gradient-to-r from-pink-500 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-pink-600 hover:to-pink-700 transition-all flex flex-col items-center justify-center gap-1"
+                >
+                  <span className="text-lg">✍️</span>
+                  <span className="text-xs">Write Practice</span>
+                </button>
+                <button
+                  onClick={() => startTroubleWriteTest(troubleModal.cards, troubleModal.deckId, troubleModal.deckName)}
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-xl font-semibold hover:from-amber-600 hover:to-orange-600 transition-all flex flex-col items-center justify-center gap-1"
+                >
+                  <span className="text-lg">🧪</span>
+                  <span className="text-xs">Write Test</span>
+                </button>
+              </div>
+              <button
+                onClick={() => setTroubleModal(null)}
+                className="w-full bg-gray-100 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Hidden file input for import (triggered by Import/Export modal) */}
         <input
           id="deck-import-file-input"
@@ -10288,6 +10927,222 @@ Rules:
           }
         `}</style>
 
+        <ChatFAB />
+        <ChatSidebar />
+      </div>
+    );
+  }
+
+  // ── Sentence Writing Practice View ────────────────────────────────────────
+  if (currentView === 'sentencePractice' && sentencePracticeDeck) {
+    // No-kewen gate screen
+    if (sentencePracticeDeck.noKewen) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-6 flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+            <div className="text-5xl mb-4">📄</div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">No 课文 attached</h2>
+            <p className="text-gray-500 mb-4 leading-relaxed">
+              This deck doesn't have a 课文 reading text attached yet. To use Sentence Writing, you need the full deck JSON with 课文 included.
+            </p>
+            <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 mb-6 text-left">
+              <p className="text-sm font-semibold text-teal-800 mb-2">📚 CHI 108 students:</p>
+              <p className="text-sm text-teal-700 leading-relaxed">
+                Download the full decks JSON (with 课文 attached) from the Google Drive folder linked on the home screen, then use <strong>Import / Export → Import Decks from File</strong> to replace your current deck.
+              </p>
+              <p className="text-sm text-teal-600 mt-2 leading-relaxed">
+                Or tap <strong>"Add 课文"</strong> on the deck card to paste the reading text manually.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setSentencePracticeDeck(null); setCurrentView('home'); }}
+                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition"
+              >← Back</button>
+              <button
+                onClick={() => {
+                  const deck = sentencePracticeDeck.deck;
+                  setSentencePracticeDeck(null);
+                  setCurrentView('home');
+                  setKewenEditDeck(deck);
+                  setKewenEditText('');
+                  setKewenViewMode('edit');
+                }}
+                className="flex-1 bg-teal-600 text-white py-3 rounded-xl font-semibold hover:bg-teal-700 transition"
+              >+ Add 课文</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const deck = sentencePracticeDeck.deck;
+    const currentSentence = sentenceQueue[sentenceIndex] || '';
+    const translation = sentenceTranslations[currentSentence];
+    const totalSentences = sentenceQueue.length;
+    const progress = totalSentences > 0 ? ((sentenceIndex + 1) / totalSentences) * 100 : 0;
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-4 sm:p-6">
+        <div className="max-w-3xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => { setSentencePracticeDeck(null); setCurrentView('home'); window.speechSynthesis?.cancel(); }}
+              className="text-gray-600 hover:text-gray-800 flex items-center gap-2 font-semibold"
+            >← Home</button>
+            <div className="text-center">
+              <h1 className="text-lg font-bold text-gray-800">课文 Sentence Writing</h1>
+              <p className="text-xs text-gray-400">{deck.name}</p>
+            </div>
+            <button
+              onClick={shuffleSentences}
+              className="text-sm bg-teal-100 hover:bg-teal-200 text-teal-700 px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1"
+              style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+            >🔀 Shuffle</button>
+          </div>
+
+          {/* Progress bar */}
+          <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
+            <div className="bg-teal-500 h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
+          </div>
+          <div className="text-xs text-gray-400 text-right mb-4">{sentenceIndex + 1} / {totalSentences}</div>
+
+          {/* Sentence card */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 mb-4">
+
+            {/* English translation */}
+            <div className="mb-5">
+              <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">English</div>
+              {sentenceTransLoading ? (
+                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                  <div className="flex gap-1">{[0,1,2].map(i => (
+                    <div key={i} className="w-1.5 h-1.5 rounded-full bg-teal-400" style={{ animation: `chatBounce 1.2s ease-in-out ${i*0.15}s infinite` }} />
+                  ))}</div>
+                  Fetching translations...
+                </div>
+              ) : (
+                <p className="text-base text-gray-700 leading-relaxed">{translation || '—'}</p>
+              )}
+            </div>
+
+            {/* Chinese sentence reveal */}
+            <div className="mb-5">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Chinese</div>
+                <div className="flex gap-2" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
+                  <button
+                    onClick={() => speakChinese(currentSentence)}
+                    className="text-xs bg-teal-50 hover:bg-teal-100 text-teal-700 px-2.5 py-1 rounded-lg border border-teal-200 transition font-medium flex items-center gap-1"
+                    style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                  >🔊 Pronounce</button>
+                  <button
+                    onClick={() => setSentenceRevealed(r => !r)}
+                    className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1 rounded-lg transition font-medium"
+                    style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                  >{sentenceRevealed ? '🙈 Hide' : '👁 Reveal'}</button>
+                </div>
+              </div>
+              {sentenceRevealed ? (
+                <p className="text-xl leading-relaxed text-gray-800 p-3 bg-teal-50 rounded-xl border border-teal-100" style={{ fontFamily: 'serif' }}>
+                  {currentSentence}
+                </p>
+              ) : (
+                <div className="h-10 bg-gray-100 rounded-xl flex items-center px-4">
+                  <span className="text-gray-400 text-sm">Hidden — write it first, then reveal to check</span>
+                </div>
+              )}
+            </div>
+
+            {/* Input mode toggle */}
+            <div className="flex gap-2 mb-3" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
+              <button
+                onClick={() => setSentenceInputMode('type')}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${sentenceInputMode === 'type' ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+              >⌨️ Type</button>
+              <button
+                onClick={() => setSentenceInputMode('handwrite')}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${sentenceInputMode === 'handwrite' ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+              >✍️ Handwrite</button>
+            </div>
+
+            {/* Typing textarea */}
+            {sentenceInputMode === 'type' && (
+              <textarea
+                value={sentenceAnswer}
+                onChange={e => setSentenceAnswer(e.target.value)}
+                placeholder="写出这个句子..."
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-teal-400 resize-none text-gray-800"
+                style={{ fontFamily: 'serif', lineHeight: 1.8, minHeight: '120px', fontSize: '18px' }}
+              />
+            )}
+
+            {/* Handwriting canvas */}
+            {sentenceInputMode === 'handwrite' && (
+              <div className="mb-2">
+                <div
+                  className="border-2 border-gray-300 rounded-xl overflow-hidden mb-2"
+                  style={{ touchAction: 'none', position: 'relative', height: '640px', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none', WebkitTapHighlightColor: 'transparent' }}
+                >
+                  <canvas
+                    ref={sentenceBgCanvasRef}
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', pointerEvents: 'none' }}
+                  />
+                  <canvas
+                    ref={sentenceCanvasRef}
+                    onPointerDown={sentenceCanvasPointerDown}
+                    onPointerMove={sentenceCanvasPointerMove}
+                    onPointerUp={sentenceCanvasPointerUp}
+                    onPointerLeave={sentenceCanvasPointerUp}
+                    onSelectStart={e => e.preventDefault()}
+                    onDragStart={e => e.preventDefault()}
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: sentenceEraserOn ? 'cell' : 'crosshair', touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none', WebkitTapHighlightColor: 'transparent', display: 'block' }}
+                  />
+                </div>
+                <div className="flex gap-2" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
+                  <button
+                    onClick={() => { sentenceDrawCtrl.current.isErasing = false; setSentenceEraserOn(false); }}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${!sentenceEraserOn ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600'}`}
+                    style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                  >✏️ Pen</button>
+                  <button
+                    onClick={() => { sentenceDrawCtrl.current.isErasing = true; setSentenceEraserOn(true); }}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${sentenceEraserOn ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600'}`}
+                    style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                  >🧹 Eraser</button>
+                  <button
+                    onClick={clearSentenceCanvas}
+                    className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
+                    style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                  >🗑️ Clear</button>
+                </div>
+              </div>
+            )}
+
+            {/* I Forgot / I Know This */}
+            <div className="flex gap-3 mt-5" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
+              <button
+                onClick={sentenceForgot}
+                className="flex-1 bg-gradient-to-r from-red-400 to-red-500 text-white py-3 rounded-xl font-semibold hover:from-red-500 hover:to-red-600 transition-all"
+                style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+              >😓 I Forgot</button>
+              <button
+                onClick={advanceSentence}
+                className="flex-1 bg-gradient-to-r from-teal-500 to-teal-600 text-white py-3 rounded-xl font-semibold hover:from-teal-600 hover:to-teal-700 transition-all"
+                style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+              >✓ I Know This</button>
+            </div>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes chatBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-6px); opacity: 1; }
+          }
+        `}</style>
         <ChatFAB />
         <ChatSidebar />
       </div>
