@@ -1859,6 +1859,13 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
             </div>
           )}
 
+          {/* Eduroam warning banner — pinned above scroll area */}
+          {!puterReady && (
+            <div style={{ flexShrink: 0, margin: '0', padding: '9px 14px', background: 'rgba(251,191,36,0.1)', borderBottom: '1px solid rgba(251,191,36,0.3)', fontSize: 12, color: '#fbbf24', lineHeight: 1.5 }}>
+              ⚠️ <strong>AI is still loading.</strong> On eduroam? AI may be blocked — try switching to <strong>hotspot</strong>, using a <strong>VPN</strong>, or changing your <strong>DNS</strong> (e.g. 8.8.8.8).
+            </div>
+          )}
+
           {/* Messages */}
           <div className="chat-scroll" style={{ flex: 1, overflowY: 'auto', padding: '16px 14px' }}>
             {chatMessages.length === 0 && (
@@ -1873,12 +1880,6 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {!puterReady && (
-              <div style={{ margin: '0 0 10px 0', padding: '9px 12px', borderRadius: 10, background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)', fontSize: 12, color: '#fbbf24', lineHeight: 1.5 }}>
-                ⚠️ <strong>AI is still loading.</strong> On eduroam? It may be blocked — try switching to <strong>hotspot</strong>, using a <strong>VPN</strong>, or changing your <strong>DNS</strong>.
               </div>
             )}
 
@@ -1957,7 +1958,7 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
   const generateAiDeck = async () => {
     if (!aiDeckTopic.trim() || aiDeckLoading) return;
     if (!window.puter || !window.puter.ai || typeof window.puter.ai.chat !== 'function') {
-      setAiDeckError('AI is still loading. Please wait a moment and try again.');
+      setAiDeckError('AI is still loading. Please wait a moment and try again. On eduroam? AI may be blocked — try switching to hotspot, using a VPN, or changing your DNS (e.g. 8.8.8.8).');
       return;
     }
     setAiDeckLoading(true);
@@ -2047,7 +2048,7 @@ Example response format:
     if (!card || exampleLoading) return;
     
     if (!window.puter || !window.puter.ai || typeof window.puter.ai.chat !== 'function') {
-      setExampleContent('⚠️ AI is still loading. Please wait a moment and try again.');
+      setExampleContent('⚠️ AI is still loading. Please wait a moment and try again. On eduroam? AI may be blocked — try switching to hotspot, using a VPN, or changing your DNS (e.g. 8.8.8.8).');
       setExamplePanelOpen(true);
       return;
     }
@@ -2319,7 +2320,7 @@ Keep it concise and practical.`,
       console.error('Puter.js not ready. window.puter:', window.puter, 'window.puter?.ai:', window.puter?.ai);
       setChatMessages(prev => [...prev, 
         { role: 'user', content },
-        { role: 'assistant', content: '⚠️ Puter.js is still loading. Please wait a few seconds and try again. If this persists, try refreshing the page.\n\n(Check browser console for details — look for "Puter.js loaded successfully" message)' }
+        { role: 'assistant', content: '⚠️ Puter.js is still loading. Please wait a few seconds and try again. If this persists, try refreshing the page.\n\nOn eduroam? AI may be blocked — try switching to hotspot, using a VPN, or changing your DNS (e.g. 8.8.8.8).\n\n(Check browser console for details — look for "Puter.js loaded successfully" message)' }
       ]);
       setChatInput('');
       return;
@@ -2823,7 +2824,7 @@ Keep it concise and practical.`,
   const generateStudyGuide = async (deck) => {
     if (!deck || studyGuideLoading) return;
     if (!window.puter || !window.puter.ai || typeof window.puter.ai.chat !== 'function') {
-      alert('AI is still loading. Please wait and try again.');
+      alert('AI is still loading. Please wait and try again.\n\nOn eduroam? AI may be blocked — try switching to hotspot, using a VPN, or changing your DNS (e.g. 8.8.8.8).');
       return;
     }
     setStudyGuideLoading(true);
@@ -2889,7 +2890,7 @@ Please create a study guide with these sections:
 
   const generateAiTestQuestion = async () => {
     if (aiTestLoading) return;
-    if (!window.puter?.ai?.chat) { alert('AI still loading.'); return; }
+    if (!window.puter?.ai?.chat) { alert('AI is still loading. Please wait a moment and try again.\n\nOn eduroam? AI may be blocked — try switching to hotspot, using a VPN, or changing your DNS (e.g. 8.8.8.8).'); return; }
     setAiTestLoading(true);
     setAiTestFeedback(null);
     setAiTestAnswer('');
@@ -3448,7 +3449,7 @@ Grade this response.` },
   const recognizeHandwriting = async () => {
     const canvas = aiTestCanvasRef.current;
     if (!canvas || aiTestLoading) return;
-    if (!window.puter?.ai?.chat) { alert('AI still loading.'); return; }
+    if (!window.puter?.ai?.chat) { alert('AI is still loading. Please wait a moment and try again.\n\nOn eduroam? AI may be blocked — try switching to hotspot, using a VPN, or changing your DNS (e.g. 8.8.8.8).'); return; }
     setAiTestLoading(true);
     try {
       // Convert canvas to base64 image with white background so the model can see the strokes
@@ -3574,7 +3575,7 @@ Grade this response.` },
     setHwrAddedToDeck(false);
 
     if (!window.puter?.ai?.chat) {
-      setHwrResult({ chinese: '', pinyin: '', english: '', error: 'AI is still loading. Please wait a moment and try again.' });
+      setHwrResult({ chinese: '', pinyin: '', english: '', error: 'AI is still loading. Please wait a moment and try again. On eduroam? AI may be blocked — try switching to hotspot, using a VPN, or changing your DNS (e.g. 8.8.8.8).' });
       setHwrLoading(false);
       return;
     }
@@ -3664,7 +3665,7 @@ Grade this response.` },
   const aiAutoSelectWords = async () => {
     if (aiAutoSelectLoading || !textImportInput.trim()) return;
     if (!window.puter || !window.puter.ai || typeof window.puter.ai.chat !== 'function') {
-      alert('AI is still loading. Please wait a moment and try again.');
+      alert('AI is still loading. Please wait a moment and try again.\n\nOn eduroam? AI may be blocked — try switching to hotspot, using a VPN, or changing your DNS (e.g. 8.8.8.8).');
       return;
     }
     setAiAutoSelectLoading(true);
@@ -3868,7 +3869,7 @@ Rules:
   // AI autofill pinyin + english for a single Chinese input
   const aiAutofillCard = async () => {
     if (!newCard.chinese.trim()) { alert('Enter a Chinese character or phrase first.'); return; }
-    if (!window.puter?.ai?.chat) { alert('AI is still loading, please wait a moment.'); return; }
+    if (!window.puter?.ai?.chat) { alert('AI is still loading, please wait a moment.\n\nOn eduroam? AI may be blocked — try switching to hotspot, using a VPN, or changing your DNS (e.g. 8.8.8.8).'); return; }
     setAiAutofillLoading(true);
     try {
       const response = await window.puter.ai.chat([
@@ -3890,7 +3891,7 @@ Rules:
   // AI bulk autofill - takes comma-separated Chinese phrases, generates cards for all
   const aiBulkAutofill = async (deckId) => {
     if (!bulkInput.trim()) { alert('Enter some Chinese phrases separated by commas.'); return; }
-    if (!window.puter?.ai?.chat) { alert('AI is still loading, please wait a moment.'); return; }
+    if (!window.puter?.ai?.chat) { alert('AI is still loading, please wait a moment.\n\nOn eduroam? AI may be blocked — try switching to hotspot, using a VPN, or changing your DNS (e.g. 8.8.8.8).'); return; }
     const phrases = bulkInput.split(/[、，,]/).map(s => s.trim()).filter(Boolean);
     if (phrases.length === 0) return;
     setBulkAutofillLoading(true);
