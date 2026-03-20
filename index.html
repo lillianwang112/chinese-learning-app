@@ -39,26 +39,21 @@
     <!-- Vite entry point -->
     <script type="module" src="/src/main.jsx"></script>
 
-    <!-- Puter.js for free AI chatbot (loaded dynamically to avoid SW interference) -->
+    <!-- Service Worker + Puter.js: both deferred until after window.load so they
+         don't block the browser's loading bar or get intercepted by the SW -->
     <script>
-        (function() {
+        window.addEventListener('load', function() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(function(reg) { console.log('Service Worker registered:', reg.scope); })
+                    .catch(function(err) { console.log('Service Worker registration failed:', err); });
+            }
             var s = document.createElement('script');
             s.src = 'https://js.puter.com/v2/';
             s.onload = function() { console.log('Puter.js loaded successfully'); };
             s.onerror = function() { console.error('Failed to load Puter.js'); };
             document.head.appendChild(s);
-        })();
-    </script>
-
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(reg => console.log('Service Worker registered:', reg.scope))
-                    .catch(err => console.log('Service Worker registration failed:', err));
-            });
-        }
+        });
     </script>
 </body>
 </html>
