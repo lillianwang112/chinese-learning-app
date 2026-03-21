@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chinese-learning-v3';
+const CACHE_NAME = 'chinese-learning-v4';
 
 // Core shell assets to precache (manifest + icons)
 const PRECACHE_ASSETS = [
@@ -71,18 +71,19 @@ self.addEventListener('fetch', event => {
     caches.match(event.request)
       .then(cachedResponse => {
         if (cachedResponse) {
-          // Return cached version, also update cache in background (stale-while-revalidate)
-          event.waitUntil(
-            fetch(event.request)
-              .then(networkResponse => {
-                if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
-                  const responseClone = networkResponse.clone();
-                  caches.open(CACHE_NAME)
-                    .then(cache => cache.put(event.request, responseClone));
-                }
-              })
-              .catch(() => {})
-          );
+          // Return cached version immediately, then update cache in background (stale-while-revalidate).
+          // Intentionally NOT using event.waitUntil() here: waitUntil() on a fetch event extends
+          // the SW event lifetime, and in Safari on macOS this causes the browser's loading
+          // indicator to stay active while background fetches are in flight. Fire-and-forget
+          // is correct here — the cache update is best-effort and doesn't need to block anything.
+          fetch(event.request)
+            .then(networkResponse => {
+              if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
+                caches.open(CACHE_NAME)
+                  .then(cache => cache.put(event.request, networkResponse));
+              }
+            })
+            .catch(() => {});
           return cachedResponse;
         }
 
