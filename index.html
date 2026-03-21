@@ -51,11 +51,24 @@
                     .then(function(reg) { console.log('Service Worker registered:', reg.scope); })
                     .catch(function(err) { console.log('Service Worker registration failed:', err); });
             }
-            var s = document.createElement('script');
-            s.src = 'https://js.puter.com/v2/';
-            s.onload = function() { console.log('Puter.js loaded successfully'); };
-            s.onerror = function() { console.error('Failed to load Puter.js'); };
-            document.head.appendChild(s);
+            // Defer Puter.js injection to the next event-loop turn so it is
+            // fully decoupled from the load event. In Safari on macOS, appending
+            // a <script> element synchronously inside the load handler can
+            // re-activate the browser's loading indicator (spinning favicon /
+            // URL-bar progress bar) while the script downloads. Scheduling via
+            // setTimeout(0) moves the injection past the load-event flush,
+            // preventing Safari from associating this network request with the
+            // page's loading lifecycle. The explicit async=true makes this
+            // intent clear to all browsers (dynamic scripts default to async,
+            // but being explicit helps older Safari versions honour it).
+            setTimeout(function() {
+                var s = document.createElement('script');
+                s.src = 'https://js.puter.com/v2/';
+                s.async = true;
+                s.onload = function() { console.log('Puter.js loaded successfully'); };
+                s.onerror = function() { console.error('Failed to load Puter.js'); };
+                document.head.appendChild(s);
+            }, 0);
         });
     </script>
 </body>
