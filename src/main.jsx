@@ -455,9 +455,13 @@ const ChineseLearningApp = () => {
   const [chatModel, setChatModel] = useState('google/gemini-2.5-flash');
   const [chatShowSettings, setChatShowSettings] = useState(false);
   const [puterReady, setPuterReady] = useState(false);
+  const [puterServiceDown, setPuterServiceDown] = useState(false);
   const eduroamToastTimer = React.useRef(null);
   const showEduroamToast = () => {
     if (typeof window.__showEduroamToast === 'function') window.__showEduroamToast();
+  };
+  const showPuterDownToast = () => {
+    if (typeof window.__showPuterDownToast === 'function') window.__showPuterDownToast();
   };
   const [chatReturnView, setChatReturnView] = useState('home');
   const chatMessagesEndRef = useRef(null);
@@ -1835,8 +1839,8 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
               <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg, #e11d48, #be123c)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 17 }}>中</div>
               <div>
                 <div style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>Chinese Tutor</div>
-                <div style={{ fontSize: 11, color: puterReady ? '#4ade80' : (window.puter ? '#fbbf24' : '#888') }}>
-                  {puterReady ? '● Online' : (window.puter ? '● Ready' : '● Loading...')}
+                <div style={{ fontSize: 11, color: puterServiceDown ? '#f97316' : (puterReady ? '#4ade80' : (window.puter ? '#fbbf24' : '#888')) }}>
+                  {puterServiceDown ? '● Service issues' : (puterReady ? '● Online' : (window.puter ? '● Ready' : '● Loading...'))}
                 </div>
               </div>
             </div>
@@ -1861,6 +1865,12 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
             </div>
           )}
 
+          {/* Puter.js service down banner */}
+          {puterServiceDown && (
+            <div style={{ flexShrink: 0, margin: '0', padding: '9px 14px', background: 'rgba(249,115,22,0.1)', borderBottom: '1px solid rgba(249,115,22,0.35)', fontSize: 12, color: '#fb923c', lineHeight: 1.5 }}>
+              🔴 <strong>Puter.js is currently down.</strong> This isn't an eduroam issue — the AI service itself is unavailable. Please try again later.
+            </div>
+          )}
           {/* Eduroam warning banner — pinned above scroll area */}
           {!puterReady && (
             <div style={{ flexShrink: 0, margin: '0', padding: '9px 14px', background: 'rgba(251,191,36,0.1)', borderBottom: '1px solid rgba(251,191,36,0.3)', fontSize: 12, color: '#fbbf24', lineHeight: 1.5 }}>
@@ -2360,8 +2370,15 @@ Keep it concise and practical.`,
       setChatMessages(prev => [...prev, { role: 'assistant', content: assistantContent }]);
     } catch (err) {
       console.error('Chat error:', err);
-      setChatMessages(prev => [...prev, { role: 'assistant', content: `⚠️ Error: ${err.message || 'Something went wrong'}. Try again or switch models in settings.` }]);
-      showEduroamToast();
+      if (puterReady) {
+        // Puter.js loaded fine but the API call failed — service is likely down
+        setPuterServiceDown(true);
+        setChatMessages(prev => [...prev, { role: 'assistant', content: `🔴 Puter.js appears to be down right now. The AI service is unavailable — this is not an eduroam issue. Please try again later.` }]);
+        showPuterDownToast();
+      } else {
+        setChatMessages(prev => [...prev, { role: 'assistant', content: `⚠️ Error: ${err.message || 'Something went wrong'}. Try again or switch models in settings.` }]);
+        showEduroamToast();
+      }
     } finally {
       setChatLoading(false);
       chatInputRef.current?.focus();
@@ -11180,6 +11197,8 @@ Rules:
         const AppWithToast = () => {
           const [toast, setToast] = React.useState(false);
           const timerRef = React.useRef(null);
+          const [puterDownToast, setPuterDownToast] = React.useState(false);
+          const puterDownTimerRef = React.useRef(null);
 
           // Expose a global trigger so ChineseLearningApp can fire it
           React.useEffect(() => {
@@ -11188,12 +11207,40 @@ Rules:
               if (timerRef.current) clearTimeout(timerRef.current);
               timerRef.current = setTimeout(() => setToast(false), 9000);
             };
-            return () => { delete window.__showEduroamToast; };
+            window.__showPuterDownToast = () => {
+              setPuterDownToast(true);
+              if (puterDownTimerRef.current) clearTimeout(puterDownTimerRef.current);
+              puterDownTimerRef.current = setTimeout(() => setPuterDownToast(false), 12000);
+            };
+            return () => { delete window.__showEduroamToast; delete window.__showPuterDownToast; };
           }, []);
 
           return (
             <React.Fragment>
               <ChineseLearningApp />
+              {puterDownToast && (
+                <div style={{
+                  position: 'fixed', bottom: toast ? 100 : 24, left: '50%', transform: 'translateX(-50%)',
+                  zIndex: 9999, maxWidth: 420, width: 'calc(100% - 32px)',
+                  background: '#1a0e08', border: '1px solid rgba(249,115,22,0.5)',
+                  borderRadius: 14, padding: '12px 16px',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                  display: 'flex', alignItems: 'flex-start', gap: 10,
+                  animation: 'toastSlideUp 0.25s ease',
+                }}>
+                  <span style={{ fontSize: 18, flexShrink: 0, marginTop: 1 }}>🔴</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ color: '#fb923c', fontWeight: 700, fontSize: 13, marginBottom: 3 }}>
+                      Puter.js is currently down
+                    </div>
+                    <div style={{ color: '#c4845a', fontSize: 12, lineHeight: 1.5 }}>
+                      The AI service is unavailable right now. This is <strong style={{color:'#fdba74'}}>not an eduroam issue</strong> — Puter.js itself is down. Please try again later.
+                    </div>
+                  </div>
+                  <button onClick={() => setPuterDownToast(false)}
+                    style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: 16, padding: '0 0 0 4px', flexShrink: 0, lineHeight: 1 }}>✕</button>
+                </div>
+              )}
               {toast && (
                 <div style={{
                   position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
