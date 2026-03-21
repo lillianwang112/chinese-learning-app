@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { createPortal } from 'react-dom';
 import './index.css';
 
         // Lucide React Icon Components (inline)
@@ -3581,17 +3582,26 @@ Grade this response.` },
     }
 
     try {
-      const dataUrl = canvas.toDataURL('image/png');
+      // Composite white background + strokes onto an offscreen canvas — same approach as AI test OCR
+      const offscreen = document.createElement('canvas');
+      offscreen.width = canvas.width;
+      offscreen.height = canvas.height;
+      const offCtx = offscreen.getContext('2d');
+      offCtx.fillStyle = '#ffffff';
+      offCtx.fillRect(0, 0, offscreen.width, offscreen.height);
+      offCtx.drawImage(canvas, 0, 0);
+      const dataUrl = offscreen.toDataURL('image/png');
+
       const res = await window.puter.ai.chat([
         {
           role: 'system',
-          content: 'You are a Chinese handwriting recognition system. The user has drawn a Chinese character or characters on a white canvas. Respond ONLY with a JSON object, no markdown, no backticks, no extra text: {"chinese":"<recognized characters>","pinyin":"<pinyin with tone marks>","english":"<concise English definition>"}. If the canvas appears blank or no Chinese characters are visible, respond with: {"chinese":"","pinyin":"","english":""}',
+          content: 'You are a Chinese handwriting recognition system. The user has drawn Chinese character(s) on a white canvas. Respond ONLY with a JSON object — no markdown, no backticks, no extra text. Format: {"chinese":"<recognized characters>","pinyin":"<pinyin with tone marks>","english":"<concise English definition>"}. IMPORTANT: Only report characters you can clearly see. Do NOT guess or invent characters. If the canvas is blank or you cannot clearly read Chinese characters, respond with exactly: {"chinese":"","pinyin":"","english":""}',
         },
         {
           role: 'user',
           content: [
             { type: 'image_url', image_url: { url: dataUrl } },
-            { type: 'text', text: 'What Chinese character(s) did I write? Return JSON only.' },
+            { type: 'text', text: 'What Chinese character(s) did I write? Return JSON only. Do not hallucinate — if the canvas looks blank or unclear, return the empty JSON.' },
           ],
         },
       ], { model: 'gpt-4o' });
@@ -7529,7 +7539,7 @@ Rules:
                     </div>
 
                     {/* Popup rendered via portal to document.body — escapes all stacking contexts */}
-                    {kewenPopup && kewenPopup.deckId === deckId && ReactDOM.createPortal(
+                    {kewenPopup && kewenPopup.deckId === deckId && createPortal(
                       <div
                         style={{ position:'fixed', left: kewenPopup.x, top: kewenPopup.y, transform:'translateX(-50%)', zIndex:999999, minWidth:230, maxWidth:310, pointerEvents:'auto' }}
                         onMouseDown={e => e.stopPropagation()}
@@ -7679,6 +7689,10 @@ Rules:
                     backgroundImage: 'linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, #e5e7eb 1px, transparent 1px)',
                     backgroundSize: '60px 60px',
                     touchAction: 'none',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    WebkitTouchCallout: 'none',
+                    WebkitTapHighlightColor: 'transparent',
                   }}
                 >
                   <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:1 }}>
@@ -7691,7 +7705,9 @@ Rules:
                     onPointerMove={hwrPointerMove}
                     onPointerUp={hwrPointerUp}
                     onPointerLeave={hwrPointerUp}
-                    style={{ width: '100%', height: '280px', display:'block', cursor: hwrEraserOn ? 'cell' : 'crosshair', touchAction:'none', position:'relative', zIndex:2 }}
+                    onSelectStart={e => e.preventDefault()}
+                    onDragStart={e => e.preventDefault()}
+                    style={{ width: '100%', height: '280px', display:'block', cursor: hwrEraserOn ? 'cell' : 'crosshair', touchAction:'none', userSelect:'none', WebkitUserSelect:'none', WebkitTouchCallout:'none', WebkitTapHighlightColor:'transparent', position:'relative', zIndex:2 }}
                   />
                 </div>
                 <div className="flex gap-2 mt-3">
