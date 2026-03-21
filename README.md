@@ -1,4 +1,4 @@
-# 汉语学习 Chinese Learning App
+# 中文-Learn Chinese Learning App
 ### CHI 108 - Princeton University
 
 <p align="center">
