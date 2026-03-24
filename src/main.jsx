@@ -294,6 +294,7 @@ import './index.css';
                     lastStudied: progressData.lastStudied || {},
                     userSettings: progressData.userSettings || {},
                     studyGuides: progressData.studyGuides || [],
+                    sentenceTranslations: progressData.sentenceTranslations || {},
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             },
@@ -311,6 +312,7 @@ import './index.css';
                     lastStudied: data.lastStudied || {},
                     userSettings: data.userSettings || null,
                     studyGuides: data.studyGuides || [],
+                    sentenceTranslations: data.sentenceTranslations || {},
                 };
             }
         };
@@ -510,6 +512,9 @@ const ChineseLearningApp = () => {
   const [kewenPopup, setKewenPopup] = useState(null); // { text, x, y, pinyin, english, loading, start, end, deckId }
   const [kewenPinyinOverlay, setKewenPinyinOverlay] = useState(() => {
     try { return JSON.parse(localStorage.getItem('kewenPinyinOverlay') || 'false'); } catch(e) { return false; }
+  });
+  const [kewenHighlightPinyin, setKewenHighlightPinyin] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('kewenHighlightPinyin') || 'false'); } catch(e) { return false; }
   });
   const [kewenPinyinLoading, setKewenPinyinLoading] = useState(false);
   // Cache: char → pinyin string, built from CEDICT on first overlay toggle
@@ -851,7 +856,7 @@ const ChineseLearningApp = () => {
     { filename: '108vocab/人权和贸易.json',                    name: '人权和贸易',                           cards: 27,  topic: 'Oh China Lesson 23' },
     { filename: '108vocab/中国人的衣食住行.json',               name: '中国人的衣食住行',                       cards: 56,  topic: 'Oh China Lesson 31' },
     { filename: '103vocab/CHI103-CHAR LIST.json',           name: 'CHI 103 Character List',             cards: 522, topic: 'CHI 103 Review' },
-    { filename: '103vocab/CHI103-VOCAB LIST.json',          name: 'CHI 103 Vocab List',                 cards: 483, topic: 'CHI 103 Review' },
+    { filename: '103vocab/CHI103-VOCAB LIST.json',          name: 'CHI 103 Vocabulary',                 cards: 483, topic: 'CHI 103 Review' },
   ];
 
   const importBuiltInDeck = async (deckInfo) => {
@@ -1095,7 +1100,7 @@ const ChineseLearningApp = () => {
       saveToCloud(currentUser.uid);
     }, 3000);
     return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
-  }, [decks, learnProgress, studyStreak, bestMatchTimes, folders, lastStudied, userSettings, currentUser, reorderMode, bulkReorderFolderId, currentView, studyGuides]);
+  }, [decks, learnProgress, studyStreak, bestMatchTimes, folders, lastStudied, userSettings, currentUser, reorderMode, bulkReorderFolderId, currentView, studyGuides, sentenceTranslations]);
 
   // Skips sync-related state updates when drawing — prevents re-renders mid-stroke.
   const safeSetSyncStatus = (status) => {
@@ -1116,7 +1121,7 @@ const ChineseLearningApp = () => {
       const foldersToSave = overrideFolders !== undefined ? overrideFolders : (latestFoldersRef.current || folders);
       const settingsToSave = latestSettingsRef.current || userSettings;
       await CloudSync.saveDecks(userId, decksToSave);
-      await CloudSync.saveProgress(userId, { learnProgress, studyStreak, bestMatchTimes, folders: foldersToSave, lastStudied, userSettings: settingsToSave, studyGuides });
+      await CloudSync.saveProgress(userId, { learnProgress, studyStreak, bestMatchTimes, folders: foldersToSave, lastStudied, userSettings: settingsToSave, studyGuides, sentenceTranslations });
       safeSetSyncStatus('synced');
       safeSetLastSyncTime(new Date());
       setTimeout(() => safeSetSyncStatus('idle'), 3000);
@@ -1167,6 +1172,9 @@ const ChineseLearningApp = () => {
         }
         if (cloudProgress.studyGuides && cloudProgress.studyGuides.length > 0) {
           setStudyGuides(cloudProgress.studyGuides);
+        }
+        if (cloudProgress.sentenceTranslations && Object.keys(cloudProgress.sentenceTranslations).length > 0) {
+          setSentenceTranslations(prev => ({ ...cloudProgress.sentenceTranslations, ...prev }));
         }
       }
 
@@ -3800,6 +3808,29 @@ Grade this response.` },
   const stopKewen = () => {
     window.speechSynthesis.cancel();
     setKewenSpeaking(false);
+  };
+
+  // Toggle highlight pinyin mode — pre-loads CEDICT on first use (highlights only)
+  const toggleKewenHighlightPinyin = async (text) => {
+    const next = !kewenHighlightPinyin;
+    setKewenHighlightPinyin(next);
+    try { localStorage.setItem('kewenHighlightPinyin', JSON.stringify(next)); } catch(e) {}
+    if (!next) return;
+    const chars = [...new Set(text.split('').filter(c => /\p{Script=Han}/u.test(c)))];
+    if (chars.every(c => kewenPinyinCacheRef.current[c] !== undefined)) return;
+    setKewenPinyinLoading(true);
+    try {
+      const dict = await getCedict();
+      if (dict) {
+        chars.forEach(c => {
+          if (kewenPinyinCacheRef.current[c] === undefined) {
+            const entry = dict[c];
+            kewenPinyinCacheRef.current[c] = entry ? (entry.p || '').split(' ')[0] : '';
+          }
+        });
+      }
+    } catch(e) {}
+    setKewenPinyinLoading(false);
   };
 
   // Toggle pinyin overlay — pre-loads CEDICT on first use
@@ -7604,7 +7635,10 @@ Rules:
                     const isHan = (c) => /\p{Script=Han}/u.test(c);
                     const cache = kewenPinyinCacheRef.current;
 
-                    const inner = kewenPinyinOverlay ? (
+                    // Show ruby pinyin if: full overlay on, OR highlight-pinyin mode on and this run is highlighted
+                    const showPinyin = kewenPinyinOverlay || (kewenHighlightPinyin && isHighlighted);
+
+                    const inner = showPinyin ? (
                       chars.map((ch, ci) => {
                         // Preserve newlines as <br> and spaces as non-breaking space in overlay mode
                         if (ch === '\n') return <br key={ci} />;
@@ -7655,7 +7689,7 @@ Rules:
                       style={{
                         fontFamily: 'serif',
                         fontSize: '1.3rem',
-                        lineHeight: kewenPinyinOverlay ? 3.2 : 2.6,
+                        lineHeight: (kewenPinyinOverlay || kewenHighlightPinyin) ? 3.2 : 2.6,
                         color: darkMode ? '#f3f4f6' : '#1a1a1a',
                         userSelect: 'text',
                         WebkitUserSelect: 'text',
@@ -7716,6 +7750,21 @@ Rules:
                             {kewenPinyinOverlay ? 'Hide Pinyin' : 'Show Pinyin'}
                           </React.Fragment>
                         )}
+                      </button>
+
+                      {/* Highlight Pinyin toggle — shows pinyin only above highlighted text */}
+                      <button
+                        onClick={() => toggleKewenHighlightPinyin(text)}
+                        disabled={kewenPinyinLoading}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition border ${
+                          kewenHighlightPinyin
+                            ? 'bg-amber-500 text-white border-amber-500'
+                            : darkMode ? 'bg-amber-900 text-amber-300 border-amber-800 hover:bg-amber-800' : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                        } disabled:opacity-50`}
+                        title="Show pinyin only above highlighted text"
+                      >
+                        <span style={{ fontFamily:'serif', fontSize:'1em', lineHeight:1 }}>亮</span>
+                        {kewenHighlightPinyin ? 'Hide Highlight Pinyin' : 'Highlight Pinyin'}
                       </button>
 
                       {highlights.length > 0 && (
@@ -9560,7 +9609,7 @@ Rules:
                    learnMode === 'fill-blank' ? 'Fill in the Blank' : 'Written Answer'}
                 </span>
               </div>
-              <div className="text-gray-600">
+              <div className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
                 Round {currentRound}{learnMode === 'multiple-choice' ? 'a' : 'b'} • Card {currentLearnIndex + 1} / {learnCards.length}
               </div>
             </div>
@@ -9568,7 +9617,7 @@ Rules:
 
           {/* Progress Bar */}
           <div className="mb-8">
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className={`w-full rounded-full h-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
               <div
                 className="bg-purple-600 h-2 rounded-full transition-all"
                 style={{ width: `${((currentLearnIndex + 1) / learnCards.length) * 100}%` }}
@@ -9577,10 +9626,10 @@ Rules:
           </div>
 
           {/* Question Card */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
+          <div className={`rounded-2xl shadow-xl p-8 mb-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
             {/* Chinese Character */}
             <div className="text-center mb-8">
-              <div className="text-7xl font-bold text-gray-800 mb-4">
+              <div className={`text-7xl font-bold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                 {currentCard.chinese}
               </div>
               <button
@@ -9595,7 +9644,7 @@ Rules:
             {/* Question based on mode */}
             {learnMode === 'multiple-choice' && !showAnswer && (
               <div>
-                <p className="text-xl text-gray-700 mb-6 text-center">Select the correct meaning:</p>
+                <p className={`text-xl mb-6 text-center ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Select the correct meaning:</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {multipleChoiceOptions.map((option, index) => (
                     <button
@@ -9604,13 +9653,13 @@ Rules:
                       className={`p-4 rounded-lg border-2 transition text-lg text-left flex items-center gap-3 ${
                         selectedOption === option
                           ? 'border-purple-600 bg-purple-50'
-                          : 'border-gray-300 hover:border-purple-400'
+                          : darkMode ? 'border-gray-600 hover:border-purple-400 text-gray-200' : 'border-gray-300 hover:border-purple-400'
                       }`}
                     >
                       <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md text-sm font-bold flex-shrink-0 ${
                         selectedOption === option
                           ? 'bg-purple-600 text-white'
-                          : 'bg-gray-200 text-gray-600'
+                          : darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-600'
                       }`}>{index + 1}</span>
                       {option}
                     </button>
@@ -9630,7 +9679,7 @@ Rules:
 
             {(learnMode === 'fill-blank' || learnMode === 'written') && !showAnswer && (
               <div>
-                <p className="text-xl text-gray-700 mb-6 text-center">
+                <p className={`text-xl mb-6 text-center ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   Type the pinyin pronunciation:
                 </p>
                 <input
@@ -9646,8 +9695,9 @@ Rules:
                   className="w-full px-6 py-4 text-xl border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 mb-4"
                   autoFocus
                 />
-                <p className="text-sm text-gray-500 mb-6 text-center">
-                  Tip: Type with tone marks (nǐ hǎo) or numbers (ni3 ha3o)
+                <p className={`text-sm mb-6 text-center ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Tip: Type with tone marks (nǐ hǎo) or numbers (ni3 ha3o)<br/>
+                  <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>For numbers, place the number right after the toned vowel: <strong>ha3o</strong> not hao3 (好 = hǎo)</span>
                 </p>
                 <button
                   onClick={checkAnswer}
@@ -9661,23 +9711,27 @@ Rules:
 
             {/* Answer Result */}
             {showAnswer && (
-              <div className={`p-6 rounded-lg ${answerResult === 'correct' ? 'bg-green-50' : 'bg-red-50'}`}>
+              <div className={`p-6 rounded-lg ${
+                answerResult === 'correct'
+                  ? darkMode ? 'bg-green-900' : 'bg-green-50'
+                  : darkMode ? 'bg-red-900' : 'bg-red-50'
+              }`}>
                 <div className="flex items-center gap-3 mb-4">
                   {answerResult === 'correct' ? (
-                    <Check size={32} className="text-green-600" />
+                    <Check size={32} className="text-green-500" />
                   ) : (
-                    <X size={32} className="text-red-600" />
+                    <X size={32} className="text-red-500" />
                   )}
-                  <h3 className={`text-2xl font-bold ${answerResult === 'correct' ? 'text-green-600' : 'text-red-600'}`}>
+                  <h3 className={`text-2xl font-bold ${answerResult === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
                     {answerResult === 'correct' ? 'Correct!' : 'Not quite...'}
                   </h3>
                 </div>
 
                 <div className="mb-4">
-                  <p className="text-gray-700 text-lg mb-2">
+                  <p className={`text-lg mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                     <span className="font-semibold">Pinyin:</span> {currentCard.pinyin}
                   </p>
-                  <p className="text-gray-700 text-lg">
+                  <p className={`text-lg ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                     <span className="font-semibold">Meaning:</span> {currentCard.english}
                   </p>
                 </div>
@@ -10575,8 +10629,8 @@ Rules:
               </button>
             </div>
 
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-700 text-center">
+            <div className={`mt-6 p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
+              <p className={`text-sm text-center ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 {(writingMode === 'test' || writingMode === 'testAll') ? (
                   <>💡 <strong>Test Mode:</strong> Try to write the character from memory using only the pinyin and English. Press "Reveal" to check your answer, then mark "I Know This" or "I Forgot".</>
                 ) : (
