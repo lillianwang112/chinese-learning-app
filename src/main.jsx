@@ -5915,7 +5915,7 @@ Rules:
 
   if (currentView === 'home') {
     return (
-      <div className="min-h-screen" style={{background: 'linear-gradient(160deg, #fdf3ee 0%, #fef9f5 60%, #fdf3ee 100%)'}}>
+      <div className="min-h-screen" style={{background: darkMode ? '#111827' : 'linear-gradient(160deg, #fdf3ee 0%, #fef9f5 60%, #fdf3ee 100%)'}}>
         {/* Hero Section */}
         <div className="text-white py-12 px-6 shadow-2xl" style={{background: 'linear-gradient(120deg, #7a0d0d 0%, #a01515 25%, #c0310d 55%, #8b1a08 80%, #5c0a0a 100%)'}}>
           <div className="max-w-6xl mx-auto">
@@ -5997,17 +5997,17 @@ Rules:
             const topCards = getTopTroubleCards(topN);
             if (topCards.length === 0) return null;
             return (
-              <div className="mb-6 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap">
+              <div className={`mb-6 rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap border ${darkMode ? 'bg-gray-800 border-orange-900' : 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-200'}`}>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-lg">🔥</span>
-                    <span className="font-bold text-gray-800">Trouble Words</span>
-                    <span className="bg-orange-100 text-orange-700 text-xs font-semibold px-2 py-0.5 rounded-full">{topCards.length} cards</span>
+                    <span className={`font-bold ${darkMode ? 'text-orange-300' : 'text-gray-800'}`}>Trouble Words</span>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${darkMode ? 'bg-orange-900 text-orange-300' : 'bg-orange-100 text-orange-700'}`}>{topCards.length} cards</span>
                   </div>
-                  <p className="text-xs text-gray-500">Your most-missed words across all decks — practice them now</p>
+                  <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Your most-missed words across all decks — practice them now</p>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {topCards.slice(0, 5).map((c, i) => (
-                      <span key={i} className="bg-white border border-orange-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">{c.chinese}</span>
+                      <span key={i} className={`text-xs px-2 py-0.5 rounded-full border ${darkMode ? 'bg-gray-700 border-orange-800 text-orange-200' : 'bg-white border-orange-200 text-gray-700'}`}>{c.chinese}</span>
                     ))}
                     {topCards.length > 5 && <span className="text-xs text-gray-400 self-center">+{topCards.length - 5} more</span>}
                   </div>
@@ -6030,7 +6030,7 @@ Rules:
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search decks or vocab (e.g. 你好, hello, HSK1)..."
-                className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 pl-12 text-lg focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all shadow-md placeholder-gray-400 text-gray-800"
+                className={`w-full border-2 rounded-2xl px-5 py-4 pl-12 text-lg focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all shadow-md placeholder-gray-400 ${darkMode ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-500' : 'bg-white border-gray-200 text-gray-800'}`}
               />
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
@@ -6048,7 +6048,7 @@ Rules:
           </div>
 
           {/* Quick Actions Bar */}
-          <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
+          <div className={`rounded-2xl shadow-xl p-6 mb-8 border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
             <div className="flex gap-3 justify-center flex-wrap">
               <button
                 onClick={() => setCurrentView('create')}
@@ -6481,11 +6481,11 @@ Rules:
             if (!folder) return null;
             return (
               <div className="mb-4 flex items-center gap-2">
-                <button onClick={() => setCurrentFolderId(null)} className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-1">
+                <button onClick={() => setCurrentFolderId(null)} className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-1 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}>
                   ← All Decks
                 </button>
                 <ChevronRight size={16} className="text-gray-400" />
-                <span className="text-gray-700 font-semibold">{folder.name}</span>
+                <span className={`font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>{folder.name}</span>
               </div>
             );
           })()}
