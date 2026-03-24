@@ -5460,11 +5460,11 @@ Rules:
   // ==========================================
   if (currentView === 'loginForm') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full border border-gray-100">
+      <div className={`min-h-screen flex items-center justify-center p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-orange-50 via-white to-blue-50'}`}>
+        <div className={`rounded-2xl shadow-2xl p-8 max-w-md w-full border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
           <button
             onClick={() => { setCurrentView('login'); setAuthError(''); }}
-            className="text-gray-500 hover:text-gray-700 mb-4 flex items-center gap-1 text-sm"
+            className={`mb-4 flex items-center gap-1 text-sm ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
           >
             ← Back
           </button>
@@ -5569,16 +5569,16 @@ Rules:
   // ==========================================
   if (currentView === 'account') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 p-6">
+      <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-orange-50 via-white to-blue-50'}`}>
         <div className="max-w-lg mx-auto">
           <button
             onClick={() => setCurrentView('home')}
-            className="text-gray-500 hover:text-gray-700 mb-6 flex items-center gap-1 text-sm"
+            className={`mb-6 flex items-center gap-1 text-sm ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
           >
             ← Back to Home
           </button>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div className={`rounded-2xl shadow-xl p-8 border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
             <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
               <UserIcon size={28} />
               Account &amp; Settings
@@ -7173,30 +7173,30 @@ Rules:
         {/* Trouble Words modal */}
         {troubleModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setTroubleModal(null)}>
-            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
+            <div className={`rounded-2xl shadow-2xl p-6 max-w-sm w-full ${darkMode ? 'bg-gray-800' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-2xl">🔥</span>
-                <h3 className="text-lg font-bold text-gray-800">Trouble Words</h3>
+                <h3 className={`text-lg font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Trouble Words</h3>
               </div>
-              <p className="text-sm text-gray-500 mb-1">
+              <p className={`text-sm mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-500'}`}>
                 {troubleModal.deckName ? `From: ${troubleModal.deckName}` : 'Across all your decks'}
               </p>
-              <p className="text-xs text-gray-400 mb-4">{troubleModal.cards.length} word{troubleModal.cards.length !== 1 ? 's' : ''} sorted by how recently and how often you've missed them</p>
+              <p className={`text-xs mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-400'}`}>{troubleModal.cards.length} word{troubleModal.cards.length !== 1 ? 's' : ''} sorted by how recently and how often you've missed them</p>
 
               {/* Preview top 6 */}
-              <div className="bg-orange-50 rounded-xl p-3 mb-5 max-h-36 overflow-y-auto space-y-1">
+              <div className={`rounded-xl p-3 mb-5 max-h-36 overflow-y-auto space-y-1 ${darkMode ? 'bg-gray-700' : 'bg-orange-50'}`}>
                 {troubleModal.cards.slice(0, 6).map((c, i) => (
                   <div key={i} className="flex items-center justify-between text-sm">
-                    <span className="font-semibold text-gray-800">{c.chinese}</span>
-                    <span className="text-gray-400 text-xs truncate max-w-[55%] text-right">{c.english}</span>
+                    <span className={`font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{c.chinese}</span>
+                    <span className={`text-xs truncate max-w-[55%] text-right ${darkMode ? 'text-gray-400' : 'text-gray-400'}`}>{c.english}</span>
                   </div>
                 ))}
                 {troubleModal.cards.length > 6 && (
-                  <p className="text-xs text-gray-400 text-center pt-1">+{troubleModal.cards.length - 6} more</p>
+                  <p className={`text-xs text-center pt-1 ${darkMode ? 'text-gray-400' : 'text-gray-400'}`}>+{troubleModal.cards.length - 6} more</p>
                 )}
               </div>
 
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Practice with:</p>
+              <p className={`text-xs font-semibold uppercase tracking-wide mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Practice with:</p>
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <button
                   onClick={() => startTroubleStudy(troubleModal.cards, troubleModal.deckId, troubleModal.deckName)}
@@ -7229,7 +7229,7 @@ Rules:
               </div>
               <button
                 onClick={() => setTroubleModal(null)}
-                className="w-full bg-gray-100 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+                className={`w-full py-2.5 rounded-xl font-semibold transition-all ${darkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
               >
                 Cancel
               </button>
@@ -7431,31 +7431,31 @@ Rules:
         {/* 课文 Rich Modal — Read, Listen, Highlight, Edit */}
         {kewenEditDeck && (
           <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className={`rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
 
               {/* Header */}
-              <div className="p-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+              <div className={`p-5 border-b flex items-center justify-between flex-shrink-0 ${darkMode ? 'border-gray-700' : 'border-gray-100'}`}>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800">
+                  <h3 className={`text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                     {kewenViewMode === 'edit' ? (kewenEditDeck.kewen ? 'Edit' : 'Add') + ' 课文' : '课文'}
                   </h3>
-                  <p className="text-sm text-gray-500 mt-0.5">{kewenEditDeck.name}</p>
+                  <p className={`text-sm mt-0.5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{kewenEditDeck.name}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {/* Mode toggle — only shown when kewen exists */}
                   {kewenEditDeck.kewen && (
-                    <div className="flex rounded-lg border border-gray-200 overflow-hidden text-xs font-semibold">
+                    <div className={`flex rounded-lg border overflow-hidden text-xs font-semibold ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
                       <button
                         onClick={() => { setKewenViewMode('read'); stopKewen(); }}
-                        className={`px-3 py-1.5 transition ${kewenViewMode === 'read' ? 'bg-orange-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                        className={`px-3 py-1.5 transition ${kewenViewMode === 'read' ? 'bg-orange-600 text-white' : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                       >📖 Read</button>
                       <button
                         onClick={() => { setKewenViewMode('edit'); stopKewen(); }}
-                        className={`px-3 py-1.5 transition ${kewenViewMode === 'edit' ? 'bg-orange-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                        className={`px-3 py-1.5 transition ${kewenViewMode === 'edit' ? 'bg-orange-600 text-white' : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                       ><Edit2 size={12} className="inline mr-1" />Edit</button>
                     </div>
                   )}
-                  <button onClick={() => { setKewenEditDeck(null); setKewenEditText(''); stopKewen(); setKewenViewMode('read'); }} className="text-gray-400 hover:text-gray-600 text-xl ml-1">✕</button>
+                  <button onClick={() => { setKewenEditDeck(null); setKewenEditText(''); stopKewen(); setKewenViewMode('read'); }} className={`text-xl ml-1 ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'}`}>✕</button>
                 </div>
               </div>
 
@@ -7656,7 +7656,7 @@ Rules:
                         fontFamily: 'serif',
                         fontSize: '1.3rem',
                         lineHeight: kewenPinyinOverlay ? 3.2 : 2.6,
-                        color: '#1a1a1a',
+                        color: darkMode ? '#f3f4f6' : '#1a1a1a',
                         userSelect: 'text',
                         WebkitUserSelect: 'text',
                         MozUserSelect: 'text',
@@ -7679,10 +7679,10 @@ Rules:
                 return (
                   <React.Fragment>
                     {/* TTS + Pinyin toolbar */}
-                    <div className="px-5 pt-4 pb-2 flex items-center gap-2 flex-shrink-0 border-b border-gray-50 flex-wrap">
+                    <div className={`px-5 pt-4 pb-2 flex items-center gap-2 flex-shrink-0 border-b flex-wrap ${darkMode ? 'border-gray-700' : 'border-gray-50'}`}>
                       <button
                         onClick={() => speakKewen(text)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition ${kewenSpeaking ? 'bg-orange-600 text-white' : 'bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100'}`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition ${kewenSpeaking ? 'bg-orange-600 text-white' : darkMode ? 'bg-orange-900 text-orange-300 border border-orange-800 hover:bg-orange-800' : 'bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100'}`}
                       >
                         {kewenSpeaking ? (
                           <React.Fragment>
@@ -7701,7 +7701,7 @@ Rules:
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition border ${
                           kewenPinyinOverlay
                             ? 'bg-rose-600 text-white border-rose-600'
-                            : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                            : darkMode ? 'bg-rose-900 text-rose-300 border-rose-800 hover:bg-rose-800' : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
                         } disabled:opacity-50`}
                         title="Toggle pinyin above each character"
                       >
@@ -7719,7 +7719,7 @@ Rules:
                       </button>
 
                       {highlights.length > 0 && (
-                        <button onClick={clearHighlights} className="px-3 py-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 text-xs font-semibold transition">
+                        <button onClick={clearHighlights} className={`px-3 py-2 rounded-lg border text-xs font-semibold transition ${darkMode ? 'bg-amber-900 text-amber-300 border-amber-800 hover:bg-amber-800' : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'}`}>
                           ✕ Clear highlights
                         </button>
                       )}
@@ -7800,11 +7800,11 @@ Rules:
                     )}
 
                     {/* Footer */}
-                    <div className="p-4 border-t border-gray-100 flex justify-between items-center flex-shrink-0">
-                      <button onClick={() => { setKewenViewMode('edit'); setKewenEditText(text); stopKewen(); setKewenPopup(null); }} className="flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-100 border border-blue-200 text-sm font-semibold transition">
+                    <div className={`p-4 border-t flex justify-between items-center flex-shrink-0 ${darkMode ? 'border-gray-700' : 'border-gray-100'}`}>
+                      <button onClick={() => { setKewenViewMode('edit'); setKewenEditText(text); stopKewen(); setKewenPopup(null); }} className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-semibold transition ${darkMode ? 'bg-blue-900 text-blue-300 border-blue-800 hover:bg-blue-800' : 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100'}`}>
                         <Edit2 size={14} /> Edit 课文
                       </button>
-                      <button onClick={() => { setKewenEditDeck(null); setKewenEditText(''); stopKewen(); setKewenViewMode('read'); setKewenPopup(null); }} className="bg-gray-100 text-gray-600 px-5 py-2 rounded-lg hover:bg-gray-200 text-sm font-semibold transition">
+                      <button onClick={() => { setKewenEditDeck(null); setKewenEditText(''); stopKewen(); setKewenViewMode('read'); setKewenPopup(null); }} className={`px-5 py-2 rounded-lg text-sm font-semibold transition ${darkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
                         Close
                       </button>
                     </div>
@@ -7819,7 +7819,7 @@ Rules:
                       value={kewenEditText}
                       onChange={e => setKewenEditText(e.target.value)}
                       placeholder="在这里粘贴课文 / Paste your reading text here..."
-                      className="w-full h-64 p-4 border-2 border-gray-200 rounded-xl text-lg focus:outline-none focus:border-orange-400 resize-none text-gray-800"
+                      className={`w-full h-64 p-4 border-2 rounded-xl text-lg focus:outline-none focus:border-orange-400 resize-none ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400' : 'bg-white border-gray-200 text-gray-800'}`}
                       style={{ fontFamily: 'serif', lineHeight: 1.8, minHeight: '250px' }}
                       autoFocus
                     />
@@ -7827,7 +7827,7 @@ Rules:
                       <p className="text-xs text-gray-400 mt-2 text-right">{kewenEditText.length} characters</p>
                     )}
                   </div>
-                  <div className="p-5 border-t border-gray-100 flex gap-3 flex-shrink-0">
+                  <div className={`p-5 border-t flex gap-3 flex-shrink-0 ${darkMode ? 'border-gray-700' : 'border-gray-100'}`}>
                     <button
                       onClick={() => {
                         addKewenToDeck(kewenEditDeck.id, kewenEditText.trim());
@@ -8058,11 +8058,11 @@ Rules:
     }, 0);
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-6">
+      <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-red-50 via-white to-yellow-50'}`}>
         <div className="max-w-2xl mx-auto">
           <button
             onClick={() => { setCurrentView('home'); setCombineSelectedDecks([]); setNewDeckName(''); setNewDeckCreated(null); }}
-            className="mb-6 text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            className={`mb-6 flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
           >
             ← Back to Home
           </button>
@@ -8570,7 +8570,7 @@ Rules:
   // EDIT DECK VIEW
   if (currentView === 'edit' && editingDeck) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-6">
+      <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-red-50 via-white to-yellow-50'}`}>
         <div className="max-w-4xl mx-auto">
           <button
             onClick={() => {
@@ -8579,7 +8579,7 @@ Rules:
               setBulkSelectedCards(new Set());
               setCurrentView('home');
             }}
-            className="mb-6 text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            className={`mb-6 flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
           >
             ← Back to Home
           </button>
@@ -8884,9 +8884,9 @@ Rules:
 
     if (!currentCard) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-6 flex items-center justify-center">
+        <div className={`min-h-screen p-6 flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-red-50 via-white to-yellow-50'}`}>
           <div className="text-center">
-            <p className="text-xl text-gray-600 mb-4">No cards in this deck yet!</p>
+            <p className={`text-xl mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>No cards in this deck yet!</p>
             <button
               onClick={() => setCurrentView('home')}
               className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
@@ -8899,7 +8899,7 @@ Rules:
     }
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-6">
+      <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-red-50 via-white to-yellow-50'}`}>
         <style>{`
           .flip-card {
             perspective: 1000px;
@@ -8953,7 +8953,7 @@ Rules:
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => setCurrentView('home')}
-              className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
+              className={`flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
             >
               ← Exit Study Mode
             </button>
@@ -9208,11 +9208,11 @@ Rules:
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 p-4 sm:p-6">
+      <div className={`min-h-screen p-4 sm:p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-green-50 via-white to-blue-50'}`}>
         <div className="max-w-5xl mx-auto">
           <button
             onClick={() => setCurrentView('home')}
-            className="mb-6 text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            className={`mb-6 flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
           >
             ← Back to Home
           </button>
@@ -9466,11 +9466,11 @@ Rules:
       const hasMoreCards = cardsCompleted < totalCards;
       
       return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 p-6 flex items-center justify-center">
-          <div className="bg-white rounded-2xl shadow-2xl p-12 max-w-2xl mx-auto text-center">
+        <div className={`min-h-screen p-6 flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-purple-50 via-white to-blue-50'}`}>
+          <div className={`rounded-2xl shadow-2xl p-12 max-w-2xl mx-auto text-center ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <div className="text-6xl mb-6">🎉</div>
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">Round {currentRound} Complete!</h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <h2 className={`text-4xl font-bold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Round {currentRound} Complete!</h2>
+            <p className={`text-xl mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               Great job! You've mastered {Math.min(10, learnCards.length)} cards.
             </p>
             
@@ -9542,13 +9542,13 @@ Rules:
     const currentCard = learnCards[currentLearnIndex];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 p-6">
+      <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-purple-50 via-white to-blue-50'}`}>
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => setCurrentView('home')}
-              className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
+              className={`flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
             >
               ← Exit Learn Mode
             </button>
@@ -9738,12 +9738,12 @@ Rules:
     const isNewBest = allMatched && (!bestMatchTimes[selectedDeck.id] || currentTimeTenths <= bestMatchTimes[selectedDeck.id]);
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-2 sm:p-4 md:p-6">
+      <div className={`min-h-screen p-2 sm:p-4 md:p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'}`}>
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8">
             <button
               onClick={() => setCurrentView('home')}
-              className="text-gray-600 hover:text-gray-800 flex items-center gap-2 font-semibold text-sm sm:text-base"
+              className={`flex items-center gap-2 font-semibold text-sm sm:text-base ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
             >
               ← Exit Match Game
             </button>
@@ -9830,18 +9830,18 @@ Rules:
     const anyEnabled = testConfig.trueFalse || testConfig.multipleChoice || testConfig.matching || testConfig.written || testConfig.typePinyin;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full relative">
+      <div className={`min-h-screen p-6 flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-white to-purple-50'}`}>
+        <div className={`rounded-2xl shadow-2xl p-8 max-w-lg w-full relative ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
           <button
             onClick={() => setCurrentView('home')}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+            className={`absolute top-4 right-4 transition ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'}`}
           >
             <X size={24} />
           </button>
 
           <div className="mb-6">
-            <p className="text-gray-500 font-medium">{testSetupDeck.name}</p>
-            <h2 className="text-3xl font-black text-gray-800">Set up your test</h2>
+            <p className={`font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{testSetupDeck.name}</p>
+            <h2 className={`text-3xl font-black ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Set up your test</h2>
           </div>
 
           {/* Number of questions */}
@@ -9955,9 +9955,9 @@ Rules:
 
     if (showTestResults) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
+        <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-white to-purple-50'}`}>
           <div className="max-w-4xl mx-auto">
-            <button onClick={() => setCurrentView('home')} className="mb-6 text-gray-600 hover:text-gray-800">← Back to Home</button>
+            <button onClick={() => setCurrentView('home')} className={`mb-6 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}>← Back to Home</button>
             <div className="bg-white rounded-2xl shadow-xl p-8 text-center mb-6">
               <div className="text-6xl mb-4">{score >= 80 ? '🎉' : score >= 60 ? '👍' : '📚'}</div>
               <h2 className="text-3xl font-bold mb-4">Test Results</h2>
@@ -10019,11 +10019,11 @@ Rules:
     const progress = ((currentTestIndex + 1) / testQuestions.length) * 100;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
+      <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-white to-purple-50'}`}>
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-4">
-            <button onClick={() => setCurrentView('home')} className="text-gray-600 hover:text-gray-800">← Exit Test</button>
-            <div className="text-gray-600 font-medium">Question {currentTestIndex + 1} of {testQuestions.length}</div>
+            <button onClick={() => setCurrentView('home')} className={`font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}>← Exit Test</button>
+            <div className={`font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Question {currentTestIndex + 1} of {testQuestions.length}</div>
           </div>
 
           {/* Progress bar */}
@@ -10245,9 +10245,9 @@ Rules:
     // Show mode selection if no mode chosen yet
     if (!writingMode) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 p-6 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-2xl p-12 max-w-2xl mx-auto">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4 text-center">Choose Practice Mode</h2>
+        <div className={`min-h-screen p-6 flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-pink-50 via-white to-rose-50'}`}>
+          <div className={`rounded-xl shadow-2xl p-12 max-w-2xl mx-auto ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <h2 className={`text-4xl font-bold mb-4 text-center ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Choose Practice Mode</h2>
             <p className="text-xl text-gray-600 mb-8 text-center">
               How would you like to practice writing?
             </p>
@@ -10318,11 +10318,11 @@ Rules:
     // Show completion screen if session is complete (only for practice10 mode)
     if (writingSessionComplete && writingCards.length > 0) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 p-6 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-2xl p-12 max-w-2xl mx-auto text-center">
+        <div className={`min-h-screen p-6 flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-pink-50 via-white to-rose-50'}`}>
+          <div className={`rounded-xl shadow-2xl p-12 max-w-2xl mx-auto text-center ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <div className="text-6xl mb-6">🎉</div>
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">Great Job!</h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <h2 className={`text-4xl font-bold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Great Job!</h2>
+            <p className={`text-xl mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               You've completed this writing practice session!
             </p>
             <div className="flex gap-4 justify-center">
@@ -10347,7 +10347,7 @@ Rules:
     const currentCard = writingCards[currentWritingIndex];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 p-3 sm:p-6" style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>
+      <div className={`min-h-screen p-3 sm:p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-pink-50 via-white to-rose-50'}`} style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <button
@@ -10357,7 +10357,7 @@ Rules:
                 if (currentUser && FIREBASE_ENABLED) saveToCloud(currentUser.uid);
                 setCurrentView('home');
               }}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 text-sm sm:text-base font-semibold transition-all"
+              className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm sm:text-base font-semibold transition-all ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
             >
               ← Home
             </button>
@@ -10613,10 +10613,10 @@ Rules:
     };
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-4 sm:p-6">
+      <div className={`min-h-screen p-4 sm:p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-white to-violet-50'}`}>
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <button onClick={() => { resetAiTest(); setCurrentView('home'); }} className="text-gray-600 hover:text-gray-800 flex items-center gap-2 font-semibold">← Home</button>
+            <button onClick={() => { resetAiTest(); setCurrentView('home'); }} className={`flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}>← Home</button>
             <h1 className="text-2xl font-bold text-gray-800">AI Test Practice</h1>
             <div />
           </div>
@@ -10993,11 +10993,11 @@ Rules:
   // ==========================================
   if (currentView === 'studyGuides') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 p-4 sm:p-6">
+      <div className={`min-h-screen p-4 sm:p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-rose-50 via-white to-pink-50'}`}>
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <button onClick={() => setCurrentView('home')} className="text-gray-600 hover:text-gray-800 flex items-center gap-2 font-semibold">← Home</button>
-            <h1 className="text-2xl font-bold text-gray-800">Study Guides</h1>
+            <button onClick={() => setCurrentView('home')} className={`flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}>← Home</button>
+            <h1 className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Study Guides</h1>
             <div />
           </div>
 
@@ -11114,10 +11114,10 @@ Rules:
     // No-kewen gate screen
     if (sentencePracticeDeck.noKewen) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-6 flex items-center justify-center">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+        <div className={`min-h-screen p-6 flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-teal-50 via-white to-cyan-50'}`}>
+          <div className={`rounded-2xl shadow-xl p-8 max-w-md w-full text-center ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <div className="text-5xl mb-4">📄</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-3">No 课文 attached</h2>
+            <h2 className={`text-2xl font-bold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>No 课文 attached</h2>
             <p className="text-gray-500 mb-4 leading-relaxed">
               This deck doesn't have a 课文 reading text attached yet. To use Sentence Writing, you need the full deck JSON with 课文 included.
             </p>
@@ -11159,13 +11159,13 @@ Rules:
     const progress = totalSentences > 0 ? ((sentenceIndex + 1) / totalSentences) * 100 : 0;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-4 sm:p-6">
+      <div className={`min-h-screen p-4 sm:p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-teal-50 via-white to-cyan-50'}`}>
         <div className="max-w-3xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => { setSentencePracticeDeck(null); setCurrentView('home'); window.speechSynthesis?.cancel(); }}
-              className="text-gray-600 hover:text-gray-800 flex items-center gap-2 font-semibold"
+              className={`flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
             >← Home</button>
             <div className="text-center">
               <h1 className="text-lg font-bold text-gray-800">课文 Sentence Writing</h1>
@@ -11327,27 +11327,30 @@ Rules:
 
   // What's New modal — shown once per version
   if (showWhatsNew) {
+    const wnBg = darkMode ? '#1f2937' : '#fff';
+    const wnHeading = darkMode ? '#f3f4f6' : '#1a1a1a';
+    const wnSub = darkMode ? '#9ca3af' : '#6b7280';
     return (
       <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-        <div style={{ background: '#fff', borderRadius: '1rem', padding: '2rem', maxWidth: '480px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', color: '#1a1a1a' }}>What's New in v{APP_VERSION} 🎉</h2>
-          <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.25rem' }}>Here's what's been added:</p>
+        <div style={{ background: wnBg, borderRadius: '1rem', padding: '2rem', maxWidth: '480px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', color: wnHeading }}>What's New in v{APP_VERSION} 🎉</h2>
+          <p style={{ fontSize: '0.875rem', color: wnSub, marginBottom: '1.25rem' }}>Here's what's been added:</p>
           <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
               <span style={{ fontSize: '1.25rem' }}>🌙</span>
-              <div><strong style={{ color: '#1a1a1a' }}>Dark mode</strong><br/><span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Opt-in toggle in Settings — easy on the eyes at night.</span></div>
+              <div><strong style={{ color: wnHeading }}>Dark mode</strong><br/><span style={{ color: wnSub, fontSize: '0.875rem' }}>Opt-in toggle in Settings — easy on the eyes at night.</span></div>
             </li>
             <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
               <span style={{ fontSize: '1.25rem' }}>🧠</span>
-              <div><strong style={{ color: '#1a1a1a' }}>Anki-style SRS ratings</strong><br/><span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Opt-in in Settings — Again / Hard / Good / Easy instead of binary buttons.</span></div>
+              <div><strong style={{ color: wnHeading }}>Anki-style SRS ratings</strong><br/><span style={{ color: wnSub, fontSize: '0.875rem' }}>Opt-in in Settings — Again / Hard / Good / Easy instead of binary buttons.</span></div>
             </li>
             <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
               <span style={{ fontSize: '1.25rem' }}>✨</span>
-              <div><strong style={{ color: '#1a1a1a' }}>Clearer AI sign-in info</strong><br/><span style={{ color: '#6b7280', fontSize: '0.875rem' }}>AI features use Puter.js — you'll be prompted for a free account on first use.</span></div>
+              <div><strong style={{ color: wnHeading }}>Clearer AI sign-in info</strong><br/><span style={{ color: wnSub, fontSize: '0.875rem' }}>AI features use Puter.js — you'll be prompted for a free account on first use.</span></div>
             </li>
             <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
               <span style={{ fontSize: '1.25rem' }}>⚡</span>
-              <div><strong style={{ color: '#1a1a1a' }}>Performance improvements</strong><br/><span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Removed debug logging and other optimizations.</span></div>
+              <div><strong style={{ color: wnHeading }}>Performance improvements</strong><br/><span style={{ color: wnSub, fontSize: '0.875rem' }}>Removed debug logging and other optimizations.</span></div>
             </li>
           </ul>
           <button
