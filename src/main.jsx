@@ -186,7 +186,6 @@ import './index.css';
                 firebaseDb = firebase.firestore();
                 // Enable offline persistence
                 firebaseDb.enablePersistence({ synchronizeTabs: true }).catch(() => {});
-                console.log('Firebase initialized successfully');
             } catch (e) {
                 console.error('Firebase initialization failed:', e);
             }
@@ -318,12 +317,26 @@ import './index.css';
 
         const { useState, useEffect, useRef } = React;
 
+const APP_VERSION = '1.1.0';
 
 const ChineseLearningApp = () => {
-  console.log('=== COMPONENT RENDERING ===');
-  
   // Touch/swipe tracking (using ref to avoid re-renders that swallow click events on mobile)
   const touchRef = useRef(null);
+
+  // Dark mode state — persisted to localStorage, opt-in toggle in settings
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('darkMode');
+      if (saved !== null) return JSON.parse(saved);
+      // Default to system preference on first load
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch(e) { return false; }
+  });
+  const darkModeRef = useRef(darkMode);
+
+  // What's New modal state
+  const [showWhatsNew, setShowWhatsNew] = useState(false);
+
   const [swipeDirection, setSwipeDirection] = useState(null);
   const cardRef = useRef(null);
 
@@ -574,7 +587,7 @@ const ChineseLearningApp = () => {
         canvas.height = cssWidth * dpr;
         this.ctx = canvas.getContext('2d');
         this.ctx.scale(dpr, dpr);
-        this.ctx.strokeStyle = '#000';
+        this.ctx.strokeStyle = darkModeRef.current ? '#f3f4f6' : '#000';
         this.ctx.lineWidth = 4;
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
@@ -758,6 +771,7 @@ const ChineseLearningApp = () => {
       flashcard: {
         autoPlayAudio: false,
         srOffset: 0, // spaced repetition offset: -2 to +2 (earlier ↔ later)
+        useAnkiRatings: false,
       },
       // Handwriting (writing) mode settings
       writing: {
@@ -1556,6 +1570,41 @@ const ChineseLearningApp = () => {
     }, 300);
   };
 
+  // Anki-style flashcard rating — called when useAnkiRatings is enabled
+  const handleAnkiFlashcard = (quality) => {
+    if (!selectedDeck || currentView !== 'study') return;
+    const currentCard = shuffledCards[currentCardIndex];
+    const direction = quality <= 2 ? 'left' : 'right';
+    const snapshot = { direction, cardIndex: currentCardIndex, cards: [...shuffledCards], card: currentCard };
+    setSwipeDirection(direction);
+
+    setTimeout(() => {
+      updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, quality, userSettings.flashcard.srOffset);
+      setSwipeHistory(prev => [...prev, snapshot]);
+
+      if (quality <= 2) {
+        // Re-queue the card proportionally later
+        const newCards = [...shuffledCards];
+        newCards.splice(currentCardIndex, 1);
+        const remaining = newCards.length - currentCardIndex;
+        const proportionalOffset = Math.max(4, Math.floor(remaining * 0.15) + Math.floor(Math.random() * Math.max(1, Math.floor(remaining * 0.05))));
+        const reinsertPosition = Math.min(currentCardIndex + proportionalOffset, newCards.length);
+        newCards.splice(reinsertPosition, 0, currentCard);
+        setShuffledCards(newCards);
+        setIsFlipped(false);
+      } else {
+        if (currentCardIndex < shuffledCards.length - 1) {
+          setCurrentCardIndex(currentCardIndex + 1);
+          setIsFlipped(false);
+        } else {
+          alert('Great job! You\'ve finished studying this deck!');
+          setCurrentView('home');
+        }
+      }
+      setSwipeDirection(null);
+    }, 300);
+  };
+
   const undoLastSwipe = () => {
     if (swipeHistory.length === 0) return;
     const last = swipeHistory[swipeHistory.length - 1];
@@ -1679,12 +1728,9 @@ const ChineseLearningApp = () => {
   };
   useEffect(() => {
     // Puter.js loads dynamically — poll until the global is available
-    console.log('Starting Puter.js readiness check...');
     const check = setInterval(() => {
       if (window.puter) {
-        console.log('window.puter found!', Object.keys(window.puter));
         if (window.puter.ai) {
-          console.log('window.puter.ai found! Marking ready.');
           setPuterReady(true);
           clearInterval(check);
         }
@@ -1692,7 +1738,6 @@ const ChineseLearningApp = () => {
     }, 500);
     const timeout = setTimeout(() => {
       clearInterval(check);
-      console.log('Puter.js readiness check timed out. window.puter:', !!window.puter);
       // Mark ready anyway if puter object exists — auth will happen on first call
       if (window.puter) {
         setPuterReady(true);
@@ -1704,6 +1749,32 @@ const ChineseLearningApp = () => {
   useEffect(() => {
     chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, chatLoading]);
+
+  // Apply/remove dark-mode class on body and persist preference
+  useEffect(() => {
+    darkModeRef.current = darkMode;
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+      // Update writing canvas stroke color if active
+      if (drawCtrl.current?.ctx) {
+        drawCtrl.current.ctx.strokeStyle = '#f3f4f6';
+      }
+    } else {
+      document.body.classList.remove('dark-mode');
+      if (drawCtrl.current?.ctx) {
+        drawCtrl.current.ctx.strokeStyle = '#000';
+      }
+    }
+  }, [darkMode]);
+
+  // Show "What's New" modal once per version
+  useEffect(() => {
+    const storedVersion = localStorage.getItem('zhongwen_app_version');
+    if (storedVersion !== APP_VERSION) {
+      setShowWhatsNew(true);
+    }
+  }, []);
 
   // Close the inline example panel when navigating to a different card
   useEffect(() => {
@@ -1790,7 +1861,7 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
       onClick={openChat}
       className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl hover:scale-110 active:scale-95 transition-all z-50"
       style={{ background: 'linear-gradient(135deg, #e11d48, #be123c)', boxShadow: '0 4px 20px rgba(225,29,72,0.4)' }}
-      title="AI Chinese Tutor"
+      title="AI Chinese Tutor (requires free Puter.js account — sign-in prompt appears on first use)"
     >
       <MessageCircle size={24} />
     </button>
@@ -1832,6 +1903,9 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
             .chat-scroll::-webkit-scrollbar-track { background: transparent; }
             .chat-scroll::-webkit-scrollbar-thumb { background: rgba(225,29,72,0.3); border-radius: 4px; }
           `}</style>
+
+          {/* Puter.js sign-in note */}
+          <p className="text-xs text-gray-400 px-3 pb-1" style={{ color: '#888', fontSize: 11, padding: '6px 16px 4px', margin: 0, flexShrink: 0 }}>AI features use Puter.js — you'll be prompted to sign in for free on first use.</p>
 
           {/* Header */}
           <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(225,29,72,0.15)', background: 'rgba(225,29,72,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
@@ -4503,7 +4577,6 @@ Rules:
   // Start Match Game
   const startMatchGame = (deck) => {
     setLastStudied(prev => ({...prev, [deck.id]: { timestamp: Date.now(), mode: 'match' }}));
-    console.log('Starting match game with deck:', deck);
     if (deck.cards.length < 4) {
       alert('You need at least 4 cards to play Match!');
       return;
@@ -4511,7 +4584,6 @@ Rules:
 
     // Select random cards (max 8 pairs)
     const shuffled = [...deck.cards].sort(() => Math.random() - 0.5).slice(0, 8);
-    console.log('Shuffled cards:', shuffled);
     
     // Create pairs: chinese and meaning
     const pairs = [];
@@ -4521,7 +4593,6 @@ Rules:
     });
 
     const finalPairs = pairs.sort(() => Math.random() - 0.5);
-    console.log('Match cards created:', finalPairs);
     
     setMatchCards(finalPairs);
     setSelectedMatchCards([]);
@@ -4530,7 +4601,6 @@ Rules:
     setMatchEndTime(null);
     setMatchLiveTime(0);
     setSelectedDeck(deck);
-    console.log('Setting view to match');
     setCurrentView('match');
   };
 
@@ -5278,8 +5348,6 @@ Rules:
     setCurrentView('edit');
   };
 
-  console.log('Current view is:', currentView);
-
   // ==========================================
   // Landing Page (non-logged-in splash screen)
   // ==========================================
@@ -5709,6 +5777,27 @@ Rules:
                           </div>
                         </div>
                       </div>
+
+                      {/* Appearance */}
+                      <div className="bg-gray-50 rounded-xl p-4 space-y-4">
+                        <h3 className="font-bold text-gray-800 flex items-center gap-2">🌙 Appearance</h3>
+                        <SettingToggle
+                          label="Dark mode"
+                          checked={darkMode}
+                          onChange={() => setDarkMode(d => !d)}
+                        />
+                      </div>
+
+                      {/* Advanced Study */}
+                      <div className="bg-gray-50 rounded-xl p-4 space-y-4">
+                        <h3 className="font-bold text-gray-800 flex items-center gap-2">🧠 Advanced Study</h3>
+                        <SettingToggle
+                          label="Anki-style SRS ratings (Again / Hard / Good / Easy)"
+                          checked={userSettings.flashcard.useAnkiRatings || false}
+                          onChange={() => setUserSettings(s => ({ ...s, flashcard: { ...s.flashcard, useAnkiRatings: !s.flashcard.useAnkiRatings } }))}
+                        />
+                        <p className="text-xs text-gray-400">Show Again / Hard / Good / Easy buttons instead of binary Know It / Don't Know It.</p>
+                      </div>
                     </div>
                   );
                 })()}
@@ -5791,6 +5880,27 @@ Rules:
                             <span className="text-sm font-semibold text-red-600 w-8 text-right">{(userSettings.troubleWords || {}).topN || 20}</span>
                           </div>
                         </div>
+                      </div>
+
+                      {/* Appearance */}
+                      <div className="bg-gray-50 rounded-xl p-4 space-y-4">
+                        <h3 className="font-bold text-gray-800 flex items-center gap-2">🌙 Appearance</h3>
+                        <SettingToggle
+                          label="Dark mode"
+                          checked={darkMode}
+                          onChange={() => setDarkMode(d => !d)}
+                        />
+                      </div>
+
+                      {/* Advanced Study */}
+                      <div className="bg-gray-50 rounded-xl p-4 space-y-4">
+                        <h3 className="font-bold text-gray-800 flex items-center gap-2">🧠 Advanced Study</h3>
+                        <SettingToggle
+                          label="Anki-style SRS ratings (Again / Hard / Good / Easy)"
+                          checked={userSettings.flashcard.useAnkiRatings || false}
+                          onChange={() => setUserSettings(s => ({ ...s, flashcard: { ...s.flashcard, useAnkiRatings: !s.flashcard.useAnkiRatings } }))}
+                        />
+                        <p className="text-xs text-gray-400">Show Again / Hard / Good / Easy buttons instead of binary Know It / Don't Know It.</p>
                       </div>
                     </div>
                   );
@@ -8044,7 +8154,8 @@ Rules:
           <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">AI Generate Deck</h2>
             <p className="text-gray-600 mb-6">Type a topic and let AI create a complete vocabulary deck for you — with pinyin and definitions included.</p>
-            
+            <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-4">✨ AI features use <strong>Puter.js</strong> — you'll be prompted to create a free account on first use.</p>
+
             <div className="mb-4">
               <label className="block text-gray-700 font-medium mb-2">Topic</label>
               <input
@@ -8505,6 +8616,7 @@ Rules:
             <div className="mb-6 p-6 bg-gray-50 rounded-lg">
               <h3 className="text-lg font-semibold text-gray-800 mb-1">Add New Card</h3>
               <p className="text-sm text-gray-500 mb-4">Type the Chinese, then click <strong>AI Autofill</strong> to generate pinyin &amp; English automatically.</p>
+              <p className="text-xs text-amber-600 mb-3">✨ AI Autofill uses Puter.js — sign-in prompt appears on first use (free).</p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                 <div>
@@ -8558,6 +8670,7 @@ Rules:
               {/* Bulk add section */}
               <div className="border-t border-gray-200 pt-5">
                 <h4 className="text-sm font-semibold text-gray-700 mb-1">Bulk Add with AI</h4>
+                <p className="text-xs text-amber-600 mb-2">✨ Uses Puter.js — sign-in prompt appears on first use (free).</p>
                 <p className="text-xs text-gray-500 mb-3">Paste multiple Chinese phrases separated by commas. AI will generate pinyin and English for all of them at once.</p>
                 <textarea
                   value={bulkInput}
@@ -8928,21 +9041,32 @@ Rules:
 
           {/* Know/Don't Know Buttons (only show when flipped) */}
           {isFlipped && !swipeDirection && (
-            <div className="flex gap-4 mb-8 justify-center">
-              <button
-                onClick={() => handleSwipe('left')}
-                className="flex items-center gap-2 bg-red-600 text-white px-8 py-4 rounded-lg hover:bg-red-700 transition text-lg font-medium"
-              >
-                <X size={24} />
-                Still Learning
-              </button>
-              <button
-                onClick={() => handleSwipe('right')}
-                className="flex items-center gap-2 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 transition text-lg font-medium"
-              >
-                <Check size={24} />
-                I Know This
-              </button>
+            <div className="flex gap-4 mb-8 justify-center flex-wrap">
+              {(userSettings.flashcard.useAnkiRatings) ? (
+                <>
+                  <button onClick={() => handleAnkiFlashcard(1)} className="bg-red-700 text-white px-5 py-3 rounded-lg hover:bg-red-800 transition font-medium">Again</button>
+                  <button onClick={() => handleAnkiFlashcard(2)} className="bg-orange-500 text-white px-5 py-3 rounded-lg hover:bg-orange-600 transition font-medium">Hard</button>
+                  <button onClick={() => handleAnkiFlashcard(4)} className="bg-blue-600 text-white px-5 py-3 rounded-lg hover:bg-blue-700 transition font-medium">Good</button>
+                  <button onClick={() => handleAnkiFlashcard(5)} className="bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 transition font-medium">Easy</button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleSwipe('left')}
+                    className="flex items-center gap-2 bg-red-600 text-white px-8 py-4 rounded-lg hover:bg-red-700 transition text-lg font-medium"
+                  >
+                    <X size={24} />
+                    Still Learning
+                  </button>
+                  <button
+                    onClick={() => handleSwipe('right')}
+                    className="flex items-center gap-2 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 transition text-lg font-medium"
+                  >
+                    <Check size={24} />
+                    I Know This
+                  </button>
+                </>
+              )}
             </div>
           )}
 
@@ -10375,7 +10499,7 @@ Rules:
               <div className="relative mx-auto" style={{ width: '100%', maxWidth: '500px' }}>
                 <canvas
                   ref={canvasRef}
-                  className={`border-4 rounded-lg cursor-crosshair touch-none bg-white block w-full ${canvasHanziChar ? 'border-purple-400' : 'border-gray-300'}`}
+                  className={`border-4 rounded-lg cursor-crosshair touch-none block w-full writing-canvas-dark ${darkMode ? 'bg-gray-800' : 'bg-white'} ${canvasHanziChar ? 'border-purple-400' : 'border-gray-300'}`}
                   style={{ height: 'auto', aspectRatio: '1', touchAction: 'none' }}
                 />
                 {/* HanziWriter draws into this div; position:absolute keeps it locked to canvas */}
@@ -10409,20 +10533,31 @@ Rules:
                   Clear Traces
                 </button>
               )}
-              <button
-                onClick={handleKnowCard}
-                className="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6"
-              >
-                <Check size={18} />
-                I Know This
-              </button>
-              <button
-                onClick={handleForgotCard}
-                className="bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6"
-              >
-                <X size={18} />
-                I Forgot
-              </button>
+              {(userSettings.flashcard.useAnkiRatings) ? (
+                <>
+                  <button onClick={() => handleForgotCard()} className="bg-red-700 text-white px-4 py-3 rounded-lg hover:bg-red-800 transition text-sm sm:text-base sm:px-5 font-medium">Again</button>
+                  <button onClick={() => { const c = writingCards[currentWritingIndex]; setWritingUndoHistory(prev => [...prev, { action: 'know', cardIndex: currentWritingIndex, cards: [...writingCards] }]); updateCardWithSpacedRepetition(selectedDeck.id, c.id, 2, userSettings.writing.srOffset); clearCanvas(); setWritingFeedback(null); setTestRevealed(false); setShowStrokePanel(false); setShowCanvasCharPicker(false); setCanvasHanziChar(null); if (canvasOverlayRef.current) { canvasOverlayRef.current.innerHTML = ''; canvasOverlayRef.current.style.opacity='1'; canvasOverlayRef.current.style.transition=''; } if (canvasHanziWriterRef.current) { try {} catch(e) {} canvasHanziWriterRef.current = null; } if (currentWritingIndex < writingCards.length - 1) { setCurrentWritingIndex(currentWritingIndex + 1); } else { if (writingMode === 'practice10' || writingMode === 'test') { setWritingSessionComplete(true); } else { localStorage.removeItem('writingSession'); alert('Great job! You\'ve completed all cards!'); setCurrentView('home'); } } }} className="bg-orange-500 text-white px-4 py-3 rounded-lg hover:bg-orange-600 transition text-sm sm:text-base sm:px-5 font-medium">Hard</button>
+                  <button onClick={handleKnowCard} className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition text-sm sm:text-base sm:px-5 font-medium">Good</button>
+                  <button onClick={() => { const c = writingCards[currentWritingIndex]; setWritingUndoHistory(prev => [...prev, { action: 'know', cardIndex: currentWritingIndex, cards: [...writingCards] }]); updateCardWithSpacedRepetition(selectedDeck.id, c.id, 5, userSettings.writing.srOffset); clearCanvas(); setWritingFeedback(null); setTestRevealed(false); setShowStrokePanel(false); setShowCanvasCharPicker(false); setCanvasHanziChar(null); if (canvasOverlayRef.current) { canvasOverlayRef.current.innerHTML = ''; canvasOverlayRef.current.style.opacity='1'; canvasOverlayRef.current.style.transition=''; } if (canvasHanziWriterRef.current) { try {} catch(e) {} canvasHanziWriterRef.current = null; } if (currentWritingIndex < writingCards.length - 1) { setCurrentWritingIndex(currentWritingIndex + 1); } else { if (writingMode === 'practice10' || writingMode === 'test') { setWritingSessionComplete(true); } else { localStorage.removeItem('writingSession'); alert('Great job! You\'ve completed all cards!'); setCurrentView('home'); } } }} className="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition text-sm sm:text-base sm:px-5 font-medium">Easy</button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleKnowCard}
+                    className="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6"
+                  >
+                    <Check size={18} />
+                    I Know This
+                  </button>
+                  <button
+                    onClick={handleForgotCard}
+                    className="bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6"
+                  >
+                    <X size={18} />
+                    I Forgot
+                  </button>
+                </>
+              )}
               {(writingMode === 'test' || writingMode === 'testAll') && (
                 <button
                   onClick={() => setTestRevealed(prev => !prev)}
@@ -10490,6 +10625,7 @@ Rules:
           {aiTestSetupStep === 'selectMode' && (
             <div className="space-y-3">
               <p className="text-gray-500 text-sm mb-4">Choose a practice mode that matches your CHI108 assessments:</p>
+              <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-4">✨ AI Test Practice uses <strong>Puter.js</strong> — you'll be prompted to create a free account on first use.</p>
               {Object.entries(modeInfo).map(([mode, info]) => (
                 <button key={mode} onClick={() => { setAiTestMode(mode); setAiTestSetupStep('selectDecks'); }}
                   className={`w-full text-left p-5 rounded-xl bg-gradient-to-r ${info.color} text-white hover:shadow-lg transition-all`}>
@@ -10869,6 +11005,7 @@ Rules:
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <h2 className="font-bold text-gray-800 mb-3">Generate Study Guide</h2>
             <p className="text-sm text-gray-500 mb-4">Pick a deck and AI will create a comprehensive study guide based on its vocabulary{' '}and 课文 (if attached).</p>
+            <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-4">✨ Study Guides use <strong>Puter.js</strong> AI — you'll be prompted to create a free account on first use.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {decks.filter(d => d.cards.length > 0).map(deck => (
                 <button
@@ -11184,6 +11321,42 @@ Rules:
         `}</style>
         <ChatFAB />
         <ChatSidebar />
+      </div>
+    );
+  }
+
+  // What's New modal — shown once per version
+  if (showWhatsNew) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+        <div style={{ background: '#fff', borderRadius: '1rem', padding: '2rem', maxWidth: '480px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', color: '#1a1a1a' }}>What's New in v{APP_VERSION} 🎉</h2>
+          <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.25rem' }}>Here's what's been added:</p>
+          <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.25rem' }}>🌙</span>
+              <div><strong style={{ color: '#1a1a1a' }}>Dark mode</strong><br/><span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Opt-in toggle in Settings — easy on the eyes at night.</span></div>
+            </li>
+            <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.25rem' }}>🧠</span>
+              <div><strong style={{ color: '#1a1a1a' }}>Anki-style SRS ratings</strong><br/><span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Opt-in in Settings — Again / Hard / Good / Easy instead of binary buttons.</span></div>
+            </li>
+            <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.25rem' }}>✨</span>
+              <div><strong style={{ color: '#1a1a1a' }}>Clearer AI sign-in info</strong><br/><span style={{ color: '#6b7280', fontSize: '0.875rem' }}>AI features use Puter.js — you'll be prompted for a free account on first use.</span></div>
+            </li>
+            <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.25rem' }}>⚡</span>
+              <div><strong style={{ color: '#1a1a1a' }}>Performance improvements</strong><br/><span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Removed debug logging and other optimizations.</span></div>
+            </li>
+          </ul>
+          <button
+            onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); }}
+            style={{ width: '100%', background: 'linear-gradient(135deg, #e11d48, #be123c)', color: '#fff', border: 'none', borderRadius: '0.75rem', padding: '0.875rem', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' }}
+          >
+            Got it!
+          </button>
+        </div>
       </div>
     );
   }
