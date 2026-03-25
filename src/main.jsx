@@ -483,7 +483,7 @@ const TUTORIAL_STEPS = {
   },
   'expand-collapse': {
     title: 'Expand / Collapse All ⊕⊖',
-    content: 'Click "▼ Expand All" to reveal extra tools below each deck\'s main buttons — 课文 reader, Sentence Writing, Study Guide, and more.\n\nClick "▲ Collapse All" to tidy the list back up.',
+    content: 'Click "▼ Expand All" to reveal extra tools below each deck\'s main buttons — 课文 reader, Sentence Writing, Study Guide, and more.\n\n💡 Leave it expanded — the next step shows the 课文 button!',
     nextId: 'kewen-reader',
     prevId: null,
     targetId: 'tutorial-expand-btn',
@@ -1389,6 +1389,16 @@ const ChineseLearningApp = () => {
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tutorialActive, tutorialStepId, tutorialIsChi108]);
+
+  // Auto-advance tutorial when user navigates by clicking a highlighted button.
+  // deck-ready → writing-strokes: fires as soon as the user clicks Write on a deck.
+  useEffect(() => {
+    if (!tutorialActive) return;
+    if (tutorialStepId === 'deck-ready' && currentView === 'writing') {
+      tutorialGoTo('writing-strokes');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tutorialActive, tutorialStepId, currentView]);
 
   // Skips sync-related state updates when drawing — prevents re-renders mid-stroke.
   const safeSetSyncStatus = (status) => {
