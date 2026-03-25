@@ -520,10 +520,18 @@ const TUTORIAL_STEPS = {
   'test-mode': {
     title: 'Test Mode 📝',
     content: 'Click the highlighted Test button to set up a quiz — choose question count, types (multiple choice, written, true/false), and answer direction.',
-    nextId: 'extended-offer',
+    nextId: 'pwa-install',
     prevId: 'match-mode',
     targetId: 'tutorial-first-deck-test',
     arrowDir: 'down',
+    view: 'home',
+  },
+  'pwa-install': {
+    title: 'Install as an App 📲',
+    content: 'Add 中文 Learn to your home screen for quick access — it works offline too!\n\n📱 iPhone/iPad: tap Share (□↑) → "Add to Home Screen"\n🤖 Android: tap ⋮ menu → "Add to Home Screen" or "Install App"\n💻 Chrome/Edge: click the ⊕ icon in the address bar → "Install"',
+    nextId: 'extended-offer',
+    prevId: 'test-mode',
+    targetId: null,
     view: 'home',
   },
   'extended-offer': {
@@ -3932,7 +3940,7 @@ Grade this response.` },
       : isChi108 === false
       ? ['welcome', 'hsk-intro', 'hsk-browse']
       : ['welcome'];
-    const coreSteps = ['deck-ready','writing-practice-select','writing-practice-active','writing-test-ready','writing-test-select','writing-test-reveal','writing-test-hide','writing-test-explore','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','extended-offer'];
+    const coreSteps = ['deck-ready','writing-practice-select','writing-practice-active','writing-test-ready','writing-test-select','writing-test-reveal','writing-test-hide','writing-test-explore','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','pwa-install','extended-offer'];
     return [...basePath, ...coreSteps];
   };
   const extendedStepList = ['expand-collapse','kewen-reader','sentence-practice','ai-test','puter-warning','settings-tour','folders-tour','stats-tour','done'];
