@@ -1,9 +1,7 @@
-const CACHE_NAME = 'chinese-learning-v4';
+const CACHE_NAME = 'chinese-learning-v5';
 
 // Core shell assets to precache (manifest + icons)
 const PRECACHE_ASSETS = [
-  './',
-  './index.html',
   './manifest.json',
 ];
 
@@ -57,8 +55,16 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch: serve from cache first, fall back to network
-// Also caches successful and opaque responses for offline use
+// Fetch: network-first for HTML navigation, cache-first for everything else.
+//
+// Why network-first for navigation?
+//   Stale-while-revalidate serves cached HTML immediately then updates the cache
+//   in the background — but GitHub Pages returns 304 Not Modified when the
+//   browser sends conditional (ETag/If-None-Match) headers. A 304 is not a full
+//   response and cannot be stored with cache.put(), so the cache silently stays
+//   stale across every reload. Users on Safari get permanently stuck on an old
+//   version of the app. Network-first ensures the latest index.html is always
+//   served when online, with the cache as an offline-only fallback.
 self.addEventListener('fetch', event => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
@@ -67,15 +73,39 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (!url.protocol.startsWith('http')) return;
 
+  // Network-first for HTML navigation requests
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then(networkResponse => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => cache.put(event.request, responseClone));
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          // Offline fallback: serve cached index.html
+          return caches.match('./index.html');
+        })
+    );
+    return;
+  }
+
+  // Cache-first with background revalidation for all other assets (JS, CSS, images, CDN).
+  // For non-navigation requests the browser does NOT send conditional headers, so
+  // the background fetch reliably returns a full 200 response that can be cached.
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
         if (cachedResponse) {
-          // Return cached version immediately, then update cache in background (stale-while-revalidate).
-          // Intentionally NOT using event.waitUntil() here: waitUntil() on a fetch event extends
-          // the SW event lifetime, and in Safari on macOS this causes the browser's loading
-          // indicator to stay active while background fetches are in flight. Fire-and-forget
-          // is correct here — the cache update is best-effort and doesn't need to block anything.
+          // Return cached version immediately, then update cache in background.
+          // Intentionally NOT using event.waitUntil() here: waitUntil() on a fetch
+          // event extends the SW event lifetime, and in Safari on macOS this causes
+          // the browser's loading indicator to stay active while background fetches
+          // are in flight. Fire-and-forget is correct here — the update is
+          // best-effort and doesn't need to block anything.
           fetch(event.request)
             .then(networkResponse => {
               if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
@@ -101,12 +131,7 @@ self.addEventListener('fetch', event => {
 
             return networkResponse;
           })
-          .catch(() => {
-            // Offline fallback for navigation requests
-            if (event.request.mode === 'navigate') {
-              return caches.match('./index.html');
-            }
-          });
+          .catch(() => {});
       })
   );
 });
