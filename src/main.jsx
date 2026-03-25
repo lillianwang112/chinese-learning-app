@@ -376,13 +376,13 @@ const TUTORIAL_STEPS = {
     content: 'Click "Browse Decks", find this week\'s CHI 108 deck, and click Import.\n\nAfter importing, close the panel (click ✕) — then click Next → below.',
     nextId: 'deck-ready',
     prevId: 'chi108-path',
-    targetId: null,
+    targetId: 'tutorial-browse-btn',
+    arrowDir: 'up',
     view: 'home',
-    noOverlay: true,
   },
   'hsk-intro': {
     title: 'Getting Started 🚀',
-    content: 'You have two options:\n\n• Create your own deck with custom vocabulary\n• Browse pre-loaded HSK (standard proficiency) decks\n\nLet\'s browse a pre-loaded deck to try the app!',
+    content: 'You have two options:\n\n• Create your own deck with custom vocabulary\n• Browse pre-loaded class decks\n\nLet\'s browse a pre-loaded deck to try the app!',
     nextId: 'hsk-browse',
     prevId: 'welcome',
     targetId: 'tutorial-browse-btn',
@@ -391,27 +391,83 @@ const TUTORIAL_STEPS = {
   },
   'hsk-browse': {
     title: 'Browse Pre-loaded Decks 🔍',
-    content: 'Click "Browse Decks", pick any HSK deck that matches your level, and click Import.\n\nAfter importing, close the panel (click ✕) — then click Next → below.',
+    content: 'Click "Browse Decks" to open the deck library, pick a deck, and click Import.\n\nAfter importing, close the panel (click ✕) — then click Next → below.',
     nextId: 'deck-ready',
     prevId: 'hsk-intro',
-    targetId: null,
+    targetId: 'tutorial-browse-btn',
+    arrowDir: 'up',
     view: 'home',
-    noOverlay: true,
   },
   'deck-ready': {
     title: 'Your Deck is Ready! ✅',
     content: 'You now have a deck loaded. Let\'s explore the study modes!\n\n👇 First up: Writing Practice. Click the "Write" button on a deck card.',
-    nextId: 'writing-strokes',
+    nextId: 'writing-practice-select',
     prevId: null,
     targetId: 'tutorial-first-deck-write',
     arrowDir: 'down',
     view: 'home',
   },
-  'writing-strokes': {
-    title: 'Writing Practice ✍️',
-    content: 'First pick a practice mode from the 4 options:\n• 📝 Practice 10 — 10 random cards\n• 📚 Practice All — full deck\n• 🧪 Test 10 / Test All — character hidden, write from memory\n\nOnce inside:\n• Click "Strokes" to watch stroke order animation\n• Click "Trace" to draw over a faded guide\n\nTry a few cards, then click ← Home to continue.',
-    nextId: 'study-intro',
-    prevId: 'deck-ready',
+  'writing-practice-select': {
+    title: 'Writing Practice ✍️ — Learn First',
+    content: 'This is the mode selection screen.\n\n👇 Click "Practice 10" — you\'ll see each character and practice writing it.\n\nThis is great for building muscle memory when you\'re first learning how to write words.',
+    nextId: 'writing-practice-active',
+    prevId: null,
+    targetId: 'tutorial-writing-practice10-btn',
+    arrowDir: 'up',
+    view: 'writing',
+  },
+  'writing-practice-active': {
+    title: 'Practice Writing ✍️',
+    content: 'Write the character shown!\n\n• Click "Strokes" to watch the stroke order animation\n• Click "Trace" to draw over a faded guide — perfect for tracing when you\'re still learning\n\nTry a few cards to get a feel for it, then click "← Home" to continue.',
+    nextId: null,
+    prevId: null,
+    targetId: null,
+    view: 'writing',
+    noOverlay: true,
+  },
+  'writing-test-ready': {
+    title: 'Now Try Test Mode! 🧪',
+    content: 'Nice work! Now let\'s try Test Mode — the character is hidden and you write purely from memory.\n\n👇 Click the "Write" button on the deck again.',
+    nextId: 'writing-test-select',
+    prevId: null,
+    targetId: 'tutorial-first-deck-write',
+    arrowDir: 'down',
+    view: 'home',
+  },
+  'writing-test-select': {
+    title: 'Test Mode — Active Recall 🧪',
+    content: 'Perfect for exam prep!\n\n👇 Click "Test 10" — only pinyin and English are shown, you write the character from memory.\n\nStrokes and Trace guides are still available if you need a hint.',
+    nextId: 'writing-test-reveal',
+    prevId: null,
+    targetId: 'tutorial-writing-test10-btn',
+    arrowDir: 'up',
+    view: 'writing',
+  },
+  'writing-test-reveal': {
+    title: 'Try the Reveal Button 👁',
+    content: 'The character is shown as question marks — write it from memory first!\n\nWhen you\'re ready to check, click "👁 Reveal" to see the character.',
+    nextId: 'writing-test-hide',
+    prevId: null,
+    targetId: 'tutorial-reveal-btn',
+    arrowDir: 'up',
+    view: 'writing',
+    noMask: true,
+  },
+  'writing-test-hide': {
+    title: 'Now Hide It Again 🙈',
+    content: 'There it is! Compare your writing with the character.\n\n🙈 Click "Hide" to hide the character and try the next card from memory.',
+    nextId: 'writing-test-explore',
+    prevId: null,
+    targetId: 'tutorial-reveal-btn',
+    arrowDir: 'up',
+    view: 'writing',
+    noMask: true,
+  },
+  'writing-test-explore': {
+    title: 'Test Mode 🎯',
+    content: 'That\'s the workflow — write from memory, then reveal to check!\n\n• "Strokes" and "Trace" are still available to help\n• This builds the active recall needed for exams\n\nTry a few more cards on your own, then click "← Home" to continue.',
+    nextId: null,
+    prevId: null,
     targetId: null,
     view: 'writing',
     noOverlay: true,
@@ -458,9 +514,8 @@ const TUTORIAL_STEPS = {
     nextId: 'test-mode',
     prevId: 'learn-mode',
     targetId: 'tutorial-first-deck-match',
+    arrowDir: 'down',
     view: 'home',
-    noMask: true,
-    topbar: true,
   },
   'test-mode': {
     title: 'Test Mode 📝',
@@ -468,9 +523,8 @@ const TUTORIAL_STEPS = {
     nextId: 'extended-offer',
     prevId: 'match-mode',
     targetId: 'tutorial-first-deck-test',
+    arrowDir: 'down',
     view: 'home',
-    noMask: true,
-    topbar: true,
   },
   'extended-offer': {
     title: 'Core Tour Complete! 🎉',
@@ -1381,27 +1435,91 @@ const ChineseLearningApp = () => {
     }
     const step = TUTORIAL_STEPS[tutorialStepId];
     if (!step) { window.__tutorialHide?.(); return; }
+
+    // Dynamic content overrides for steps whose UI depends on runtime state
+    const topTroubleCount = tutorialStepId === 'trouble-words'
+      ? getTopTroubleCards((userSettings.troubleWords?.topN) || 20).length : 0;
+    const dynamicStep = tutorialStepId === 'trouble-words' ? {
+      ...step,
+      targetId: topTroubleCount > 0 ? 'tutorial-trouble-section' : null,
+      noOverlay: topTroubleCount === 0,
+      content: topTroubleCount > 0
+        ? step.content
+        : 'You don\'t have any trouble words yet — they appear here once you\'ve studied some cards and clicked "I Forgot".\n\nLet\'s continue to Learn Mode!',
+    } : step;
+
+    // Per-step onNext overrides: pressing Next on highlighted-button steps launches
+    // the same action as clicking the button — no black screens ever.
+    const onNext = (() => {
+      if (tutorialStepId === 'deck-ready') {
+        // Next = same as clicking Write button on first deck
+        return decks.length > 0 ? () => startWritingPractice(decks[0]) : null;
+      }
+      if (tutorialStepId === 'writing-practice-select') {
+        // Next = same as clicking Practice 10
+        return () => { startPractice10(); tutorialGoTo('writing-practice-active'); };
+      }
+      if (tutorialStepId === 'writing-practice-active') {
+        // Next = same as clicking ← Home; auto-advance effect then goes to writing-test-ready
+        return () => setCurrentView('home');
+      }
+      if (tutorialStepId === 'writing-test-ready') {
+        // Next = same as clicking Write button; auto-advance effect goes to writing-test-select
+        return decks.length > 0 ? () => startWritingPractice(decks[0]) : null;
+      }
+      if (tutorialStepId === 'writing-test-select') {
+        // Next = same as clicking Test 10; auto-advance effect moves to writing-test-reveal
+        return () => { startWritingTest(); tutorialGoTo('writing-test-reveal'); };
+      }
+      if (tutorialStepId === 'writing-test-reveal') {
+        // Next = same as clicking Reveal
+        return () => { setTestRevealed(true); tutorialGoTo('writing-test-hide'); };
+      }
+      if (tutorialStepId === 'writing-test-hide') {
+        // Next = same as clicking Hide
+        return () => { setTestRevealed(false); tutorialGoTo('writing-test-explore'); };
+      }
+      if (tutorialStepId === 'writing-test-explore') {
+        // Next = same as clicking ← Home; auto-advance effect then goes to study-intro
+        return () => setCurrentView('home');
+      }
+      if (tutorialStepId === 'study-intro') {
+        return decks.length > 0 ? () => startStudy(decks[0]) : null;
+      }
+      if (tutorialStepId === 'expand-collapse') {
+        return () => {
+          if (expandedDecks.size === 0) setExpandedDecks(new Set(decks.map(d => d.id)));
+          tutorialGoTo('kewen-reader');
+        };
+      }
+      return dynamicStep.nextId ? () => tutorialGoTo(dynamicStep.nextId) : null;
+    })();
+
     window.__tutorialUpdate?.({
-      step,
+      step: dynamicStep,
       stepId: tutorialStepId,
       isChi108: tutorialIsChi108,
       stepNumber: tutorialStepNumber,
       totalSteps: tutorialTotalSteps,
-      onNext: step.nextId ? () => tutorialGoTo(step.nextId) : null,
-      onBack: step.prevId ? () => tutorialGoTo(step.prevId) : null,
+      onNext,
+      onBack: dynamicStep.prevId ? () => tutorialGoTo(dynamicStep.prevId) : null,
       onChoice: (nextId, extraState) => tutorialGoTo(nextId, extraState || {}),
       onEnd: endTutorial,
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tutorialActive, tutorialPaused, tutorialStepId, tutorialIsChi108]);
 
-  // Auto-advance tutorial when user navigates by clicking a highlighted button.
-  // deck-ready  → writing-strokes : fires when user clicks Write on a deck.
-  // study-intro → study-flip      : fires when user clicks Study on a deck.
+  // Auto-advance tutorial when user navigates by clicking a highlighted button or ← Home.
   useEffect(() => {
     if (!tutorialActive) return;
     if (tutorialStepId === 'deck-ready' && currentView === 'writing') {
-      tutorialGoTo('writing-strokes');
+      tutorialGoTo('writing-practice-select');
+    } else if (tutorialStepId === 'writing-practice-active' && currentView === 'home') {
+      tutorialGoTo('writing-test-ready');
+    } else if (tutorialStepId === 'writing-test-ready' && currentView === 'writing') {
+      tutorialGoTo('writing-test-select');
+    } else if (tutorialStepId === 'writing-test-explore' && currentView === 'home') {
+      tutorialGoTo('study-intro');
     } else if (tutorialStepId === 'study-intro' && currentView === 'study') {
       tutorialGoTo('study-flip');
     }
@@ -1417,6 +1535,38 @@ const ChineseLearningApp = () => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showImportExportModal]);
+
+  // When the Browse panel closes while paused on a browse step, un-pause and advance.
+  useEffect(() => {
+    if (!showBrowseDecks && tutorialPaused &&
+        (tutorialStepId === 'chi108-browse' || tutorialStepId === 'hsk-browse')) {
+      setTutorialPaused(false);
+      tutorialGoTo('deck-ready');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showBrowseDecks]);
+
+  // When the Trouble Words modal closes while paused on trouble-words, advance to learn-mode.
+  useEffect(() => {
+    if (!troubleModal && tutorialPaused && tutorialStepId === 'trouble-words') {
+      setTutorialPaused(false);
+      tutorialGoTo('learn-mode');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [troubleModal]);
+
+  // When the user returns home after playing Match or Test, un-pause and advance.
+  useEffect(() => {
+    if (!tutorialActive || !tutorialPaused || currentView !== 'home') return;
+    if (tutorialStepId === 'match-mode') {
+      setTutorialPaused(false);
+      tutorialGoTo('test-mode');
+    } else if (tutorialStepId === 'test-mode') {
+      setTutorialPaused(false);
+      tutorialGoTo('extended-offer');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentView, tutorialPaused]);
 
   // Skips sync-related state updates when drawing — prevents re-renders mid-stroke.
   const safeSetSyncStatus = (status) => {
@@ -3747,6 +3897,7 @@ Grade this response.` },
       : isChi108 === false
       ? ['welcome', 'hsk-intro', 'hsk-browse']
       : ['welcome'];
+    const coreSteps = ['deck-ready','writing-practice-select','writing-practice-active','writing-test-ready','writing-test-select','writing-test-reveal','writing-test-hide','writing-test-explore','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','extended-offer'];
     const coreSteps = ['deck-ready','writing-strokes','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','extended-offer'];
     return [...basePath, ...coreSteps];
   };
@@ -6467,7 +6618,10 @@ Rules:
                   </div>
                 </div>
                 <button
-                  onClick={() => setTroubleModal({ cards: topCards, deckId: null, deckName: null })}
+                  onClick={() => {
+                    setTroubleModal({ cards: topCards, deckId: null, deckName: null });
+                    if (tutorialActive && tutorialStepId === 'trouble-words') setTutorialPaused(true);
+                  }}
                   className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:from-orange-600 hover:to-red-600 transition-all shadow-md flex-shrink-0"
                 >
                   Practice All →
@@ -6527,7 +6681,18 @@ Rules:
               </button>
               <button
                 id="tutorial-browse-btn"
-                onClick={() => setShowBrowseDecks(true)}
+                onClick={() => {
+                  setShowBrowseDecks(true);
+                  if (tutorialActive && tutorialStepId === 'hsk-intro') {
+                    // Immediately hide the overlay and advance to hsk-browse so the
+                    // user can see the panel clearly; showBrowseDecks effect advances
+                    // to deck-ready when they close it.
+                    setTutorialPaused(true);
+                    tutorialGoTo('hsk-browse');
+                  } else if (tutorialActive && (tutorialStepId === 'chi108-browse' || tutorialStepId === 'hsk-browse')) {
+                    setTutorialPaused(true);
+                  }
+                }}
                 className="flex items-center gap-2 bg-gradient-to-r from-rose-500 to-rose-600 text-white px-6 py-3 rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
               >
                 <BookOpen size={20} />
@@ -7282,7 +7447,10 @@ Rules:
                             <div className="grid grid-cols-3 gap-2">
                               <button
                                 id={deckIndex === 0 ? 'tutorial-first-deck-match' : undefined}
-                                onClick={() => startMatchGame(deck)}
+                                onClick={() => {
+                                  startMatchGame(deck);
+                                  if (tutorialActive && tutorialStepId === 'match-mode') setTutorialPaused(true);
+                                }}
                                 disabled={totalCards < 4}
                                 className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white py-2 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-sm hover:shadow-md disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-xs font-semibold"
                               >
@@ -7290,7 +7458,10 @@ Rules:
                               </button>
                               <button
                                 id={deckIndex === 0 ? 'tutorial-first-deck-test' : undefined}
-                                onClick={() => startPracticeTest(deck)}
+                                onClick={() => {
+                                  startPracticeTest(deck);
+                                  if (tutorialActive && tutorialStepId === 'test-mode') setTutorialPaused(true);
+                                }}
                                 disabled={totalCards < 4}
                                 className="bg-gradient-to-r from-indigo-400 to-indigo-500 text-white py-2 rounded-lg hover:from-indigo-500 hover:to-indigo-600 transition-all shadow-sm hover:shadow-md disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-xs font-semibold"
                               >
@@ -10837,7 +11008,11 @@ Rules:
                 );
               })()}
               <button
-                onClick={startPractice10}
+                id="tutorial-writing-practice10-btn"
+                onClick={() => {
+                  startPractice10();
+                  if (tutorialActive && tutorialStepId === 'writing-practice-select') tutorialGoTo('writing-practice-active');
+                }}
                 className="w-full bg-pink-600 text-white px-8 py-6 rounded-lg hover:bg-pink-700 transition text-left"
               >
                 <div className="text-2xl font-bold mb-2">📝 Practice 10</div>
@@ -10855,7 +11030,11 @@ Rules:
                 </div>
               </button>
               <button
-                onClick={startWritingTest}
+                id="tutorial-writing-test10-btn"
+                onClick={() => {
+                  startWritingTest();
+                  if (tutorialActive && tutorialStepId === 'writing-test-select') tutorialGoTo('writing-test-reveal');
+                }}
                 className="w-full bg-orange-600 text-white px-8 py-6 rounded-lg hover:bg-orange-700 transition text-left"
               >
                 <div className="text-2xl font-bold mb-2">🧪 Test 10</div>
@@ -11129,7 +11308,14 @@ Rules:
               )}
               {(writingMode === 'test' || writingMode === 'testAll') && (
                 <button
-                  onClick={() => setTestRevealed(prev => !prev)}
+                  id="tutorial-reveal-btn"
+                  onClick={() => {
+                    setTestRevealed(prev => !prev);
+                    if (tutorialActive) {
+                      if (tutorialStepId === 'writing-test-reveal') tutorialGoTo('writing-test-hide');
+                      else if (tutorialStepId === 'writing-test-hide') tutorialGoTo('writing-test-explore');
+                    }
+                  }}
                   className={`${testRevealed ? 'bg-gray-500 hover:bg-gray-600' : 'bg-orange-500 hover:bg-orange-600'} text-white px-4 py-3 rounded-lg transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6`}
                 >
                   {testRevealed ? '🙈 Hide' : '👁 Reveal'}
