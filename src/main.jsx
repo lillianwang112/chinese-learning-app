@@ -364,7 +364,7 @@ const TUTORIAL_STEPS = {
   },
   'chi108-import': {
     title: 'Step 2: Import Your Deck 📥',
-    content: '👆 Click "Import / Export" → "Import Decks from File", then select the JSON you downloaded.\n\nYour deck will appear in your list below!',
+    content: '👆 Click "Import / Export" → "Import Decks from File", then select the JSON you downloaded.\n\nSince the file has all 23 lessons, you\'ll be asked whether to import as separate decks or combine them — choose whichever you prefer!',
     nextId: 'deck-ready',
     prevId: 'chi108-drive',
     targetId: 'tutorial-import-btn',
@@ -405,6 +405,15 @@ const TUTORIAL_STEPS = {
     prevId: null,
     targetId: 'tutorial-first-deck-write',
     arrowDir: 'down',
+    view: 'home',
+  },
+  'needs-decks': {
+    title: 'Add a Deck to Continue 📥',
+    content: 'You need at least one deck to continue the tour.\n\nClick "Import / Export" to import a JSON file, or "Browse Decks" to load a pre-built deck. You can also create your own deck!\n\nThe tour will continue automatically once a deck is added.',
+    nextId: null,
+    prevId: null,
+    targetId: 'tutorial-import-btn',
+    arrowDir: 'up',
     view: 'home',
   },
   'writing-practice-select': {
@@ -874,6 +883,9 @@ const ChineseLearningApp = () => {
   const [tutorialIsChi108, setTutorialIsChi108] = useState(null); // null | true | false
   // tutorialPaused: hides the overlay while the import modal is open so the user can see what they're doing
   const [tutorialPaused, setTutorialPaused] = useState(false);
+  // tutorialTargetDeckId: when set, tutorial-first-deck-* IDs attach to this deck instead of deckIndex===0.
+  // Set after a successful CHI 108 JSON import so the tour spotlights an imported lesson, not the HSK sample.
+  const [tutorialTargetDeckId, setTutorialTargetDeckId] = useState(null);
   const [sentenceRevealed, setSentenceRevealed] = useState(false);
   const [sentenceResumeModal, setSentenceResumeModal] = useState(null); // { deck } | null
   const [sentenceAnswer, setSentenceAnswer] = useState('');
@@ -1569,25 +1581,46 @@ const ChineseLearningApp = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tutorialActive, tutorialStepId, currentView]);
 
-  // When the import modal closes while the tutorial is paused on chi108-import,
-  // un-pause and advance to the next step so the user sees the deck-ready card.
+  // When both import-related modals are closed while the tutorial is paused on chi108-import,
+  // un-pause and advance. We wait for BOTH modals to be closed because selecting a multi-deck
+  // JSON closes showImportExportModal and opens showImportModal in the same batched render —
+  // if we only watched showImportExportModal we'd advance while the separate/combine dialog
+  // is still open, causing the tour overlay to reappear on top of it.
   useEffect(() => {
-    if (!showImportExportModal && tutorialPaused && tutorialStepId === 'chi108-import') {
-      setTutorialPaused(false);
+    if (showImportExportModal || showImportModal) return;
+    if (!tutorialPaused || tutorialStepId !== 'chi108-import') return;
+    setTutorialPaused(false);
+    if (decks.length > 0) {
       tutorialGoTo('deck-ready');
+    } else {
+      tutorialGoTo('needs-decks');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showImportExportModal]);
+  }, [showImportExportModal, showImportModal]);
 
   // When the Browse panel closes while paused on a browse step, un-pause and advance.
+  // If the user closed the panel without importing anything, send them to needs-decks.
   useEffect(() => {
     if (!showBrowseDecks && tutorialPaused &&
         (tutorialStepId === 'chi108-browse' || tutorialStepId === 'hsk-browse')) {
       setTutorialPaused(false);
-      tutorialGoTo('deck-ready');
+      if (decks.length > 0) {
+        tutorialGoTo('deck-ready');
+      } else {
+        tutorialGoTo('needs-decks');
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showBrowseDecks]);
+
+  // On the needs-decks step, auto-advance to deck-ready the moment any deck appears.
+  // This handles all import paths (file, browse, create) without needing per-path logic.
+  useEffect(() => {
+    if (tutorialActive && tutorialStepId === 'needs-decks' && decks.length > 0) {
+      tutorialGoTo('deck-ready');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [decks]);
 
   // When the Trouble Words modal closes while paused on trouble-words, advance to learn-mode.
   useEffect(() => {
@@ -3908,6 +3941,7 @@ Grade this response.` },
 
   const endTutorial = () => {
     setTutorialActive(false);
+    setTutorialTargetDeckId(null);
     // Notify AppWithToast overlay to hide
     window.__tutorialHide?.();
   };
@@ -5110,6 +5144,10 @@ Rules:
             if (importTargetFolder) {
               setFolders(prev => prev.map(f => f.id === importTargetFolder ? { ...f, deckIds: [...f.deckIds, parsed[0].id] } : f));
             }
+            // Track the imported deck so the tour spotlights it instead of the HSK sample
+            if (tutorialActive && tutorialStepId === 'chi108-import') {
+              setTutorialTargetDeckId(parsed[0].id);
+            }
             alert(`Deck "${parsed[0].name}" imported successfully!`);
           } else {
             // Multiple decks - ask user whether to combine or separate
@@ -5124,10 +5162,15 @@ Rules:
   };
 
   const handleImportSeparate = () => {
+    const firstId = importedDecks[0]?.id;
     setDecks(prev => [...prev, ...importedDecks]);
     if (importTargetFolder) {
       const newIds = importedDecks.map(d => d.id);
       setFolders(prev => prev.map(f => f.id === importTargetFolder ? { ...f, deckIds: [...f.deckIds, ...newIds] } : f));
+    }
+    // Track the first imported deck so the tour spotlights it instead of the HSK sample
+    if (tutorialActive && tutorialStepId === 'chi108-import' && firstId) {
+      setTutorialTargetDeckId(firstId);
     }
     setShowImportModal(false);
     setImportedDecks([]);
@@ -5153,6 +5196,10 @@ Rules:
     setDecks(prev => [...prev, combined]);
     if (importTargetFolder) {
       setFolders(prev => prev.map(f => f.id === importTargetFolder ? { ...f, deckIds: [...f.deckIds, combined.id] } : f));
+    }
+    // Track the combined deck so the tour spotlights it instead of the HSK sample
+    if (tutorialActive && tutorialStepId === 'chi108-import') {
+      setTutorialTargetDeckId(combined.id);
     }
     setShowImportModal(false);
     setImportedDecks([]);
@@ -7466,7 +7513,7 @@ Rules:
                           <div className="space-y-2 mb-4">
                             <div className="grid grid-cols-2 gap-2">
                               <button
-                                id={deckIndex === 0 ? 'tutorial-first-deck-study' : undefined}
+                                id={(tutorialTargetDeckId ? deck.id === tutorialTargetDeckId : deckIndex === 0) ? 'tutorial-first-deck-study' : undefined}
                                 onClick={() => startStudy(deck)}
                                 disabled={totalCards === 0}
                                 className="bg-gradient-to-r from-red-500 to-red-600 text-white py-2.5 rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-semibold text-sm"
@@ -7475,7 +7522,7 @@ Rules:
                                 Study
                               </button>
                               <button
-                                id={deckIndex === 0 ? 'tutorial-first-deck-learn' : undefined}
+                                id={(tutorialTargetDeckId ? deck.id === tutorialTargetDeckId : deckIndex === 0) ? 'tutorial-first-deck-learn' : undefined}
                                 onClick={() => startLearnMode(deck)}
                                 disabled={totalCards === 0}
                                 className="bg-gradient-to-r from-purple-500 to-purple-600 text-white py-2.5 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-semibold text-sm"
@@ -7488,7 +7535,7 @@ Rules:
                             {/* Secondary Actions */}
                             <div className="grid grid-cols-3 gap-2">
                               <button
-                                id={deckIndex === 0 ? 'tutorial-first-deck-match' : undefined}
+                                id={(tutorialTargetDeckId ? deck.id === tutorialTargetDeckId : deckIndex === 0) ? 'tutorial-first-deck-match' : undefined}
                                 onClick={() => {
                                   startMatchGame(deck);
                                   if (tutorialActive && tutorialStepId === 'match-mode') setTutorialPaused(true);
@@ -7499,7 +7546,7 @@ Rules:
                                 Match
                               </button>
                               <button
-                                id={deckIndex === 0 ? 'tutorial-first-deck-test' : undefined}
+                                id={(tutorialTargetDeckId ? deck.id === tutorialTargetDeckId : deckIndex === 0) ? 'tutorial-first-deck-test' : undefined}
                                 onClick={() => {
                                   startPracticeTest(deck);
                                   if (tutorialActive && tutorialStepId === 'test-mode') setTutorialPaused(true);
@@ -7510,7 +7557,7 @@ Rules:
                                 Test
                               </button>
                               <button
-                                id={deckIndex === 0 ? 'tutorial-first-deck-write' : undefined}
+                                id={(tutorialTargetDeckId ? deck.id === tutorialTargetDeckId : deckIndex === 0) ? 'tutorial-first-deck-write' : undefined}
                                 onClick={() => startWritingPractice(deck)}
                                 disabled={totalCards === 0}
                                 className="bg-gradient-to-r from-pink-400 to-pink-500 text-white py-2 rounded-lg hover:from-pink-500 hover:to-pink-600 transition-all shadow-sm hover:shadow-md disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-xs font-semibold"
@@ -7557,7 +7604,7 @@ Rules:
                           <div className="space-y-2 pt-3 border-t border-gray-100">
                             <div className="grid grid-cols-2 gap-2">
                               <button
-                                id={deckIndex === 0 ? 'tutorial-first-deck-kewen' : undefined}
+                                id={(tutorialTargetDeckId ? deck.id === tutorialTargetDeckId : deckIndex === 0) ? 'tutorial-first-deck-kewen' : undefined}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setKewenEditDeck(deck);
