@@ -1448,6 +1448,38 @@ const ChineseLearningApp = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showImportExportModal]);
 
+  // When the Browse panel closes while paused on a browse step, un-pause and advance.
+  useEffect(() => {
+    if (!showBrowseDecks && tutorialPaused &&
+        (tutorialStepId === 'chi108-browse' || tutorialStepId === 'hsk-browse')) {
+      setTutorialPaused(false);
+      tutorialGoTo('deck-ready');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showBrowseDecks]);
+
+  // When the Trouble Words modal closes while paused on trouble-words, advance to learn-mode.
+  useEffect(() => {
+    if (!troubleModal && tutorialPaused && tutorialStepId === 'trouble-words') {
+      setTutorialPaused(false);
+      tutorialGoTo('learn-mode');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [troubleModal]);
+
+  // When the user returns home after playing Match or Test, un-pause and advance.
+  useEffect(() => {
+    if (!tutorialActive || !tutorialPaused || currentView !== 'home') return;
+    if (tutorialStepId === 'match-mode') {
+      setTutorialPaused(false);
+      tutorialGoTo('test-mode');
+    } else if (tutorialStepId === 'test-mode') {
+      setTutorialPaused(false);
+      tutorialGoTo('extended-offer');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentView, tutorialPaused]);
+
   // Skips sync-related state updates when drawing — prevents re-renders mid-stroke.
   const safeSetSyncStatus = (status) => {
     if (currentViewRef.current === 'writing') return;
