@@ -9673,7 +9673,7 @@ Rules:
                       onClick={() => setSelectedOption(option)}
                       className={`p-4 rounded-lg border-2 transition text-lg text-left flex items-center gap-3 ${
                         selectedOption === option
-                          ? 'border-purple-600 bg-purple-50'
+                          ? darkMode ? 'border-purple-400 bg-purple-900 text-purple-100' : 'border-purple-600 bg-purple-50'
                           : darkMode ? 'border-gray-600 hover:border-purple-400 text-gray-200' : 'border-gray-300 hover:border-purple-400'
                       }`}
                     >
