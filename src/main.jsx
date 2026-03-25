@@ -436,13 +436,12 @@ const TUTORIAL_STEPS = {
   },
   'trouble-words': {
     title: 'Trouble Words 🔥',
-    content: 'The Trouble Words section shows your weakest cards — ones you\'ve marked "I Forgot" most often.\n\nClick "Start Practice" inside it to drill those cards!\n\nGreat for quick targeted review before a test.',
+    content: 'The Trouble Words section shows your weakest cards — ones you\'ve marked "I Forgot" most often.\n\nClick "Practice All →" to drill them. Great for quick review before a test!',
     nextId: 'learn-mode',
     prevId: null,
-    targetId: 'tutorial-trouble-section',
-    arrowDir: 'down',
+    targetId: null,
     view: 'home',
-    noMask: true,
+    noOverlay: true,
   },
   'learn-mode': {
     title: 'Learn Mode 🎓',
@@ -455,21 +454,23 @@ const TUTORIAL_STEPS = {
   },
   'match-mode': {
     title: 'Match Game 🎮',
-    content: 'Click the 🎮 Match button on your deck card to start the match game.\n\nClick matching Chinese–English pairs as fast as you can — beat your best time!',
+    content: '👇 Click the Match button to play! Match Chinese–English pairs as fast as you can — beat your best time.',
     nextId: 'test-mode',
     prevId: 'learn-mode',
-    targetId: null,
+    targetId: 'tutorial-first-deck-match',
+    arrowDir: 'down',
     view: 'home',
-    noOverlay: true,
+    noMask: true,
   },
   'test-mode': {
     title: 'Test Mode 📝',
-    content: 'Click the 📝 Test button on your deck card to set up a quiz.\n\nChoose question count, types (multiple choice, written, true/false), and whether to answer in Chinese or English.',
+    content: '👇 Click the Test button to set up a quiz — choose question count, types (multiple choice, written, true/false), and answer direction.',
     nextId: 'extended-offer',
     prevId: 'match-mode',
-    targetId: null,
+    targetId: 'tutorial-first-deck-test',
+    arrowDir: 'down',
     view: 'home',
-    noOverlay: true,
+    noMask: true,
   },
   'extended-offer': {
     title: 'Core Tour Complete! 🎉',
@@ -488,7 +489,7 @@ const TUTORIAL_STEPS = {
     targetId: 'tutorial-expand-btn',
     arrowDir: 'down',
     view: 'home',
-    noOverlay: true,
+    noMask: true,
   },
   'kewen-reader': {
     title: '课文 Reader 📖',
@@ -11929,8 +11930,9 @@ Rules:
             // hasSpot: any spotlight — drives card positioning
             const hasSpot = hasBorder;
             // Floating card (top-right corner, no overlay) when:
-            // - step has no targetId, OR noOverlay flag set, OR the targeted element has left the DOM
-            const isFloating = !step.targetId || step.noOverlay || !hasSpot;
+            // - step has no targetId, OR noOverlay flag, OR noMask flag (card stays out of the way
+            //   while the glow border is still shown), OR the targeted element has left the DOM
+            const isFloating = !step.targetId || step.noOverlay || step.noMask || !hasSpot;
             const vh = window.innerHeight || 600;
             const vw = window.innerWidth || 400;
 
@@ -11938,9 +11940,9 @@ Rules:
             const targetCenterY = hasSpot ? spotRect.top + spotRect.height / 2 : vh / 2;
             const cardAtBottom = !hasSpot || targetCenterY < vh * 0.55;
 
-            // Arrow direction: up-arrow when card is BELOW target, down-arrow when card is ABOVE target
-            const showArrowUp = hasSpot && cardAtBottom;
-            const showArrowDown = hasSpot && !cardAtBottom;
+            // Arrows only make sense when card is anchored near the target (not floating)
+            const showArrowUp = !isFloating && hasSpot && cardAtBottom;
+            const showArrowDown = !isFloating && hasSpot && !cardAtBottom;
 
             const cardStyle = isFloating ? {
               // Compact floating card in top-right corner — stays out of the way of canvases/content
