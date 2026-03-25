@@ -7660,9 +7660,11 @@ Rules:
                             {ch}
                             <rt style={{
                               fontSize: '0.45em',
-                              color: isHighlighted ? '#92400e' : '#e11d48',
+                              color: isHighlighted
+                                ? (darkMode ? '#fbbf24' : '#92400e')
+                                : (darkMode ? '#f87171' : '#e11d48'),
                               fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-                              fontWeight: 500,
+                              fontWeight: 600,
                               letterSpacing: 0,
                               lineHeight: 1,
                               userSelect: 'none',
