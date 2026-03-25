@@ -519,6 +519,7 @@ const ChineseLearningApp = () => {
   const [kewenPinyinLoading, setKewenPinyinLoading] = useState(false);
   // Cache: char → pinyin string, built from CEDICT on first overlay toggle
   const kewenPinyinCacheRef = React.useRef({}); // { char: 'pīnyīn' }
+  const kewenPosMapRef = React.useRef({}); // { deckId: string[] } — per-position pinyin via word segmentation
 
   // Handwrite-Recognize modal state
   const [showHandwriteRecognize, setShowHandwriteRecognize] = useState(false);
@@ -2877,6 +2878,38 @@ Keep it concise and practical.`,
     return cedictCacheRef.current;
   };
 
+  // Build per-position pinyin map using greedy longest-match word segmentation
+  // This gives contextually accurate pinyin (e.g. 广 in 广告 → guǎng, not the radical yǎn)
+  const buildPinyinPosMap = async (text, deckId) => {
+    const dict = await getCedict();
+    if (!dict) return;
+    const posMap = new Array(text.length).fill('');
+    let i = 0;
+    while (i < text.length) {
+      if (!/\p{Script=Han}/u.test(text[i])) { i++; continue; }
+      let matched = false;
+      for (let len = Math.min(6, text.length - i); len >= 2; len--) {
+        const word = text.slice(i, i + len);
+        const entry = dict[word];
+        if (entry && entry.p) {
+          const syllables = entry.p.split(' ');
+          if (syllables.length === len) {
+            for (let k = 0; k < len; k++) posMap[i + k] = syllables[k] || '';
+            i += len;
+            matched = true;
+            break;
+          }
+        }
+      }
+      if (!matched) {
+        const entry = dict[text[i]];
+        posMap[i] = entry ? (entry.p || '').split(' ')[0] : '';
+        i++;
+      }
+    }
+    kewenPosMapRef.current[deckId] = posMap;
+  };
+
   const lookupWord = async (word) => {
     setSelectedWords(prev => {
       const next = new Map(prev);
@@ -3811,53 +3844,26 @@ Grade this response.` },
   };
 
   // Toggle highlight pinyin mode — pre-loads CEDICT on first use (highlights only)
-  const toggleKewenHighlightPinyin = async (text) => {
+  const toggleKewenHighlightPinyin = async (text, deckId) => {
     const next = !kewenHighlightPinyin;
     setKewenHighlightPinyin(next);
     try { localStorage.setItem('kewenHighlightPinyin', JSON.stringify(next)); } catch(e) {}
     if (!next) return;
-    const chars = [...new Set(text.split('').filter(c => /\p{Script=Han}/u.test(c)))];
-    if (chars.every(c => kewenPinyinCacheRef.current[c] !== undefined)) return;
+    if (kewenPosMapRef.current[deckId]) return; // already built
     setKewenPinyinLoading(true);
-    try {
-      const dict = await getCedict();
-      if (dict) {
-        chars.forEach(c => {
-          if (kewenPinyinCacheRef.current[c] === undefined) {
-            const entry = dict[c];
-            kewenPinyinCacheRef.current[c] = entry ? (entry.p || '').split(' ')[0] : '';
-          }
-        });
-      }
-    } catch(e) {}
+    try { await buildPinyinPosMap(text, deckId); } catch(e) {}
     setKewenPinyinLoading(false);
   };
 
   // Toggle pinyin overlay — pre-loads CEDICT on first use
-  const toggleKewenPinyin = async (text) => {
+  const toggleKewenPinyin = async (text, deckId) => {
     const next = !kewenPinyinOverlay;
     setKewenPinyinOverlay(next);
     try { localStorage.setItem('kewenPinyinOverlay', JSON.stringify(next)); } catch(e) {}
-    if (!next) return; // turning off — nothing to load
-
-    // If cache already has entries for this text's chars, we're done
-    const chars = [...new Set(text.split('').filter(c => /\p{Script=Han}/u.test(c)))];
-    if (chars.every(c => kewenPinyinCacheRef.current[c] !== undefined)) return;
-
-    // Load CEDICT and populate cache
+    if (!next) return;
+    if (kewenPosMapRef.current[deckId]) return; // already built
     setKewenPinyinLoading(true);
-    try {
-      const dict = await getCedict();
-      if (dict) {
-        chars.forEach(c => {
-          if (kewenPinyinCacheRef.current[c] === undefined) {
-            const entry = dict[c];
-            // CEDICT pinyin is space-separated with tone numbers or marks; take first reading
-            kewenPinyinCacheRef.current[c] = entry ? (entry.p || '').split(' ')[0] : '';
-          }
-        });
-      }
-    } catch(e) {}
+    try { await buildPinyinPosMap(text, deckId); } catch(e) {}
     setKewenPinyinLoading(false);
   };
 
@@ -7570,11 +7576,15 @@ Rules:
                       const walk = (node) => {
                         if (startOffset !== null && endOffset !== null) return;
                         if (node.nodeType === 3) { // TEXT_NODE
+                          // Skip <rt> text nodes — they contain pinyin labels, not source text
+                          if (node.parentElement && node.parentElement.tagName === 'RT') return;
                           const len = node.textContent.length;
                           if (startOffset === null && node === range.startContainer) startOffset = cumulative + range.startOffset;
                           if (endOffset === null && node === range.endContainer) endOffset = cumulative + range.endOffset;
                           cumulative += len;
                         } else {
+                          // Skip entire <rt> subtrees
+                          if (node.tagName === 'RT') return;
                           for (let ci = 0; ci < node.childNodes.length; ci++) walk(node.childNodes[ci]);
                         }
                       };
@@ -7632,18 +7642,19 @@ Rules:
                   // Render a single run of text — either plain or with per-character ruby pinyin
                   const renderRun = (runText, isHighlighted, runStart) => {
                     const chars = runText.split('');
-                    const isHan = (c) => /\p{Script=Han}/u.test(c);
-                    const cache = kewenPinyinCacheRef.current;
 
                     // Show ruby pinyin if: full overlay on, OR highlight-pinyin mode on and this run is highlighted
                     const showPinyin = kewenPinyinOverlay || (kewenHighlightPinyin && isHighlighted);
+
+                    // Use per-position map (word-segmentation aware) for accurate readings
+                    const posMap = kewenPosMapRef.current[deckId];
 
                     const inner = showPinyin ? (
                       chars.map((ch, ci) => {
                         // Preserve newlines as <br> and spaces as non-breaking space in overlay mode
                         if (ch === '\n') return <br key={ci} />;
                         if (ch === ' ' || ch === '\u3000') return <span key={ci}>{'\u00A0'}</span>;
-                        const py = isHan(ch) ? (cache[ch] || '') : '';
+                        const py = posMap ? (posMap[runStart + ci] || '') : '';
                         return py ? (
                           <ruby key={ci} style={{ rubyAlign: 'center' }}>
                             {ch}
@@ -7730,7 +7741,7 @@ Rules:
 
                       {/* Pinyin overlay toggle */}
                       <button
-                        onClick={() => toggleKewenPinyin(text)}
+                        onClick={() => toggleKewenPinyin(text, deckId)}
                         disabled={kewenPinyinLoading}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition border ${
                           kewenPinyinOverlay
@@ -7754,7 +7765,7 @@ Rules:
 
                       {/* Highlight Pinyin toggle — shows pinyin only above highlighted text */}
                       <button
-                        onClick={() => toggleKewenHighlightPinyin(text)}
+                        onClick={() => toggleKewenHighlightPinyin(text, deckId)}
                         disabled={kewenPinyinLoading}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition border ${
                           kewenHighlightPinyin
@@ -7774,6 +7785,14 @@ Rules:
                       )}
                       <span className="text-xs text-gray-400 ml-auto">{text.length} chars · Select any word</span>
                     </div>
+
+                    {/* Hint bar for highlight pinyin mode */}
+                    {kewenHighlightPinyin && (
+                      <div className={`px-5 py-2 text-xs flex items-center gap-2 border-b ${darkMode ? 'bg-amber-900/30 border-amber-800 text-amber-300' : 'bg-amber-50 border-amber-100 text-amber-700'}`}>
+                        <span>✨</span>
+                        <span><strong>Highlight Pinyin mode is on.</strong> Select / drag over any text in the passage to highlight it — pinyin will appear above the highlighted words and persist.</span>
+                      </div>
+                    )}
 
                     {/* Scrollable text */}
                     <div className="flex-1 overflow-y-auto p-5" onClick={() => { const s = window.getSelection(); if (!s || s.isCollapsed) setKewenPopup(null); }}>
@@ -11222,7 +11241,7 @@ Rules:
               className={`flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
             >← Home</button>
             <div className="text-center">
-              <h1 className="text-lg font-bold text-gray-800">课文 Sentence Writing</h1>
+              <h1 className={`text-lg font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>课文 Sentence Writing</h1>
               <p className="text-xs text-gray-400">{deck.name}</p>
             </div>
             <button
@@ -11239,7 +11258,7 @@ Rules:
           <div className="text-xs text-gray-400 text-right mb-4">{sentenceIndex + 1} / {totalSentences}</div>
 
           {/* Sentence card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-4">
+          <div className={`rounded-2xl shadow-lg p-6 mb-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
 
             {/* English translation */}
             <div className="mb-5">
@@ -11252,7 +11271,7 @@ Rules:
                   Fetching translations...
                 </div>
               ) : (
-                <p className="text-base text-gray-700 leading-relaxed">{translation || '—'}</p>
+                <p className={`text-base leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{translation || '—'}</p>
               )}
             </div>
 
@@ -11263,22 +11282,22 @@ Rules:
                 <div className="flex gap-2" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
                   <button
                     onClick={() => speakChinese(currentSentence)}
-                    className="text-xs bg-teal-50 hover:bg-teal-100 text-teal-700 px-2.5 py-1 rounded-lg border border-teal-200 transition font-medium flex items-center gap-1"
+                    className={`text-xs px-2.5 py-1 rounded-lg border transition font-medium flex items-center gap-1 ${darkMode ? 'bg-teal-900 hover:bg-teal-800 text-teal-300 border-teal-700' : 'bg-teal-50 hover:bg-teal-100 text-teal-700 border-teal-200'}`}
                     style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                   >🔊 Pronounce</button>
                   <button
                     onClick={() => setSentenceRevealed(r => !r)}
-                    className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1 rounded-lg transition font-medium"
+                    className={`text-xs px-2.5 py-1 rounded-lg transition font-medium ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
                     style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                   >{sentenceRevealed ? '🙈 Hide' : '👁 Reveal'}</button>
                 </div>
               </div>
               {sentenceRevealed ? (
-                <p className="text-xl leading-relaxed text-gray-800 p-3 bg-teal-50 rounded-xl border border-teal-100" style={{ fontFamily: 'serif' }}>
+                <p className={`text-xl leading-relaxed p-3 rounded-xl border ${darkMode ? 'text-gray-100 bg-teal-900/40 border-teal-700' : 'text-gray-800 bg-teal-50 border-teal-100'}`} style={{ fontFamily: 'serif' }}>
                   {currentSentence}
                 </p>
               ) : (
-                <div className="h-10 bg-gray-100 rounded-xl flex items-center px-4">
+                <div className={`h-10 rounded-xl flex items-center px-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
                   <span className="text-gray-400 text-sm">Hidden — write it first, then reveal to check</span>
                 </div>
               )}
@@ -11288,12 +11307,12 @@ Rules:
             <div className="flex gap-2 mb-3" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
               <button
                 onClick={() => setSentenceInputMode('type')}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${sentenceInputMode === 'type' ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${sentenceInputMode === 'type' ? 'bg-teal-600 text-white' : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                 style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
               >⌨️ Type</button>
               <button
                 onClick={() => setSentenceInputMode('handwrite')}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${sentenceInputMode === 'handwrite' ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${sentenceInputMode === 'handwrite' ? 'bg-teal-600 text-white' : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                 style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
               >✍️ Handwrite</button>
             </div>
