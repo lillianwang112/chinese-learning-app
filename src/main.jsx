@@ -3425,7 +3425,13 @@ Grade this response.` },
     const kewenHash = kewen ? String(kewen.split('').reduce((acc, c) => (acc + c.charCodeAt(0)) & 0xfffffff, 0)) : '0';
     const cacheKey = `sentenceTrans_${deckId}`;
 
-    // Check localStorage cache first
+    // Check in-memory state first — translations may already be loaded from Firebase
+    if (sentences.length > 0 && sentences.every(s => sentenceTranslations[s])) {
+      setSentenceTransLoading(false);
+      return; // already in state (e.g. loaded from cloud sync) — no AI call needed
+    }
+
+    // Check localStorage cache next
     try {
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
@@ -3433,7 +3439,7 @@ Grade this response.` },
         if (hash === kewenHash) {
           setSentenceTranslations(translations);
           setSentenceTransLoading(false);
-          return; // cache hit — no AI call needed
+          return; // localStorage cache hit — no AI call needed
         }
       }
     } catch (e) { /* ignore parse errors, fall through to fetch */ }
@@ -9112,8 +9118,10 @@ Rules:
 
           {/* Swipe Instructions */}
           <div className="text-center mb-4">
-            <p className="text-gray-600">
-              Tap to flip • Swipe right if you know it • Swipe left if you're still learning
+            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              {userSettings.flashcard.useAnkiRatings
+                ? 'Tap to flip • Then rate how well you knew it using the buttons below'
+                : 'Tap to flip • Swipe right if you know it • Swipe left if you\'re still learning'}
             </p>
           </div>
 
