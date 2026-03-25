@@ -437,15 +437,35 @@ const TUTORIAL_STEPS = {
   'writing-test-select': {
     title: 'Test Mode — Active Recall 🧪',
     content: 'Perfect for exam prep!\n\n👇 Click "Test 10" — only pinyin and English are shown, you write the character from memory.\n\nStrokes and Trace guides are still available if you need a hint.',
-    nextId: 'writing-test-active',
+    nextId: 'writing-test-reveal',
     prevId: null,
     targetId: 'tutorial-writing-test10-btn',
     arrowDir: 'up',
     view: 'writing',
   },
-  'writing-test-active': {
+  'writing-test-reveal': {
+    title: 'Try the Reveal Button 👁',
+    content: 'The character is shown as question marks — write it from memory first!\n\nWhen you\'re ready to check, click "👁 Reveal" to see the character.',
+    nextId: 'writing-test-hide',
+    prevId: null,
+    targetId: 'tutorial-reveal-btn',
+    arrowDir: 'up',
+    view: 'writing',
+    noMask: true,
+  },
+  'writing-test-hide': {
+    title: 'Now Hide It Again 🙈',
+    content: 'There it is! Compare your writing with the character.\n\n🙈 Click "Hide" to hide the character and try the next card from memory.',
+    nextId: 'writing-test-explore',
+    prevId: null,
+    targetId: 'tutorial-reveal-btn',
+    arrowDir: 'up',
+    view: 'writing',
+    noMask: true,
+  },
+  'writing-test-explore': {
     title: 'Test Mode 🎯',
-    content: 'The character is hidden — write it from memory!\n\n• "Strokes" and "Trace" are still here if you need them\n• This builds the active recall needed for exams\n\nTry a few cards, then click "← Home" to continue.',
+    content: 'That\'s the workflow — write from memory, then reveal to check!\n\n• "Strokes" and "Trace" are still available to help\n• This builds the active recall needed for exams\n\nTry a few more cards on your own, then click "← Home" to continue.',
     nextId: null,
     prevId: null,
     targetId: null,
@@ -1448,10 +1468,18 @@ const ChineseLearningApp = () => {
         return decks.length > 0 ? () => startWritingPractice(decks[0]) : null;
       }
       if (tutorialStepId === 'writing-test-select') {
-        // Next = same as clicking Test 10
-        return () => { startWritingTest(); tutorialGoTo('writing-test-active'); };
+        // Next = same as clicking Test 10; auto-advance effect moves to writing-test-reveal
+        return () => { startWritingTest(); tutorialGoTo('writing-test-reveal'); };
       }
-      if (tutorialStepId === 'writing-test-active') {
+      if (tutorialStepId === 'writing-test-reveal') {
+        // Next = same as clicking Reveal
+        return () => { setTestRevealed(true); tutorialGoTo('writing-test-hide'); };
+      }
+      if (tutorialStepId === 'writing-test-hide') {
+        // Next = same as clicking Hide
+        return () => { setTestRevealed(false); tutorialGoTo('writing-test-explore'); };
+      }
+      if (tutorialStepId === 'writing-test-explore') {
         // Next = same as clicking ← Home; auto-advance effect then goes to study-intro
         return () => setCurrentView('home');
       }
@@ -1490,7 +1518,7 @@ const ChineseLearningApp = () => {
       tutorialGoTo('writing-test-ready');
     } else if (tutorialStepId === 'writing-test-ready' && currentView === 'writing') {
       tutorialGoTo('writing-test-select');
-    } else if (tutorialStepId === 'writing-test-active' && currentView === 'home') {
+    } else if (tutorialStepId === 'writing-test-explore' && currentView === 'home') {
       tutorialGoTo('study-intro');
     } else if (tutorialStepId === 'study-intro' && currentView === 'study') {
       tutorialGoTo('study-flip');
@@ -3869,7 +3897,7 @@ Grade this response.` },
       : isChi108 === false
       ? ['welcome', 'hsk-intro', 'hsk-browse']
       : ['welcome'];
-    const coreSteps = ['deck-ready','writing-practice-select','writing-practice-active','writing-test-ready','writing-test-select','writing-test-active','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','extended-offer'];
+    const coreSteps = ['deck-ready','writing-practice-select','writing-practice-active','writing-test-ready','writing-test-select','writing-test-reveal','writing-test-hide','writing-test-explore','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','extended-offer'];
     return [...basePath, ...coreSteps];
   };
   const extendedStepList = ['expand-collapse','kewen-reader','sentence-practice','ai-test','puter-warning','settings-tour','folders-tour','stats-tour','done'];
@@ -11004,7 +11032,7 @@ Rules:
                 id="tutorial-writing-test10-btn"
                 onClick={() => {
                   startWritingTest();
-                  if (tutorialActive && tutorialStepId === 'writing-test-select') tutorialGoTo('writing-test-active');
+                  if (tutorialActive && tutorialStepId === 'writing-test-select') tutorialGoTo('writing-test-reveal');
                 }}
                 className="w-full bg-orange-600 text-white px-8 py-6 rounded-lg hover:bg-orange-700 transition text-left"
               >
@@ -11279,7 +11307,14 @@ Rules:
               )}
               {(writingMode === 'test' || writingMode === 'testAll') && (
                 <button
-                  onClick={() => setTestRevealed(prev => !prev)}
+                  id="tutorial-reveal-btn"
+                  onClick={() => {
+                    setTestRevealed(prev => !prev);
+                    if (tutorialActive) {
+                      if (tutorialStepId === 'writing-test-reveal') tutorialGoTo('writing-test-hide');
+                      else if (tutorialStepId === 'writing-test-hide') tutorialGoTo('writing-test-explore');
+                    }
+                  }}
                   className={`${testRevealed ? 'bg-gray-500 hover:bg-gray-600' : 'bg-orange-500 hover:bg-orange-600'} text-white px-4 py-3 rounded-lg transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6`}
                 >
                   {testRevealed ? '🙈 Hide' : '👁 Reveal'}
