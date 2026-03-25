@@ -379,6 +379,7 @@ const TUTORIAL_STEPS = {
     targetId: 'tutorial-browse-btn',
     arrowDir: 'up',
     view: 'home',
+    noOverlay: true,
   },
   'hsk-intro': {
     title: 'Getting Started 🚀',
@@ -397,6 +398,7 @@ const TUTORIAL_STEPS = {
     targetId: 'tutorial-browse-btn',
     arrowDir: 'up',
     view: 'home',
+    noOverlay: true,
   },
   'deck-ready': {
     title: 'Your Deck is Ready! ✅',
@@ -414,6 +416,7 @@ const TUTORIAL_STEPS = {
     prevId: 'deck-ready',
     targetId: null,
     view: 'writing',
+    noOverlay: true,
   },
   'study-intro': {
     title: 'Flashcard Study 📚',
@@ -431,6 +434,7 @@ const TUTORIAL_STEPS = {
     prevId: 'study-intro',
     targetId: null,
     view: 'study',
+    noOverlay: true,
   },
   'trouble-words': {
     title: 'Trouble Words 🔥',
@@ -11894,20 +11898,42 @@ Rules:
             const { step, stepId, isChi108, stepNumber, totalSteps, onNext, onBack, onChoice, onEnd } = tutData;
             if (!step) return null;
 
+            // Directly clear local state — reliable dismiss that doesn't depend on cross-component chain
+            const dismissOverlay = () => {
+              setTutData(null);
+              setSpotRect(null);
+              if (onEnd) onEnd();
+            };
+
             const pad = 10;
-            const hasSpot = !!spotRect;
+            // Only show spotlight when we have a rect AND the step didn't opt out of overlay
+            const hasSpot = !!spotRect && !step.noOverlay;
+            // Floating card (no dark overlay) for steps that show a different view or open modals
+            const isFloating = !step.targetId || step.noOverlay;
             const vh = window.innerHeight || 600;
             const vw = window.innerWidth || 400;
 
-            // Card position: prefer bottom if target is in upper 60%, top if lower
+            // Card position: prefer bottom if target is in upper 55%, top if lower
             const targetCenterY = hasSpot ? spotRect.top + spotRect.height / 2 : vh / 2;
             const cardAtBottom = !hasSpot || targetCenterY < vh * 0.55;
 
-            // Arrow direction: up-arrow when card is BELOW target (card at bottom), down-arrow when card is ABOVE target
+            // Arrow direction: up-arrow when card is BELOW target, down-arrow when card is ABOVE target
             const showArrowUp = hasSpot && cardAtBottom;
             const showArrowDown = hasSpot && !cardAtBottom;
 
-            const cardStyle = {
+            const cardStyle = isFloating ? {
+              // Compact floating card in bottom-right corner — doesn't block the view
+              position: 'fixed',
+              bottom: 20,
+              right: 20,
+              width: Math.min(vw - 24, 340),
+              zIndex: 10001,
+              background: 'rgba(255,255,255,0.97)',
+              borderRadius: 16,
+              boxShadow: '0 8px 40px rgba(0,0,0,0.35)',
+              padding: '14px 18px',
+              border: '2px solid #f59e0b',
+            } : {
               position: 'fixed',
               left: '50%',
               transform: 'translateX(-50%)',
@@ -11923,26 +11949,22 @@ Rules:
 
             return createPortal(
               <div style={{ position: 'fixed', inset: 0, zIndex: 10000, pointerEvents: 'none' }}>
-                {/* Dark overlay with SVG spotlight cutout */}
-                <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} aria-hidden="true">
-                  {hasSpot ? (
-                    <>
-                      <defs>
-                        <mask id="tut-mask">
-                          <rect width="100%" height="100%" fill="white" />
-                          <rect
-                            x={spotRect.left - pad} y={spotRect.top - pad}
-                            width={spotRect.width + pad * 2} height={spotRect.height + pad * 2}
-                            rx="10" fill="black"
-                          />
-                        </mask>
-                      </defs>
-                      <rect width="100%" height="100%" fill="rgba(0,0,0,0.72)" mask="url(#tut-mask)" />
-                    </>
-                  ) : (
-                    <rect width="100%" height="100%" fill="rgba(0,0,0,0.72)" />
-                  )}
-                </svg>
+                {/* Dark overlay with SVG spotlight cutout — only when there IS a spotlight target */}
+                {hasSpot && (
+                  <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} aria-hidden="true">
+                    <defs>
+                      <mask id="tut-mask">
+                        <rect width="100%" height="100%" fill="white" />
+                        <rect
+                          x={spotRect.left - pad} y={spotRect.top - pad}
+                          width={spotRect.width + pad * 2} height={spotRect.height + pad * 2}
+                          rx="10" fill="black"
+                        />
+                      </mask>
+                    </defs>
+                    <rect width="100%" height="100%" fill="rgba(0,0,0,0.72)" mask="url(#tut-mask)" />
+                  </svg>
+                )}
 
                 {/* Glowing border around spotlight target */}
                 {hasSpot && (
@@ -11976,7 +11998,8 @@ Rules:
                         <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           Step {stepNumber} of {totalSteps}
                         </span>
-                        <button onClick={onEnd} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 18, lineHeight: 1, padding: 0 }} title="Close tour">✕</button>
+                        {/* Use dismissOverlay directly — bypasses unreliable cross-component onEnd chain */}
+                        <button onClick={dismissOverlay} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 18, lineHeight: 1, padding: 0 }} title="Close tour">✕</button>
                       </div>
                       <div style={{ height: 4, background: '#e5e7eb', borderRadius: 4, overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${(stepNumber / totalSteps) * 100}%`, background: 'linear-gradient(90deg,#f59e0b,#ef4444)', borderRadius: 4, transition: 'width 0.4s ease' }} />
@@ -12018,7 +12041,8 @@ Rules:
                         </button>
                       ) : <div />}
                       {step.finishButton ? (
-                        <button onClick={onEnd} style={{ padding: '9px 20px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+                        /* Use dismissOverlay directly — bypasses unreliable cross-component onEnd chain */
+                        <button onClick={dismissOverlay} style={{ padding: '9px 20px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
                           🎊 Finish Tour
                         </button>
                       ) : onNext ? (
