@@ -520,10 +520,18 @@ const TUTORIAL_STEPS = {
   'test-mode': {
     title: 'Test Mode 📝',
     content: 'Click the highlighted Test button to set up a quiz — choose question count, types (multiple choice, written, true/false), and answer direction.',
-    nextId: 'extended-offer',
+    nextId: 'pwa-install',
     prevId: 'match-mode',
     targetId: 'tutorial-first-deck-test',
     arrowDir: 'down',
+    view: 'home',
+  },
+  'pwa-install': {
+    title: 'Install as an App 📲',
+    content: 'Add 中文 Learn to your home screen for quick access — it works offline too!\n\n📱 iPhone/iPad: tap Share (□↑) → "Add to Home Screen"\n🤖 Android: tap ⋮ menu → "Add to Home Screen" or "Install App"\n💻 Chrome/Edge: click the ⊕ icon in the address bar → "Install"',
+    nextId: 'extended-offer',
+    prevId: 'test-mode',
+    targetId: null,
     view: 'home',
   },
   'extended-offer': {
@@ -1472,12 +1480,30 @@ const ChineseLearningApp = () => {
         return () => { startWritingTest(); tutorialGoTo('writing-test-reveal'); };
       }
       if (tutorialStepId === 'writing-test-reveal') {
-        // Next = same as clicking Reveal
-        return () => { setTestRevealed(true); tutorialGoTo('writing-test-hide'); };
+        // Next = same as clicking Reveal; scroll up to show character, then back down to show Hide btn
+        return () => {
+          setTestRevealed(true);
+          tutorialGoTo('writing-test-hide');
+          const needsScroll = document.documentElement.scrollHeight > window.innerHeight + 100;
+          if (needsScroll) {
+            setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 500);
+            setTimeout(() => {
+              document.getElementById('tutorial-reveal-btn')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 3000);
+          }
+        };
       }
       if (tutorialStepId === 'writing-test-hide') {
-        // Next = same as clicking Hide
-        return () => { setTestRevealed(false); tutorialGoTo('writing-test-explore'); };
+        // Next = same as clicking Hide; scroll up to show hidden ???, then back down to show canvas
+        return () => {
+          setTestRevealed(false);
+          tutorialGoTo('writing-test-explore');
+          const needsScroll = document.documentElement.scrollHeight > window.innerHeight + 100;
+          if (needsScroll) {
+            setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 500);
+            setTimeout(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }), 3000);
+          }
+        };
       }
       if (tutorialStepId === 'writing-test-explore') {
         // Next = same as clicking ← Home; auto-advance effect then goes to study-intro
@@ -1490,6 +1516,23 @@ const ChineseLearningApp = () => {
         return () => {
           if (expandedDecks.size === 0) setExpandedDecks(new Set(decks.map(d => d.id)));
           tutorialGoTo('kewen-reader');
+        };
+      }
+      if (tutorialStepId === 'kewen-reader') {
+        // Next = close the 课文 reader modal (if open) then go to sentence-practice
+        return () => {
+          setKewenEditDeck(null);
+          setKewenEditText('');
+          stopKewen();
+          setKewenViewMode('read');
+          tutorialGoTo('sentence-practice');
+        };
+      }
+      if (tutorialStepId === 'sentence-practice') {
+        // Next = exit sentence practice view (if open) and go to ai-test
+        return () => {
+          if (currentView === 'sentencePractice') setCurrentView('home');
+          tutorialGoTo('ai-test');
         };
       }
       return dynamicStep.nextId ? () => tutorialGoTo(dynamicStep.nextId) : null;
@@ -3897,7 +3940,7 @@ Grade this response.` },
       : isChi108 === false
       ? ['welcome', 'hsk-intro', 'hsk-browse']
       : ['welcome'];
-    const coreSteps = ['deck-ready','writing-practice-select','writing-practice-active','writing-test-ready','writing-test-select','writing-test-reveal','writing-test-hide','writing-test-explore','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','extended-offer'];
+    const coreSteps = ['deck-ready','writing-practice-select','writing-practice-active','writing-test-ready','writing-test-select','writing-test-reveal','writing-test-hide','writing-test-explore','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','pwa-install','extended-offer'];
     return [...basePath, ...coreSteps];
   };
   const extendedStepList = ['expand-collapse','kewen-reader','sentence-practice','ai-test','puter-warning','settings-tour','folders-tour','stats-tour','done'];
@@ -11309,10 +11352,27 @@ Rules:
                 <button
                   id="tutorial-reveal-btn"
                   onClick={() => {
+                    const wasRevealed = testRevealed;
                     setTestRevealed(prev => !prev);
                     if (tutorialActive) {
-                      if (tutorialStepId === 'writing-test-reveal') tutorialGoTo('writing-test-hide');
-                      else if (tutorialStepId === 'writing-test-hide') tutorialGoTo('writing-test-explore');
+                      const needsScroll = document.documentElement.scrollHeight > window.innerHeight + 100;
+                      if (tutorialStepId === 'writing-test-reveal') {
+                        tutorialGoTo('writing-test-hide');
+                        // Scroll up to show the revealed character, then back down to show Hide button
+                        if (needsScroll) {
+                          setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 500);
+                          setTimeout(() => {
+                            document.getElementById('tutorial-reveal-btn')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }, 3000);
+                        }
+                      } else if (tutorialStepId === 'writing-test-hide') {
+                        tutorialGoTo('writing-test-explore');
+                        // Scroll up to show hidden ???, then back down to show canvas
+                        if (needsScroll) {
+                          setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 500);
+                          setTimeout(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }), 3000);
+                        }
+                      }
                     }
                   }}
                   className={`${testRevealed ? 'bg-gray-500 hover:bg-gray-600' : 'bg-orange-500 hover:bg-orange-600'} text-white px-4 py-3 rounded-lg transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6`}
