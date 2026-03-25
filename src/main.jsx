@@ -109,6 +109,13 @@ import './index.css';
             </svg>
         );
 
+        const SettingsIcon = ({size = 24, className = ''}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        );
+
         const RefreshCw = ({size = 24, className = ''}) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 <polyline points="23 4 23 10 17 10"></polyline>
@@ -6184,15 +6191,15 @@ Rules:
                 </button>
               )}
               <button
-                onClick={() => currentUser ? setCurrentView('account') : setCurrentView('login')}
+                onClick={() => setCurrentView('account')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold ${
                   currentUser
                     ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700'
                     : 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-indigo-700'
                 }`}
               >
-                <UserIcon size={20} />
-                {currentUser ? 'Account' : 'Sign In'}
+                {currentUser ? <UserIcon size={20} /> : <SettingsIcon size={20} />}
+                {currentUser ? 'Account' : 'Settings'}
                 {currentUser && syncStatus === 'syncing' && (
                   <RefreshCw size={14} className="animate-spin" />
                 )}
@@ -10731,9 +10738,13 @@ Rules:
             <div className={`mt-6 p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
               <p className={`text-sm text-center ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 {(writingMode === 'test' || writingMode === 'testAll') ? (
-                  <>💡 <strong>Test Mode:</strong> Try to write the character from memory using only the pinyin and English. Press "Reveal" to check your answer, then mark "I Know This" or "I Forgot".</>
+                  userSettings.flashcard.useAnkiRatings
+                    ? <>💡 <strong>Test Mode:</strong> Write the character from memory, then rate yourself — <span className="text-red-500 font-semibold">Again</span> = very soon · <span className="text-orange-500 font-semibold">Hard</span> = later this session · <span className="text-blue-500 font-semibold">Good</span> = near end · <span className="text-green-500 font-semibold">Easy</span> = done</>
+                    : <>💡 <strong>Test Mode:</strong> Try to write the character from memory using only the pinyin and English. Press "Reveal" to check your answer, then mark "I Know This" or "I Forgot".</>
                 ) : (
-                  <>💡 <strong>Tip:</strong> Practice writing, then click "I Know This" if you got it right or "I Forgot" if you need more practice. Cards you forget will come back soon!</>
+                  userSettings.flashcard.useAnkiRatings
+                    ? <>💡 <strong>Tip:</strong> Practice writing, then rate yourself — <span className="text-red-500 font-semibold">Again</span> = very soon · <span className="text-orange-500 font-semibold">Hard</span> = later this session · <span className="text-blue-500 font-semibold">Good</span> = near end · <span className="text-green-500 font-semibold">Easy</span> = done</>
+                    : <>💡 <strong>Tip:</strong> Practice writing, then click "I Know This" if you got it right or "I Forgot" if you need more practice. Cards you forget will come back soon!</>
                 )}
               </p>
             </div>
