@@ -454,23 +454,23 @@ const TUTORIAL_STEPS = {
   },
   'match-mode': {
     title: 'Match Game 🎮',
-    content: '👇 Click the Match button to play! Match Chinese–English pairs as fast as you can — beat your best time.',
+    content: 'Click the highlighted Match button to play! Match Chinese–English pairs as fast as you can — beat your best time.',
     nextId: 'test-mode',
     prevId: 'learn-mode',
     targetId: 'tutorial-first-deck-match',
-    arrowDir: 'down',
     view: 'home',
     noMask: true,
+    topbar: true,
   },
   'test-mode': {
     title: 'Test Mode 📝',
-    content: '👇 Click the Test button to set up a quiz — choose question count, types (multiple choice, written, true/false), and answer direction.',
+    content: 'Click the highlighted Test button to set up a quiz — choose question count, types (multiple choice, written, true/false), and answer direction.',
     nextId: 'extended-offer',
     prevId: 'match-mode',
     targetId: 'tutorial-first-deck-test',
-    arrowDir: 'down',
     view: 'home',
     noMask: true,
+    topbar: true,
   },
   'extended-offer': {
     title: 'Core Tour Complete! 🎉',
@@ -513,7 +513,7 @@ const TUTORIAL_STEPS = {
   },
   'ai-test': {
     title: 'AI Test Practice 🤖',
-    content: '👇 Click "AI Test Practice" to generate a custom quiz from your decks.\n\nUses Claude AI to create unique questions tailored to your vocabulary.',
+    content: '👇 Click "AI Test Practice" to generate a custom quiz from your decks.\n\nPowered by Puter.js — you\'ll need a free Puter.js account to use it.',
     nextId: 'puter-warning',
     prevId: null,
     targetId: 'tutorial-ai-test-btn',
@@ -1391,11 +1391,14 @@ const ChineseLearningApp = () => {
   }, [tutorialActive, tutorialStepId, tutorialIsChi108]);
 
   // Auto-advance tutorial when user navigates by clicking a highlighted button.
-  // deck-ready → writing-strokes: fires as soon as the user clicks Write on a deck.
+  // deck-ready  → writing-strokes : fires when user clicks Write on a deck.
+  // study-intro → study-flip      : fires when user clicks Study on a deck.
   useEffect(() => {
     if (!tutorialActive) return;
     if (tutorialStepId === 'deck-ready' && currentView === 'writing') {
       tutorialGoTo('writing-strokes');
+    } else if (tutorialStepId === 'study-intro' && currentView === 'study') {
+      tutorialGoTo('study-flip');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tutorialActive, tutorialStepId, currentView]);
@@ -11939,10 +11942,11 @@ Rules:
             const hasMask = hasBorder && !step.noMask;
             // hasSpot: any spotlight — drives card positioning
             const hasSpot = hasBorder;
+            // topbar: thin strip pinned to very top of screen — never blocks game cards or modals
+            const isTopbar = !!step.topbar;
             // Floating card (top-right corner, no overlay) when:
-            // - step has no targetId, OR noOverlay flag, OR noMask flag (card stays out of the way
-            //   while the glow border is still shown), OR the targeted element has left the DOM
-            const isFloating = !step.targetId || step.noOverlay || step.noMask || !hasSpot;
+            // - not topbar, AND (step has no targetId, OR noOverlay flag, OR noMask flag, OR element gone)
+            const isFloating = !isTopbar && (!step.targetId || step.noOverlay || step.noMask || !hasSpot);
             const vh = window.innerHeight || 600;
             const vw = window.innerWidth || 400;
 
@@ -11950,11 +11954,20 @@ Rules:
             const targetCenterY = hasSpot ? spotRect.top + spotRect.height / 2 : vh / 2;
             const cardAtBottom = !hasSpot || targetCenterY < vh * 0.55;
 
-            // Arrows only make sense when card is anchored near the target (not floating)
-            const showArrowUp = !isFloating && hasSpot && cardAtBottom;
-            const showArrowDown = !isFloating && hasSpot && !cardAtBottom;
+            // Arrows only make sense when card is anchored near the target (not floating/topbar)
+            const showArrowUp = !isFloating && !isTopbar && hasSpot && cardAtBottom;
+            const showArrowDown = !isFloating && !isTopbar && hasSpot && !cardAtBottom;
 
-            const cardStyle = isFloating ? {
+            const cardStyle = isTopbar ? {
+              // Narrow horizontal strip pinned to the very top — zero footprint on the rest of the screen
+              position: 'fixed',
+              top: 0, left: 0, right: 0,
+              zIndex: 10001,
+              background: 'rgba(255,255,255,0.97)',
+              borderBottom: '2px solid #f59e0b',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.18)',
+              padding: '0 12px',
+            } : isFloating ? {
               // Compact floating card in top-right corner — stays out of the way of canvases/content
               position: 'fixed',
               top: 20,
@@ -12017,6 +12030,31 @@ Rules:
 
                 {/* Step card */}
                 <div style={{ ...cardStyle, pointerEvents: 'all' }}>
+                  {isTopbar ? (
+                    /* ── Topbar layout: single horizontal row, very short height ── */
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, height: 44 }}>
+                      {/* Step counter */}
+                      {stepNumber > 0 && totalSteps > 0 && (
+                        <span style={{ flex: '0 0 auto', fontSize: 10, color: '#9ca3af', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                          {stepNumber}/{totalSteps}
+                        </span>
+                      )}
+                      {/* Title */}
+                      <span style={{ flex: '0 0 auto', fontSize: 13, fontWeight: 700, color: '#1f2937', whiteSpace: 'nowrap' }}>{step.title}</span>
+                      {/* Divider */}
+                      <div style={{ width: 1, height: 24, background: '#e5e7eb', flex: '0 0 auto' }} />
+                      {/* Content — single line, truncated */}
+                      <span style={{ flex: 1, fontSize: 12, color: '#4b5563', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                        {step.content.replace(/\n/g, ' ')}
+                      </span>
+                      {/* Nav buttons */}
+                      <div style={{ flex: '0 0 auto', display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <button onClick={dismissOverlay} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 15, lineHeight: 1, padding: '0 2px' }} title="Close tour">✕</button>
+                        {onBack && <button onClick={onBack} style={{ padding: '4px 10px', borderRadius: 8, border: '1px solid #d1d5db', background: '#f9fafb', color: '#374151', fontWeight: 600, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>← Back</button>}
+                        {onNext && <button onClick={onNext} style={{ padding: '4px 10px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg,#f59e0b,#ef4444)', color: '#fff', fontWeight: 700, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>Next →</button>}
+                      </div>
+                    </div>
+                  ) : (<>
                   {/* Arrow pointing upward (toward target above card) */}
                   {showArrowUp && (
                     <div style={{ textAlign: 'center', marginBottom: 6, fontSize: 28, color: '#f59e0b', animation: 'tutBounceUp 1s ease-in-out infinite' }}>
@@ -12092,6 +12130,7 @@ Rules:
                       ▼
                     </div>
                   )}
+                  </>)}
                 </div>
 
                 {/* Keyframe styles */}
