@@ -810,6 +810,8 @@ const ChineseLearningApp = () => {
   const [tutorialActive, setTutorialActive] = useState(false);
   const [tutorialStepId, setTutorialStepId] = useState('welcome');
   const [tutorialIsChi108, setTutorialIsChi108] = useState(null); // null | true | false
+  // tutorialPaused: hides the overlay while the import modal is open so the user can see what they're doing
+  const [tutorialPaused, setTutorialPaused] = useState(false);
   const [sentenceRevealed, setSentenceRevealed] = useState(false);
   const [sentenceResumeModal, setSentenceResumeModal] = useState(null); // { deck } | null
   const [sentenceAnswer, setSentenceAnswer] = useState('');
@@ -1369,9 +1371,11 @@ const ChineseLearningApp = () => {
     }
   }, [bulkReorderFolderId]);
 
-  // Sync tutorial state to the AppWithToast overlay whenever it changes
+  // Sync tutorial state to the AppWithToast overlay whenever it changes.
+  // When tutorialPaused is true (e.g. import modal is open) the overlay is hidden so
+  // the user can interact with the screen freely.
   useEffect(() => {
-    if (!tutorialActive) {
+    if (!tutorialActive || tutorialPaused) {
       window.__tutorialHide?.();
       return;
     }
@@ -1389,7 +1393,7 @@ const ChineseLearningApp = () => {
       onEnd: endTutorial,
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tutorialActive, tutorialStepId, tutorialIsChi108]);
+  }, [tutorialActive, tutorialPaused, tutorialStepId, tutorialIsChi108]);
 
   // Auto-advance tutorial when user navigates by clicking a highlighted button.
   // deck-ready  → writing-strokes : fires when user clicks Write on a deck.
@@ -1403,6 +1407,16 @@ const ChineseLearningApp = () => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tutorialActive, tutorialStepId, currentView]);
+
+  // When the import modal closes while the tutorial is paused on chi108-import,
+  // un-pause and advance to the next step so the user sees the deck-ready card.
+  useEffect(() => {
+    if (!showImportExportModal && tutorialPaused && tutorialStepId === 'chi108-import') {
+      setTutorialPaused(false);
+      tutorialGoTo('deck-ready');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showImportExportModal]);
 
   // Skips sync-related state updates when drawing — prevents re-renders mid-stroke.
   const safeSetSyncStatus = (status) => {
@@ -6487,7 +6501,13 @@ Rules:
               </button>
               <button
                 id="tutorial-import-btn"
-                onClick={() => setShowImportExportModal(true)}
+                onClick={() => {
+                  setShowImportExportModal(true);
+                  // Hide tutorial overlay immediately so the user can see the import modal clearly
+                  if (tutorialActive && tutorialStepId === 'chi108-import') {
+                    setTutorialPaused(true);
+                  }
+                }}
                 className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer font-semibold"
               >
                 <Upload size={20} />
