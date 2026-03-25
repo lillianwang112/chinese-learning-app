@@ -10738,9 +10738,13 @@ Rules:
             <div className={`mt-6 p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
               <p className={`text-sm text-center ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 {(writingMode === 'test' || writingMode === 'testAll') ? (
-                  <>💡 <strong>Test Mode:</strong> Try to write the character from memory using only the pinyin and English. Press "Reveal" to check your answer, then mark "I Know This" or "I Forgot".</>
+                  userSettings.flashcard.useAnkiRatings
+                    ? <>💡 <strong>Test Mode:</strong> Write the character from memory, then rate yourself — <span className="text-red-500 font-semibold">Again</span> = very soon · <span className="text-orange-500 font-semibold">Hard</span> = later this session · <span className="text-blue-500 font-semibold">Good</span> = near end · <span className="text-green-500 font-semibold">Easy</span> = done</>
+                    : <>💡 <strong>Test Mode:</strong> Try to write the character from memory using only the pinyin and English. Press "Reveal" to check your answer, then mark "I Know This" or "I Forgot".</>
                 ) : (
-                  <>💡 <strong>Tip:</strong> Practice writing, then click "I Know This" if you got it right or "I Forgot" if you need more practice. Cards you forget will come back soon!</>
+                  userSettings.flashcard.useAnkiRatings
+                    ? <>💡 <strong>Tip:</strong> Practice writing, then rate yourself — <span className="text-red-500 font-semibold">Again</span> = very soon · <span className="text-orange-500 font-semibold">Hard</span> = later this session · <span className="text-blue-500 font-semibold">Good</span> = near end · <span className="text-green-500 font-semibold">Easy</span> = done</>
+                    : <>💡 <strong>Tip:</strong> Practice writing, then click "I Know This" if you got it right or "I Forgot" if you need more practice. Cards you forget will come back soon!</>
                 )}
               </p>
             </div>
