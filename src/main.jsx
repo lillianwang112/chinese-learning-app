@@ -186,7 +186,6 @@ import './index.css';
                 firebaseDb = firebase.firestore();
                 // Enable offline persistence
                 firebaseDb.enablePersistence({ synchronizeTabs: true }).catch(() => {});
-                console.log('Firebase initialized successfully');
             } catch (e) {
                 console.error('Firebase initialization failed:', e);
             }
@@ -295,6 +294,7 @@ import './index.css';
                     lastStudied: progressData.lastStudied || {},
                     userSettings: progressData.userSettings || {},
                     studyGuides: progressData.studyGuides || [],
+                    sentenceTranslations: progressData.sentenceTranslations || {},
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             },
@@ -312,18 +312,33 @@ import './index.css';
                     lastStudied: data.lastStudied || {},
                     userSettings: data.userSettings || null,
                     studyGuides: data.studyGuides || [],
+                    sentenceTranslations: data.sentenceTranslations || {},
                 };
             }
         };
 
         const { useState, useEffect, useRef } = React;
 
+const APP_VERSION = '1.1.0';
 
 const ChineseLearningApp = () => {
-  console.log('=== COMPONENT RENDERING ===');
-  
   // Touch/swipe tracking (using ref to avoid re-renders that swallow click events on mobile)
   const touchRef = useRef(null);
+
+  // Dark mode state — persisted to localStorage, opt-in toggle in settings
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('darkMode');
+      if (saved !== null) return JSON.parse(saved);
+      // Default to system preference on first load
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch(e) { return false; }
+  });
+  const darkModeRef = useRef(darkMode);
+
+  // What's New modal state
+  const [showWhatsNew, setShowWhatsNew] = useState(false);
+
   const [swipeDirection, setSwipeDirection] = useState(null);
   const cardRef = useRef(null);
 
@@ -498,9 +513,13 @@ const ChineseLearningApp = () => {
   const [kewenPinyinOverlay, setKewenPinyinOverlay] = useState(() => {
     try { return JSON.parse(localStorage.getItem('kewenPinyinOverlay') || 'false'); } catch(e) { return false; }
   });
+  const [kewenHighlightPinyin, setKewenHighlightPinyin] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('kewenHighlightPinyin') || 'false'); } catch(e) { return false; }
+  });
   const [kewenPinyinLoading, setKewenPinyinLoading] = useState(false);
   // Cache: char → pinyin string, built from CEDICT on first overlay toggle
   const kewenPinyinCacheRef = React.useRef({}); // { char: 'pīnyīn' }
+  const kewenPosMapRef = React.useRef({}); // { deckId: string[] } — per-position pinyin via word segmentation
 
   // Handwrite-Recognize modal state
   const [showHandwriteRecognize, setShowHandwriteRecognize] = useState(false);
@@ -574,7 +593,7 @@ const ChineseLearningApp = () => {
         canvas.height = cssWidth * dpr;
         this.ctx = canvas.getContext('2d');
         this.ctx.scale(dpr, dpr);
-        this.ctx.strokeStyle = '#000';
+        this.ctx.strokeStyle = darkModeRef.current ? '#f3f4f6' : '#000';
         this.ctx.lineWidth = 4;
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
@@ -758,6 +777,7 @@ const ChineseLearningApp = () => {
       flashcard: {
         autoPlayAudio: false,
         srOffset: 0, // spaced repetition offset: -2 to +2 (earlier ↔ later)
+        useAnkiRatings: false,
       },
       // Handwriting (writing) mode settings
       writing: {
@@ -837,7 +857,7 @@ const ChineseLearningApp = () => {
     { filename: '108vocab/人权和贸易.json',                    name: '人权和贸易',                           cards: 27,  topic: 'Oh China Lesson 23' },
     { filename: '108vocab/中国人的衣食住行.json',               name: '中国人的衣食住行',                       cards: 56,  topic: 'Oh China Lesson 31' },
     { filename: '103vocab/CHI103-CHAR LIST.json',           name: 'CHI 103 Character List',             cards: 522, topic: 'CHI 103 Review' },
-    { filename: '103vocab/CHI103-VOCAB LIST.json',          name: 'CHI 103 Vocab List',                 cards: 483, topic: 'CHI 103 Review' },
+    { filename: '103vocab/CHI103-VOCAB LIST.json',          name: 'CHI 103 Vocabulary',                 cards: 483, topic: 'CHI 103 Review' },
   ];
 
   const importBuiltInDeck = async (deckInfo) => {
@@ -1081,7 +1101,7 @@ const ChineseLearningApp = () => {
       saveToCloud(currentUser.uid);
     }, 3000);
     return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
-  }, [decks, learnProgress, studyStreak, bestMatchTimes, folders, lastStudied, userSettings, currentUser, reorderMode, bulkReorderFolderId, currentView, studyGuides]);
+  }, [decks, learnProgress, studyStreak, bestMatchTimes, folders, lastStudied, userSettings, currentUser, reorderMode, bulkReorderFolderId, currentView, studyGuides, sentenceTranslations]);
 
   // Skips sync-related state updates when drawing — prevents re-renders mid-stroke.
   const safeSetSyncStatus = (status) => {
@@ -1102,7 +1122,7 @@ const ChineseLearningApp = () => {
       const foldersToSave = overrideFolders !== undefined ? overrideFolders : (latestFoldersRef.current || folders);
       const settingsToSave = latestSettingsRef.current || userSettings;
       await CloudSync.saveDecks(userId, decksToSave);
-      await CloudSync.saveProgress(userId, { learnProgress, studyStreak, bestMatchTimes, folders: foldersToSave, lastStudied, userSettings: settingsToSave, studyGuides });
+      await CloudSync.saveProgress(userId, { learnProgress, studyStreak, bestMatchTimes, folders: foldersToSave, lastStudied, userSettings: settingsToSave, studyGuides, sentenceTranslations });
       safeSetSyncStatus('synced');
       safeSetLastSyncTime(new Date());
       setTimeout(() => safeSetSyncStatus('idle'), 3000);
@@ -1153,6 +1173,9 @@ const ChineseLearningApp = () => {
         }
         if (cloudProgress.studyGuides && cloudProgress.studyGuides.length > 0) {
           setStudyGuides(cloudProgress.studyGuides);
+        }
+        if (cloudProgress.sentenceTranslations && Object.keys(cloudProgress.sentenceTranslations).length > 0) {
+          setSentenceTranslations(prev => ({ ...cloudProgress.sentenceTranslations, ...prev }));
         }
       }
 
@@ -1556,6 +1579,41 @@ const ChineseLearningApp = () => {
     }, 300);
   };
 
+  // Anki-style flashcard rating — called when useAnkiRatings is enabled
+  const handleAnkiFlashcard = (quality) => {
+    if (!selectedDeck || currentView !== 'study') return;
+    const currentCard = shuffledCards[currentCardIndex];
+    const direction = quality <= 2 ? 'left' : 'right';
+    const snapshot = { direction, cardIndex: currentCardIndex, cards: [...shuffledCards], card: currentCard };
+    setSwipeDirection(direction);
+
+    setTimeout(() => {
+      updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, quality, userSettings.flashcard.srOffset);
+      setSwipeHistory(prev => [...prev, snapshot]);
+
+      if (quality <= 2) {
+        // Re-queue the card proportionally later
+        const newCards = [...shuffledCards];
+        newCards.splice(currentCardIndex, 1);
+        const remaining = newCards.length - currentCardIndex;
+        const proportionalOffset = Math.max(4, Math.floor(remaining * 0.15) + Math.floor(Math.random() * Math.max(1, Math.floor(remaining * 0.05))));
+        const reinsertPosition = Math.min(currentCardIndex + proportionalOffset, newCards.length);
+        newCards.splice(reinsertPosition, 0, currentCard);
+        setShuffledCards(newCards);
+        setIsFlipped(false);
+      } else {
+        if (currentCardIndex < shuffledCards.length - 1) {
+          setCurrentCardIndex(currentCardIndex + 1);
+          setIsFlipped(false);
+        } else {
+          alert('Great job! You\'ve finished studying this deck!');
+          setCurrentView('home');
+        }
+      }
+      setSwipeDirection(null);
+    }, 300);
+  };
+
   const undoLastSwipe = () => {
     if (swipeHistory.length === 0) return;
     const last = swipeHistory[swipeHistory.length - 1];
@@ -1679,12 +1737,9 @@ const ChineseLearningApp = () => {
   };
   useEffect(() => {
     // Puter.js loads dynamically — poll until the global is available
-    console.log('Starting Puter.js readiness check...');
     const check = setInterval(() => {
       if (window.puter) {
-        console.log('window.puter found!', Object.keys(window.puter));
         if (window.puter.ai) {
-          console.log('window.puter.ai found! Marking ready.');
           setPuterReady(true);
           clearInterval(check);
         }
@@ -1692,7 +1747,6 @@ const ChineseLearningApp = () => {
     }, 500);
     const timeout = setTimeout(() => {
       clearInterval(check);
-      console.log('Puter.js readiness check timed out. window.puter:', !!window.puter);
       // Mark ready anyway if puter object exists — auth will happen on first call
       if (window.puter) {
         setPuterReady(true);
@@ -1704,6 +1758,32 @@ const ChineseLearningApp = () => {
   useEffect(() => {
     chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, chatLoading]);
+
+  // Apply/remove dark-mode class on body and persist preference
+  useEffect(() => {
+    darkModeRef.current = darkMode;
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+      // Update writing canvas stroke color if active
+      if (drawCtrl.current?.ctx) {
+        drawCtrl.current.ctx.strokeStyle = '#f3f4f6';
+      }
+    } else {
+      document.body.classList.remove('dark-mode');
+      if (drawCtrl.current?.ctx) {
+        drawCtrl.current.ctx.strokeStyle = '#000';
+      }
+    }
+  }, [darkMode]);
+
+  // Show "What's New" modal once per version
+  useEffect(() => {
+    const storedVersion = localStorage.getItem('zhongwen_app_version');
+    if (storedVersion !== APP_VERSION) {
+      setShowWhatsNew(true);
+    }
+  }, []);
 
   // Close the inline example panel when navigating to a different card
   useEffect(() => {
@@ -1790,7 +1870,7 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
       onClick={openChat}
       className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl hover:scale-110 active:scale-95 transition-all z-50"
       style={{ background: 'linear-gradient(135deg, #e11d48, #be123c)', boxShadow: '0 4px 20px rgba(225,29,72,0.4)' }}
-      title="AI Chinese Tutor"
+      title="AI Chinese Tutor (requires free Puter.js account — sign-in prompt appears on first use)"
     >
       <MessageCircle size={24} />
     </button>
@@ -1832,6 +1912,9 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
             .chat-scroll::-webkit-scrollbar-track { background: transparent; }
             .chat-scroll::-webkit-scrollbar-thumb { background: rgba(225,29,72,0.3); border-radius: 4px; }
           `}</style>
+
+          {/* Puter.js sign-in note */}
+          <p className="text-xs text-gray-400 px-3 pb-1" style={{ color: '#888', fontSize: 11, padding: '6px 16px 4px', margin: 0, flexShrink: 0 }}>AI features use Puter.js — you'll be prompted to sign in for free on first use.</p>
 
           {/* Header */}
           <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(225,29,72,0.15)', background: 'rgba(225,29,72,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
@@ -2795,6 +2878,38 @@ Keep it concise and practical.`,
     return cedictCacheRef.current;
   };
 
+  // Build per-position pinyin map using greedy longest-match word segmentation
+  // This gives contextually accurate pinyin (e.g. 广 in 广告 → guǎng, not the radical yǎn)
+  const buildPinyinPosMap = async (text, deckId) => {
+    const dict = await getCedict();
+    if (!dict) return;
+    const posMap = new Array(text.length).fill('');
+    let i = 0;
+    while (i < text.length) {
+      if (!/\p{Script=Han}/u.test(text[i])) { i++; continue; }
+      let matched = false;
+      for (let len = Math.min(6, text.length - i); len >= 2; len--) {
+        const word = text.slice(i, i + len);
+        const entry = dict[word];
+        if (entry && entry.p) {
+          const syllables = entry.p.split(' ');
+          if (syllables.length === len) {
+            for (let k = 0; k < len; k++) posMap[i + k] = syllables[k] || '';
+            i += len;
+            matched = true;
+            break;
+          }
+        }
+      }
+      if (!matched) {
+        const entry = dict[text[i]];
+        posMap[i] = entry ? (entry.p || '').split(' ')[0] : '';
+        i++;
+      }
+    }
+    kewenPosMapRef.current[deckId] = posMap;
+  };
+
   const lookupWord = async (word) => {
     setSelectedWords(prev => {
       const next = new Map(prev);
@@ -3728,31 +3843,27 @@ Grade this response.` },
     setKewenSpeaking(false);
   };
 
+  // Toggle highlight pinyin mode — pre-loads CEDICT on first use (highlights only)
+  const toggleKewenHighlightPinyin = async (text, deckId) => {
+    const next = !kewenHighlightPinyin;
+    setKewenHighlightPinyin(next);
+    try { localStorage.setItem('kewenHighlightPinyin', JSON.stringify(next)); } catch(e) {}
+    if (!next) return;
+    if (kewenPosMapRef.current[deckId]) return; // already built
+    setKewenPinyinLoading(true);
+    try { await buildPinyinPosMap(text, deckId); } catch(e) {}
+    setKewenPinyinLoading(false);
+  };
+
   // Toggle pinyin overlay — pre-loads CEDICT on first use
-  const toggleKewenPinyin = async (text) => {
+  const toggleKewenPinyin = async (text, deckId) => {
     const next = !kewenPinyinOverlay;
     setKewenPinyinOverlay(next);
     try { localStorage.setItem('kewenPinyinOverlay', JSON.stringify(next)); } catch(e) {}
-    if (!next) return; // turning off — nothing to load
-
-    // If cache already has entries for this text's chars, we're done
-    const chars = [...new Set(text.split('').filter(c => /\p{Script=Han}/u.test(c)))];
-    if (chars.every(c => kewenPinyinCacheRef.current[c] !== undefined)) return;
-
-    // Load CEDICT and populate cache
+    if (!next) return;
+    if (kewenPosMapRef.current[deckId]) return; // already built
     setKewenPinyinLoading(true);
-    try {
-      const dict = await getCedict();
-      if (dict) {
-        chars.forEach(c => {
-          if (kewenPinyinCacheRef.current[c] === undefined) {
-            const entry = dict[c];
-            // CEDICT pinyin is space-separated with tone numbers or marks; take first reading
-            kewenPinyinCacheRef.current[c] = entry ? (entry.p || '').split(' ')[0] : '';
-          }
-        });
-      }
-    } catch(e) {}
+    try { await buildPinyinPosMap(text, deckId); } catch(e) {}
     setKewenPinyinLoading(false);
   };
 
@@ -4503,7 +4614,6 @@ Rules:
   // Start Match Game
   const startMatchGame = (deck) => {
     setLastStudied(prev => ({...prev, [deck.id]: { timestamp: Date.now(), mode: 'match' }}));
-    console.log('Starting match game with deck:', deck);
     if (deck.cards.length < 4) {
       alert('You need at least 4 cards to play Match!');
       return;
@@ -4511,7 +4621,6 @@ Rules:
 
     // Select random cards (max 8 pairs)
     const shuffled = [...deck.cards].sort(() => Math.random() - 0.5).slice(0, 8);
-    console.log('Shuffled cards:', shuffled);
     
     // Create pairs: chinese and meaning
     const pairs = [];
@@ -4521,7 +4630,6 @@ Rules:
     });
 
     const finalPairs = pairs.sort(() => Math.random() - 0.5);
-    console.log('Match cards created:', finalPairs);
     
     setMatchCards(finalPairs);
     setSelectedMatchCards([]);
@@ -4530,7 +4638,6 @@ Rules:
     setMatchEndTime(null);
     setMatchLiveTime(0);
     setSelectedDeck(deck);
-    console.log('Setting view to match');
     setCurrentView('match');
   };
 
@@ -5278,8 +5385,6 @@ Rules:
     setCurrentView('edit');
   };
 
-  console.log('Current view is:', currentView);
-
   // ==========================================
   // Landing Page (non-logged-in splash screen)
   // ==========================================
@@ -5392,11 +5497,11 @@ Rules:
   // ==========================================
   if (currentView === 'loginForm') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full border border-gray-100">
+      <div className={`min-h-screen flex items-center justify-center p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-orange-50 via-white to-blue-50'}`}>
+        <div className={`rounded-2xl shadow-2xl p-8 max-w-md w-full border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
           <button
             onClick={() => { setCurrentView('login'); setAuthError(''); }}
-            className="text-gray-500 hover:text-gray-700 mb-4 flex items-center gap-1 text-sm"
+            className={`mb-4 flex items-center gap-1 text-sm ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
           >
             ← Back
           </button>
@@ -5501,16 +5606,16 @@ Rules:
   // ==========================================
   if (currentView === 'account') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 p-6">
+      <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-orange-50 via-white to-blue-50'}`}>
         <div className="max-w-lg mx-auto">
           <button
             onClick={() => setCurrentView('home')}
-            className="text-gray-500 hover:text-gray-700 mb-6 flex items-center gap-1 text-sm"
+            className={`mb-6 flex items-center gap-1 text-sm ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
           >
             ← Back to Home
           </button>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div className={`rounded-2xl shadow-xl p-8 border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
             <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
               <UserIcon size={28} />
               Account &amp; Settings
@@ -5709,6 +5814,27 @@ Rules:
                           </div>
                         </div>
                       </div>
+
+                      {/* Appearance */}
+                      <div className="bg-gray-50 rounded-xl p-4 space-y-4">
+                        <h3 className="font-bold text-gray-800 flex items-center gap-2">🌙 Appearance</h3>
+                        <SettingToggle
+                          label="Dark mode"
+                          checked={darkMode}
+                          onChange={() => setDarkMode(d => !d)}
+                        />
+                      </div>
+
+                      {/* Advanced Study */}
+                      <div className="bg-gray-50 rounded-xl p-4 space-y-4">
+                        <h3 className="font-bold text-gray-800 flex items-center gap-2">🧠 Advanced Study</h3>
+                        <SettingToggle
+                          label="Anki-style SRS ratings (Again / Hard / Good / Easy)"
+                          checked={userSettings.flashcard.useAnkiRatings || false}
+                          onChange={() => setUserSettings(s => ({ ...s, flashcard: { ...s.flashcard, useAnkiRatings: !s.flashcard.useAnkiRatings } }))}
+                        />
+                        <p className="text-xs text-gray-400">Show Again / Hard / Good / Easy buttons instead of binary Know It / Don't Know It.</p>
+                      </div>
                     </div>
                   );
                 })()}
@@ -5792,6 +5918,27 @@ Rules:
                           </div>
                         </div>
                       </div>
+
+                      {/* Appearance */}
+                      <div className="bg-gray-50 rounded-xl p-4 space-y-4">
+                        <h3 className="font-bold text-gray-800 flex items-center gap-2">🌙 Appearance</h3>
+                        <SettingToggle
+                          label="Dark mode"
+                          checked={darkMode}
+                          onChange={() => setDarkMode(d => !d)}
+                        />
+                      </div>
+
+                      {/* Advanced Study */}
+                      <div className="bg-gray-50 rounded-xl p-4 space-y-4">
+                        <h3 className="font-bold text-gray-800 flex items-center gap-2">🧠 Advanced Study</h3>
+                        <SettingToggle
+                          label="Anki-style SRS ratings (Again / Hard / Good / Easy)"
+                          checked={userSettings.flashcard.useAnkiRatings || false}
+                          onChange={() => setUserSettings(s => ({ ...s, flashcard: { ...s.flashcard, useAnkiRatings: !s.flashcard.useAnkiRatings } }))}
+                        />
+                        <p className="text-xs text-gray-400">Show Again / Hard / Good / Easy buttons instead of binary Know It / Don't Know It.</p>
+                      </div>
                     </div>
                   );
                 })()}
@@ -5805,7 +5952,7 @@ Rules:
 
   if (currentView === 'home') {
     return (
-      <div className="min-h-screen" style={{background: 'linear-gradient(160deg, #fdf3ee 0%, #fef9f5 60%, #fdf3ee 100%)'}}>
+      <div className="min-h-screen" style={{background: darkMode ? '#111827' : 'linear-gradient(160deg, #fdf3ee 0%, #fef9f5 60%, #fdf3ee 100%)'}}>
         {/* Hero Section */}
         <div className="text-white py-12 px-6 shadow-2xl" style={{background: 'linear-gradient(120deg, #7a0d0d 0%, #a01515 25%, #c0310d 55%, #8b1a08 80%, #5c0a0a 100%)'}}>
           <div className="max-w-6xl mx-auto">
@@ -5887,17 +6034,17 @@ Rules:
             const topCards = getTopTroubleCards(topN);
             if (topCards.length === 0) return null;
             return (
-              <div className="mb-6 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap">
+              <div className={`mb-6 rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap border ${darkMode ? 'bg-gray-800 border-orange-900' : 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-200'}`}>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-lg">🔥</span>
-                    <span className="font-bold text-gray-800">Trouble Words</span>
-                    <span className="bg-orange-100 text-orange-700 text-xs font-semibold px-2 py-0.5 rounded-full">{topCards.length} cards</span>
+                    <span className={`font-bold ${darkMode ? 'text-orange-300' : 'text-gray-800'}`}>Trouble Words</span>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${darkMode ? 'bg-orange-900 text-orange-300' : 'bg-orange-100 text-orange-700'}`}>{topCards.length} cards</span>
                   </div>
-                  <p className="text-xs text-gray-500">Your most-missed words across all decks — practice them now</p>
+                  <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Your most-missed words across all decks — practice them now</p>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {topCards.slice(0, 5).map((c, i) => (
-                      <span key={i} className="bg-white border border-orange-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">{c.chinese}</span>
+                      <span key={i} className={`text-xs px-2 py-0.5 rounded-full border ${darkMode ? 'bg-gray-700 border-orange-800 text-orange-200' : 'bg-white border-orange-200 text-gray-700'}`}>{c.chinese}</span>
                     ))}
                     {topCards.length > 5 && <span className="text-xs text-gray-400 self-center">+{topCards.length - 5} more</span>}
                   </div>
@@ -5920,7 +6067,7 @@ Rules:
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search decks or vocab (e.g. 你好, hello, HSK1)..."
-                className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 pl-12 text-lg focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all shadow-md placeholder-gray-400 text-gray-800"
+                className={`w-full border-2 rounded-2xl px-5 py-4 pl-12 text-lg focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all shadow-md placeholder-gray-400 ${darkMode ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-500' : 'bg-white border-gray-200 text-gray-800'}`}
               />
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
@@ -5938,7 +6085,7 @@ Rules:
           </div>
 
           {/* Quick Actions Bar */}
-          <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
+          <div className={`rounded-2xl shadow-xl p-6 mb-8 border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
             <div className="flex gap-3 justify-center flex-wrap">
               <button
                 onClick={() => setCurrentView('create')}
@@ -6371,11 +6518,11 @@ Rules:
             if (!folder) return null;
             return (
               <div className="mb-4 flex items-center gap-2">
-                <button onClick={() => setCurrentFolderId(null)} className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-1">
+                <button onClick={() => setCurrentFolderId(null)} className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-1 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}>
                   ← All Decks
                 </button>
                 <ChevronRight size={16} className="text-gray-400" />
-                <span className="text-gray-700 font-semibold">{folder.name}</span>
+                <span className={`font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>{folder.name}</span>
               </div>
             );
           })()}
@@ -7063,30 +7210,30 @@ Rules:
         {/* Trouble Words modal */}
         {troubleModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setTroubleModal(null)}>
-            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
+            <div className={`rounded-2xl shadow-2xl p-6 max-w-sm w-full ${darkMode ? 'bg-gray-800' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-2xl">🔥</span>
-                <h3 className="text-lg font-bold text-gray-800">Trouble Words</h3>
+                <h3 className={`text-lg font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Trouble Words</h3>
               </div>
-              <p className="text-sm text-gray-500 mb-1">
+              <p className={`text-sm mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-500'}`}>
                 {troubleModal.deckName ? `From: ${troubleModal.deckName}` : 'Across all your decks'}
               </p>
-              <p className="text-xs text-gray-400 mb-4">{troubleModal.cards.length} word{troubleModal.cards.length !== 1 ? 's' : ''} sorted by how recently and how often you've missed them</p>
+              <p className={`text-xs mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-400'}`}>{troubleModal.cards.length} word{troubleModal.cards.length !== 1 ? 's' : ''} sorted by how recently and how often you've missed them</p>
 
               {/* Preview top 6 */}
-              <div className="bg-orange-50 rounded-xl p-3 mb-5 max-h-36 overflow-y-auto space-y-1">
+              <div className={`rounded-xl p-3 mb-5 max-h-36 overflow-y-auto space-y-1 ${darkMode ? 'bg-gray-700' : 'bg-orange-50'}`}>
                 {troubleModal.cards.slice(0, 6).map((c, i) => (
                   <div key={i} className="flex items-center justify-between text-sm">
-                    <span className="font-semibold text-gray-800">{c.chinese}</span>
-                    <span className="text-gray-400 text-xs truncate max-w-[55%] text-right">{c.english}</span>
+                    <span className={`font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{c.chinese}</span>
+                    <span className={`text-xs truncate max-w-[55%] text-right ${darkMode ? 'text-gray-400' : 'text-gray-400'}`}>{c.english}</span>
                   </div>
                 ))}
                 {troubleModal.cards.length > 6 && (
-                  <p className="text-xs text-gray-400 text-center pt-1">+{troubleModal.cards.length - 6} more</p>
+                  <p className={`text-xs text-center pt-1 ${darkMode ? 'text-gray-400' : 'text-gray-400'}`}>+{troubleModal.cards.length - 6} more</p>
                 )}
               </div>
 
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Practice with:</p>
+              <p className={`text-xs font-semibold uppercase tracking-wide mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Practice with:</p>
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <button
                   onClick={() => startTroubleStudy(troubleModal.cards, troubleModal.deckId, troubleModal.deckName)}
@@ -7119,7 +7266,7 @@ Rules:
               </div>
               <button
                 onClick={() => setTroubleModal(null)}
-                className="w-full bg-gray-100 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+                className={`w-full py-2.5 rounded-xl font-semibold transition-all ${darkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
               >
                 Cancel
               </button>
@@ -7321,31 +7468,31 @@ Rules:
         {/* 课文 Rich Modal — Read, Listen, Highlight, Edit */}
         {kewenEditDeck && (
           <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className={`rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
 
               {/* Header */}
-              <div className="p-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+              <div className={`p-5 border-b flex items-center justify-between flex-shrink-0 ${darkMode ? 'border-gray-700' : 'border-gray-100'}`}>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800">
+                  <h3 className={`text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                     {kewenViewMode === 'edit' ? (kewenEditDeck.kewen ? 'Edit' : 'Add') + ' 课文' : '课文'}
                   </h3>
-                  <p className="text-sm text-gray-500 mt-0.5">{kewenEditDeck.name}</p>
+                  <p className={`text-sm mt-0.5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{kewenEditDeck.name}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {/* Mode toggle — only shown when kewen exists */}
                   {kewenEditDeck.kewen && (
-                    <div className="flex rounded-lg border border-gray-200 overflow-hidden text-xs font-semibold">
+                    <div className={`flex rounded-lg border overflow-hidden text-xs font-semibold ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
                       <button
                         onClick={() => { setKewenViewMode('read'); stopKewen(); }}
-                        className={`px-3 py-1.5 transition ${kewenViewMode === 'read' ? 'bg-orange-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                        className={`px-3 py-1.5 transition ${kewenViewMode === 'read' ? 'bg-orange-600 text-white' : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                       >📖 Read</button>
                       <button
                         onClick={() => { setKewenViewMode('edit'); stopKewen(); }}
-                        className={`px-3 py-1.5 transition ${kewenViewMode === 'edit' ? 'bg-orange-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                        className={`px-3 py-1.5 transition ${kewenViewMode === 'edit' ? 'bg-orange-600 text-white' : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                       ><Edit2 size={12} className="inline mr-1" />Edit</button>
                     </div>
                   )}
-                  <button onClick={() => { setKewenEditDeck(null); setKewenEditText(''); stopKewen(); setKewenViewMode('read'); }} className="text-gray-400 hover:text-gray-600 text-xl ml-1">✕</button>
+                  <button onClick={() => { setKewenEditDeck(null); setKewenEditText(''); stopKewen(); setKewenViewMode('read'); }} className={`text-xl ml-1 ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'}`}>✕</button>
                 </div>
               </div>
 
@@ -7429,11 +7576,15 @@ Rules:
                       const walk = (node) => {
                         if (startOffset !== null && endOffset !== null) return;
                         if (node.nodeType === 3) { // TEXT_NODE
+                          // Skip <rt> text nodes — they contain pinyin labels, not source text
+                          if (node.parentElement && node.parentElement.tagName === 'RT') return;
                           const len = node.textContent.length;
                           if (startOffset === null && node === range.startContainer) startOffset = cumulative + range.startOffset;
                           if (endOffset === null && node === range.endContainer) endOffset = cumulative + range.endOffset;
                           cumulative += len;
                         } else {
+                          // Skip entire <rt> subtrees
+                          if (node.tagName === 'RT') return;
                           for (let ci = 0; ci < node.childNodes.length; ci++) walk(node.childNodes[ci]);
                         }
                       };
@@ -7491,23 +7642,29 @@ Rules:
                   // Render a single run of text — either plain or with per-character ruby pinyin
                   const renderRun = (runText, isHighlighted, runStart) => {
                     const chars = runText.split('');
-                    const isHan = (c) => /\p{Script=Han}/u.test(c);
-                    const cache = kewenPinyinCacheRef.current;
 
-                    const inner = kewenPinyinOverlay ? (
+                    // Show ruby pinyin if: full overlay on, OR highlight-pinyin mode on and this run is highlighted
+                    const showPinyin = kewenPinyinOverlay || (kewenHighlightPinyin && isHighlighted);
+
+                    // Use per-position map (word-segmentation aware) for accurate readings
+                    const posMap = kewenPosMapRef.current[deckId];
+
+                    const inner = showPinyin ? (
                       chars.map((ch, ci) => {
                         // Preserve newlines as <br> and spaces as non-breaking space in overlay mode
                         if (ch === '\n') return <br key={ci} />;
                         if (ch === ' ' || ch === '\u3000') return <span key={ci}>{'\u00A0'}</span>;
-                        const py = isHan(ch) ? (cache[ch] || '') : '';
+                        const py = posMap ? (posMap[runStart + ci] || '') : '';
                         return py ? (
                           <ruby key={ci} style={{ rubyAlign: 'center' }}>
                             {ch}
                             <rt style={{
                               fontSize: '0.45em',
-                              color: isHighlighted ? '#92400e' : '#e11d48',
+                              color: isHighlighted
+                                ? (darkMode ? '#fbbf24' : '#92400e')
+                                : (darkMode ? '#f87171' : '#e11d48'),
                               fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
-                              fontWeight: 500,
+                              fontWeight: 600,
                               letterSpacing: 0,
                               lineHeight: 1,
                               userSelect: 'none',
@@ -7545,8 +7702,8 @@ Rules:
                       style={{
                         fontFamily: 'serif',
                         fontSize: '1.3rem',
-                        lineHeight: kewenPinyinOverlay ? 3.2 : 2.6,
-                        color: '#1a1a1a',
+                        lineHeight: (kewenPinyinOverlay || kewenHighlightPinyin) ? 3.2 : 2.6,
+                        color: darkMode ? '#f3f4f6' : '#1a1a1a',
                         userSelect: 'text',
                         WebkitUserSelect: 'text',
                         MozUserSelect: 'text',
@@ -7569,10 +7726,10 @@ Rules:
                 return (
                   <React.Fragment>
                     {/* TTS + Pinyin toolbar */}
-                    <div className="px-5 pt-4 pb-2 flex items-center gap-2 flex-shrink-0 border-b border-gray-50 flex-wrap">
+                    <div className={`px-5 pt-4 pb-2 flex items-center gap-2 flex-shrink-0 border-b flex-wrap ${darkMode ? 'border-gray-700' : 'border-gray-50'}`}>
                       <button
                         onClick={() => speakKewen(text)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition ${kewenSpeaking ? 'bg-orange-600 text-white' : 'bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100'}`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition ${kewenSpeaking ? 'bg-orange-600 text-white' : darkMode ? 'bg-orange-900 text-orange-300 border border-orange-800 hover:bg-orange-800' : 'bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100'}`}
                       >
                         {kewenSpeaking ? (
                           <React.Fragment>
@@ -7586,12 +7743,12 @@ Rules:
 
                       {/* Pinyin overlay toggle */}
                       <button
-                        onClick={() => toggleKewenPinyin(text)}
+                        onClick={() => toggleKewenPinyin(text, deckId)}
                         disabled={kewenPinyinLoading}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition border ${
                           kewenPinyinOverlay
                             ? 'bg-rose-600 text-white border-rose-600'
-                            : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                            : darkMode ? 'bg-rose-900 text-rose-300 border-rose-800 hover:bg-rose-800' : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
                         } disabled:opacity-50`}
                         title="Toggle pinyin above each character"
                       >
@@ -7608,13 +7765,36 @@ Rules:
                         )}
                       </button>
 
+                      {/* Highlight Pinyin toggle — shows pinyin only above highlighted text */}
+                      <button
+                        onClick={() => toggleKewenHighlightPinyin(text, deckId)}
+                        disabled={kewenPinyinLoading}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition border ${
+                          kewenHighlightPinyin
+                            ? 'bg-amber-500 text-white border-amber-500'
+                            : darkMode ? 'bg-amber-900 text-amber-300 border-amber-800 hover:bg-amber-800' : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                        } disabled:opacity-50`}
+                        title="Show pinyin only above highlighted text"
+                      >
+                        <span style={{ fontFamily:'serif', fontSize:'1em', lineHeight:1 }}>亮</span>
+                        {kewenHighlightPinyin ? 'Hide Highlight Pinyin' : 'Highlight Pinyin'}
+                      </button>
+
                       {highlights.length > 0 && (
-                        <button onClick={clearHighlights} className="px-3 py-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 text-xs font-semibold transition">
+                        <button onClick={clearHighlights} className={`px-3 py-2 rounded-lg border text-xs font-semibold transition ${darkMode ? 'bg-amber-900 text-amber-300 border-amber-800 hover:bg-amber-800' : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'}`}>
                           ✕ Clear highlights
                         </button>
                       )}
                       <span className="text-xs text-gray-400 ml-auto">{text.length} chars · Select any word</span>
                     </div>
+
+                    {/* Hint bar for highlight pinyin mode */}
+                    {kewenHighlightPinyin && (
+                      <div className={`px-5 py-2 text-xs flex items-center gap-2 border-b ${darkMode ? 'bg-amber-900/30 border-amber-800 text-amber-300' : 'bg-amber-50 border-amber-100 text-amber-700'}`}>
+                        <span>✨</span>
+                        <span><strong>Highlight Pinyin mode is on.</strong> Select / drag over any text in the passage to highlight it — pinyin will appear above the highlighted words and persist.</span>
+                      </div>
+                    )}
 
                     {/* Scrollable text */}
                     <div className="flex-1 overflow-y-auto p-5" onClick={() => { const s = window.getSelection(); if (!s || s.isCollapsed) setKewenPopup(null); }}>
@@ -7690,11 +7870,11 @@ Rules:
                     )}
 
                     {/* Footer */}
-                    <div className="p-4 border-t border-gray-100 flex justify-between items-center flex-shrink-0">
-                      <button onClick={() => { setKewenViewMode('edit'); setKewenEditText(text); stopKewen(); setKewenPopup(null); }} className="flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-100 border border-blue-200 text-sm font-semibold transition">
+                    <div className={`p-4 border-t flex justify-between items-center flex-shrink-0 ${darkMode ? 'border-gray-700' : 'border-gray-100'}`}>
+                      <button onClick={() => { setKewenViewMode('edit'); setKewenEditText(text); stopKewen(); setKewenPopup(null); }} className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-semibold transition ${darkMode ? 'bg-blue-900 text-blue-300 border-blue-800 hover:bg-blue-800' : 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100'}`}>
                         <Edit2 size={14} /> Edit 课文
                       </button>
-                      <button onClick={() => { setKewenEditDeck(null); setKewenEditText(''); stopKewen(); setKewenViewMode('read'); setKewenPopup(null); }} className="bg-gray-100 text-gray-600 px-5 py-2 rounded-lg hover:bg-gray-200 text-sm font-semibold transition">
+                      <button onClick={() => { setKewenEditDeck(null); setKewenEditText(''); stopKewen(); setKewenViewMode('read'); setKewenPopup(null); }} className={`px-5 py-2 rounded-lg text-sm font-semibold transition ${darkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
                         Close
                       </button>
                     </div>
@@ -7709,7 +7889,7 @@ Rules:
                       value={kewenEditText}
                       onChange={e => setKewenEditText(e.target.value)}
                       placeholder="在这里粘贴课文 / Paste your reading text here..."
-                      className="w-full h-64 p-4 border-2 border-gray-200 rounded-xl text-lg focus:outline-none focus:border-orange-400 resize-none text-gray-800"
+                      className={`w-full h-64 p-4 border-2 rounded-xl text-lg focus:outline-none focus:border-orange-400 resize-none ${darkMode ? 'bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400' : 'bg-white border-gray-200 text-gray-800'}`}
                       style={{ fontFamily: 'serif', lineHeight: 1.8, minHeight: '250px' }}
                       autoFocus
                     />
@@ -7717,7 +7897,7 @@ Rules:
                       <p className="text-xs text-gray-400 mt-2 text-right">{kewenEditText.length} characters</p>
                     )}
                   </div>
-                  <div className="p-5 border-t border-gray-100 flex gap-3 flex-shrink-0">
+                  <div className={`p-5 border-t flex gap-3 flex-shrink-0 ${darkMode ? 'border-gray-700' : 'border-gray-100'}`}>
                     <button
                       onClick={() => {
                         addKewenToDeck(kewenEditDeck.id, kewenEditText.trim());
@@ -7948,11 +8128,11 @@ Rules:
     }, 0);
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-6">
+      <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-red-50 via-white to-yellow-50'}`}>
         <div className="max-w-2xl mx-auto">
           <button
             onClick={() => { setCurrentView('home'); setCombineSelectedDecks([]); setNewDeckName(''); setNewDeckCreated(null); }}
-            className="mb-6 text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            className={`mb-6 flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
           >
             ← Back to Home
           </button>
@@ -8044,7 +8224,8 @@ Rules:
           <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">AI Generate Deck</h2>
             <p className="text-gray-600 mb-6">Type a topic and let AI create a complete vocabulary deck for you — with pinyin and definitions included.</p>
-            
+            <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-4">✨ AI features use <strong>Puter.js</strong> — you'll be prompted to create a free account on first use.</p>
+
             <div className="mb-4">
               <label className="block text-gray-700 font-medium mb-2">Topic</label>
               <input
@@ -8459,7 +8640,7 @@ Rules:
   // EDIT DECK VIEW
   if (currentView === 'edit' && editingDeck) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-6">
+      <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-red-50 via-white to-yellow-50'}`}>
         <div className="max-w-4xl mx-auto">
           <button
             onClick={() => {
@@ -8468,7 +8649,7 @@ Rules:
               setBulkSelectedCards(new Set());
               setCurrentView('home');
             }}
-            className="mb-6 text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            className={`mb-6 flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
           >
             ← Back to Home
           </button>
@@ -8505,6 +8686,7 @@ Rules:
             <div className="mb-6 p-6 bg-gray-50 rounded-lg">
               <h3 className="text-lg font-semibold text-gray-800 mb-1">Add New Card</h3>
               <p className="text-sm text-gray-500 mb-4">Type the Chinese, then click <strong>AI Autofill</strong> to generate pinyin &amp; English automatically.</p>
+              <p className="text-xs text-amber-600 mb-3">✨ AI Autofill uses Puter.js — sign-in prompt appears on first use (free).</p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                 <div>
@@ -8558,6 +8740,7 @@ Rules:
               {/* Bulk add section */}
               <div className="border-t border-gray-200 pt-5">
                 <h4 className="text-sm font-semibold text-gray-700 mb-1">Bulk Add with AI</h4>
+                <p className="text-xs text-amber-600 mb-2">✨ Uses Puter.js — sign-in prompt appears on first use (free).</p>
                 <p className="text-xs text-gray-500 mb-3">Paste multiple Chinese phrases separated by commas. AI will generate pinyin and English for all of them at once.</p>
                 <textarea
                   value={bulkInput}
@@ -8771,9 +8954,9 @@ Rules:
 
     if (!currentCard) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-6 flex items-center justify-center">
+        <div className={`min-h-screen p-6 flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-red-50 via-white to-yellow-50'}`}>
           <div className="text-center">
-            <p className="text-xl text-gray-600 mb-4">No cards in this deck yet!</p>
+            <p className={`text-xl mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>No cards in this deck yet!</p>
             <button
               onClick={() => setCurrentView('home')}
               className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
@@ -8786,7 +8969,7 @@ Rules:
     }
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-yellow-50 p-6">
+      <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-red-50 via-white to-yellow-50'}`}>
         <style>{`
           .flip-card {
             perspective: 1000px;
@@ -8840,7 +9023,7 @@ Rules:
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => setCurrentView('home')}
-              className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
+              className={`flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
             >
               ← Exit Study Mode
             </button>
@@ -8928,21 +9111,32 @@ Rules:
 
           {/* Know/Don't Know Buttons (only show when flipped) */}
           {isFlipped && !swipeDirection && (
-            <div className="flex gap-4 mb-8 justify-center">
-              <button
-                onClick={() => handleSwipe('left')}
-                className="flex items-center gap-2 bg-red-600 text-white px-8 py-4 rounded-lg hover:bg-red-700 transition text-lg font-medium"
-              >
-                <X size={24} />
-                Still Learning
-              </button>
-              <button
-                onClick={() => handleSwipe('right')}
-                className="flex items-center gap-2 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 transition text-lg font-medium"
-              >
-                <Check size={24} />
-                I Know This
-              </button>
+            <div className="flex gap-4 mb-8 justify-center flex-wrap">
+              {(userSettings.flashcard.useAnkiRatings) ? (
+                <>
+                  <button onClick={() => handleAnkiFlashcard(1)} className="bg-red-700 text-white px-5 py-3 rounded-lg hover:bg-red-800 transition font-medium">Again</button>
+                  <button onClick={() => handleAnkiFlashcard(2)} className="bg-orange-500 text-white px-5 py-3 rounded-lg hover:bg-orange-600 transition font-medium">Hard</button>
+                  <button onClick={() => handleAnkiFlashcard(4)} className="bg-blue-600 text-white px-5 py-3 rounded-lg hover:bg-blue-700 transition font-medium">Good</button>
+                  <button onClick={() => handleAnkiFlashcard(5)} className="bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 transition font-medium">Easy</button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleSwipe('left')}
+                    className="flex items-center gap-2 bg-red-600 text-white px-8 py-4 rounded-lg hover:bg-red-700 transition text-lg font-medium"
+                  >
+                    <X size={24} />
+                    Still Learning
+                  </button>
+                  <button
+                    onClick={() => handleSwipe('right')}
+                    className="flex items-center gap-2 bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 transition text-lg font-medium"
+                  >
+                    <Check size={24} />
+                    I Know This
+                  </button>
+                </>
+              )}
             </div>
           )}
 
@@ -9084,11 +9278,11 @@ Rules:
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 p-4 sm:p-6">
+      <div className={`min-h-screen p-4 sm:p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-green-50 via-white to-blue-50'}`}>
         <div className="max-w-5xl mx-auto">
           <button
             onClick={() => setCurrentView('home')}
-            className="mb-6 text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            className={`mb-6 flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
           >
             ← Back to Home
           </button>
@@ -9342,11 +9536,11 @@ Rules:
       const hasMoreCards = cardsCompleted < totalCards;
       
       return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 p-6 flex items-center justify-center">
-          <div className="bg-white rounded-2xl shadow-2xl p-12 max-w-2xl mx-auto text-center">
+        <div className={`min-h-screen p-6 flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-purple-50 via-white to-blue-50'}`}>
+          <div className={`rounded-2xl shadow-2xl p-12 max-w-2xl mx-auto text-center ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <div className="text-6xl mb-6">🎉</div>
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">Round {currentRound} Complete!</h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <h2 className={`text-4xl font-bold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Round {currentRound} Complete!</h2>
+            <p className={`text-xl mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               Great job! You've mastered {Math.min(10, learnCards.length)} cards.
             </p>
             
@@ -9418,13 +9612,13 @@ Rules:
     const currentCard = learnCards[currentLearnIndex];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 p-6">
+      <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-purple-50 via-white to-blue-50'}`}>
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => setCurrentView('home')}
-              className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
+              className={`flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
             >
               ← Exit Learn Mode
             </button>
@@ -9436,7 +9630,7 @@ Rules:
                    learnMode === 'fill-blank' ? 'Fill in the Blank' : 'Written Answer'}
                 </span>
               </div>
-              <div className="text-gray-600">
+              <div className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
                 Round {currentRound}{learnMode === 'multiple-choice' ? 'a' : 'b'} • Card {currentLearnIndex + 1} / {learnCards.length}
               </div>
             </div>
@@ -9444,7 +9638,7 @@ Rules:
 
           {/* Progress Bar */}
           <div className="mb-8">
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className={`w-full rounded-full h-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
               <div
                 className="bg-purple-600 h-2 rounded-full transition-all"
                 style={{ width: `${((currentLearnIndex + 1) / learnCards.length) * 100}%` }}
@@ -9453,10 +9647,10 @@ Rules:
           </div>
 
           {/* Question Card */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
+          <div className={`rounded-2xl shadow-xl p-8 mb-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
             {/* Chinese Character */}
             <div className="text-center mb-8">
-              <div className="text-7xl font-bold text-gray-800 mb-4">
+              <div className={`text-7xl font-bold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                 {currentCard.chinese}
               </div>
               <button
@@ -9471,7 +9665,7 @@ Rules:
             {/* Question based on mode */}
             {learnMode === 'multiple-choice' && !showAnswer && (
               <div>
-                <p className="text-xl text-gray-700 mb-6 text-center">Select the correct meaning:</p>
+                <p className={`text-xl mb-6 text-center ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Select the correct meaning:</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {multipleChoiceOptions.map((option, index) => (
                     <button
@@ -9480,13 +9674,13 @@ Rules:
                       className={`p-4 rounded-lg border-2 transition text-lg text-left flex items-center gap-3 ${
                         selectedOption === option
                           ? 'border-purple-600 bg-purple-50'
-                          : 'border-gray-300 hover:border-purple-400'
+                          : darkMode ? 'border-gray-600 hover:border-purple-400 text-gray-200' : 'border-gray-300 hover:border-purple-400'
                       }`}
                     >
                       <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md text-sm font-bold flex-shrink-0 ${
                         selectedOption === option
                           ? 'bg-purple-600 text-white'
-                          : 'bg-gray-200 text-gray-600'
+                          : darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-600'
                       }`}>{index + 1}</span>
                       {option}
                     </button>
@@ -9506,7 +9700,7 @@ Rules:
 
             {(learnMode === 'fill-blank' || learnMode === 'written') && !showAnswer && (
               <div>
-                <p className="text-xl text-gray-700 mb-6 text-center">
+                <p className={`text-xl mb-6 text-center ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   Type the pinyin pronunciation:
                 </p>
                 <input
@@ -9522,8 +9716,9 @@ Rules:
                   className="w-full px-6 py-4 text-xl border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 mb-4"
                   autoFocus
                 />
-                <p className="text-sm text-gray-500 mb-6 text-center">
-                  Tip: Type with tone marks (nǐ hǎo) or numbers (ni3 ha3o)
+                <p className={`text-sm mb-6 text-center ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Tip: Type with tone marks (nǐ hǎo) or numbers (ni3 ha3o)<br/>
+                  <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>For numbers, place the number right after the toned vowel: <strong>ha3o</strong> not hao3 (好 = hǎo)</span>
                 </p>
                 <button
                   onClick={checkAnswer}
@@ -9537,23 +9732,27 @@ Rules:
 
             {/* Answer Result */}
             {showAnswer && (
-              <div className={`p-6 rounded-lg ${answerResult === 'correct' ? 'bg-green-50' : 'bg-red-50'}`}>
+              <div className={`p-6 rounded-lg ${
+                answerResult === 'correct'
+                  ? darkMode ? 'bg-green-900' : 'bg-green-50'
+                  : darkMode ? 'bg-red-900' : 'bg-red-50'
+              }`}>
                 <div className="flex items-center gap-3 mb-4">
                   {answerResult === 'correct' ? (
-                    <Check size={32} className="text-green-600" />
+                    <Check size={32} className="text-green-500" />
                   ) : (
-                    <X size={32} className="text-red-600" />
+                    <X size={32} className="text-red-500" />
                   )}
-                  <h3 className={`text-2xl font-bold ${answerResult === 'correct' ? 'text-green-600' : 'text-red-600'}`}>
+                  <h3 className={`text-2xl font-bold ${answerResult === 'correct' ? 'text-green-500' : 'text-red-500'}`}>
                     {answerResult === 'correct' ? 'Correct!' : 'Not quite...'}
                   </h3>
                 </div>
 
                 <div className="mb-4">
-                  <p className="text-gray-700 text-lg mb-2">
+                  <p className={`text-lg mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                     <span className="font-semibold">Pinyin:</span> {currentCard.pinyin}
                   </p>
-                  <p className="text-gray-700 text-lg">
+                  <p className={`text-lg ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                     <span className="font-semibold">Meaning:</span> {currentCard.english}
                   </p>
                 </div>
@@ -9614,12 +9813,12 @@ Rules:
     const isNewBest = allMatched && (!bestMatchTimes[selectedDeck.id] || currentTimeTenths <= bestMatchTimes[selectedDeck.id]);
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-2 sm:p-4 md:p-6">
+      <div className={`min-h-screen p-2 sm:p-4 md:p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'}`}>
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8">
             <button
               onClick={() => setCurrentView('home')}
-              className="text-gray-600 hover:text-gray-800 flex items-center gap-2 font-semibold text-sm sm:text-base"
+              className={`flex items-center gap-2 font-semibold text-sm sm:text-base ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
             >
               ← Exit Match Game
             </button>
@@ -9706,18 +9905,18 @@ Rules:
     const anyEnabled = testConfig.trueFalse || testConfig.multipleChoice || testConfig.matching || testConfig.written || testConfig.typePinyin;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full relative">
+      <div className={`min-h-screen p-6 flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-white to-purple-50'}`}>
+        <div className={`rounded-2xl shadow-2xl p-8 max-w-lg w-full relative ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
           <button
             onClick={() => setCurrentView('home')}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+            className={`absolute top-4 right-4 transition ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'}`}
           >
             <X size={24} />
           </button>
 
           <div className="mb-6">
-            <p className="text-gray-500 font-medium">{testSetupDeck.name}</p>
-            <h2 className="text-3xl font-black text-gray-800">Set up your test</h2>
+            <p className={`font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{testSetupDeck.name}</p>
+            <h2 className={`text-3xl font-black ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Set up your test</h2>
           </div>
 
           {/* Number of questions */}
@@ -9831,9 +10030,9 @@ Rules:
 
     if (showTestResults) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
+        <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-white to-purple-50'}`}>
           <div className="max-w-4xl mx-auto">
-            <button onClick={() => setCurrentView('home')} className="mb-6 text-gray-600 hover:text-gray-800">← Back to Home</button>
+            <button onClick={() => setCurrentView('home')} className={`mb-6 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}>← Back to Home</button>
             <div className="bg-white rounded-2xl shadow-xl p-8 text-center mb-6">
               <div className="text-6xl mb-4">{score >= 80 ? '🎉' : score >= 60 ? '👍' : '📚'}</div>
               <h2 className="text-3xl font-bold mb-4">Test Results</h2>
@@ -9895,11 +10094,11 @@ Rules:
     const progress = ((currentTestIndex + 1) / testQuestions.length) * 100;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
+      <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-white to-purple-50'}`}>
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-4">
-            <button onClick={() => setCurrentView('home')} className="text-gray-600 hover:text-gray-800">← Exit Test</button>
-            <div className="text-gray-600 font-medium">Question {currentTestIndex + 1} of {testQuestions.length}</div>
+            <button onClick={() => setCurrentView('home')} className={`font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}>← Exit Test</button>
+            <div className={`font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Question {currentTestIndex + 1} of {testQuestions.length}</div>
           </div>
 
           {/* Progress bar */}
@@ -10121,9 +10320,9 @@ Rules:
     // Show mode selection if no mode chosen yet
     if (!writingMode) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 p-6 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-2xl p-12 max-w-2xl mx-auto">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4 text-center">Choose Practice Mode</h2>
+        <div className={`min-h-screen p-6 flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-pink-50 via-white to-rose-50'}`}>
+          <div className={`rounded-xl shadow-2xl p-12 max-w-2xl mx-auto ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <h2 className={`text-4xl font-bold mb-4 text-center ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Choose Practice Mode</h2>
             <p className="text-xl text-gray-600 mb-8 text-center">
               How would you like to practice writing?
             </p>
@@ -10194,11 +10393,11 @@ Rules:
     // Show completion screen if session is complete (only for practice10 mode)
     if (writingSessionComplete && writingCards.length > 0) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 p-6 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-2xl p-12 max-w-2xl mx-auto text-center">
+        <div className={`min-h-screen p-6 flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-pink-50 via-white to-rose-50'}`}>
+          <div className={`rounded-xl shadow-2xl p-12 max-w-2xl mx-auto text-center ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <div className="text-6xl mb-6">🎉</div>
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">Great Job!</h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <h2 className={`text-4xl font-bold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Great Job!</h2>
+            <p className={`text-xl mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               You've completed this writing practice session!
             </p>
             <div className="flex gap-4 justify-center">
@@ -10223,7 +10422,7 @@ Rules:
     const currentCard = writingCards[currentWritingIndex];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 p-3 sm:p-6" style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>
+      <div className={`min-h-screen p-3 sm:p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-pink-50 via-white to-rose-50'}`} style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <button
@@ -10233,7 +10432,7 @@ Rules:
                 if (currentUser && FIREBASE_ENABLED) saveToCloud(currentUser.uid);
                 setCurrentView('home');
               }}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 text-sm sm:text-base font-semibold transition-all"
+              className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm sm:text-base font-semibold transition-all ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
             >
               ← Home
             </button>
@@ -10375,7 +10574,7 @@ Rules:
               <div className="relative mx-auto" style={{ width: '100%', maxWidth: '500px' }}>
                 <canvas
                   ref={canvasRef}
-                  className={`border-4 rounded-lg cursor-crosshair touch-none bg-white block w-full ${canvasHanziChar ? 'border-purple-400' : 'border-gray-300'}`}
+                  className={`border-4 rounded-lg cursor-crosshair touch-none block w-full writing-canvas-dark ${darkMode ? 'bg-gray-800' : 'bg-white'} ${canvasHanziChar ? 'border-purple-400' : 'border-gray-300'}`}
                   style={{ height: 'auto', aspectRatio: '1', touchAction: 'none' }}
                 />
                 {/* HanziWriter draws into this div; position:absolute keeps it locked to canvas */}
@@ -10409,20 +10608,31 @@ Rules:
                   Clear Traces
                 </button>
               )}
-              <button
-                onClick={handleKnowCard}
-                className="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6"
-              >
-                <Check size={18} />
-                I Know This
-              </button>
-              <button
-                onClick={handleForgotCard}
-                className="bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6"
-              >
-                <X size={18} />
-                I Forgot
-              </button>
+              {(userSettings.flashcard.useAnkiRatings) ? (
+                <>
+                  <button onClick={() => handleForgotCard()} className="bg-red-700 text-white px-4 py-3 rounded-lg hover:bg-red-800 transition text-sm sm:text-base sm:px-5 font-medium">Again</button>
+                  <button onClick={() => { const c = writingCards[currentWritingIndex]; setWritingUndoHistory(prev => [...prev, { action: 'know', cardIndex: currentWritingIndex, cards: [...writingCards] }]); updateCardWithSpacedRepetition(selectedDeck.id, c.id, 2, userSettings.writing.srOffset); clearCanvas(); setWritingFeedback(null); setTestRevealed(false); setShowStrokePanel(false); setShowCanvasCharPicker(false); setCanvasHanziChar(null); if (canvasOverlayRef.current) { canvasOverlayRef.current.innerHTML = ''; canvasOverlayRef.current.style.opacity='1'; canvasOverlayRef.current.style.transition=''; } if (canvasHanziWriterRef.current) { try {} catch(e) {} canvasHanziWriterRef.current = null; } if (currentWritingIndex < writingCards.length - 1) { setCurrentWritingIndex(currentWritingIndex + 1); } else { if (writingMode === 'practice10' || writingMode === 'test') { setWritingSessionComplete(true); } else { localStorage.removeItem('writingSession'); alert('Great job! You\'ve completed all cards!'); setCurrentView('home'); } } }} className="bg-orange-500 text-white px-4 py-3 rounded-lg hover:bg-orange-600 transition text-sm sm:text-base sm:px-5 font-medium">Hard</button>
+                  <button onClick={handleKnowCard} className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition text-sm sm:text-base sm:px-5 font-medium">Good</button>
+                  <button onClick={() => { const c = writingCards[currentWritingIndex]; setWritingUndoHistory(prev => [...prev, { action: 'know', cardIndex: currentWritingIndex, cards: [...writingCards] }]); updateCardWithSpacedRepetition(selectedDeck.id, c.id, 5, userSettings.writing.srOffset); clearCanvas(); setWritingFeedback(null); setTestRevealed(false); setShowStrokePanel(false); setShowCanvasCharPicker(false); setCanvasHanziChar(null); if (canvasOverlayRef.current) { canvasOverlayRef.current.innerHTML = ''; canvasOverlayRef.current.style.opacity='1'; canvasOverlayRef.current.style.transition=''; } if (canvasHanziWriterRef.current) { try {} catch(e) {} canvasHanziWriterRef.current = null; } if (currentWritingIndex < writingCards.length - 1) { setCurrentWritingIndex(currentWritingIndex + 1); } else { if (writingMode === 'practice10' || writingMode === 'test') { setWritingSessionComplete(true); } else { localStorage.removeItem('writingSession'); alert('Great job! You\'ve completed all cards!'); setCurrentView('home'); } } }} className="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition text-sm sm:text-base sm:px-5 font-medium">Easy</button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleKnowCard}
+                    className="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6"
+                  >
+                    <Check size={18} />
+                    I Know This
+                  </button>
+                  <button
+                    onClick={handleForgotCard}
+                    className="bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base sm:px-6"
+                  >
+                    <X size={18} />
+                    I Forgot
+                  </button>
+                </>
+              )}
               {(writingMode === 'test' || writingMode === 'testAll') && (
                 <button
                   onClick={() => setTestRevealed(prev => !prev)}
@@ -10440,8 +10650,8 @@ Rules:
               </button>
             </div>
 
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-700 text-center">
+            <div className={`mt-6 p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
+              <p className={`text-sm text-center ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 {(writingMode === 'test' || writingMode === 'testAll') ? (
                   <>💡 <strong>Test Mode:</strong> Try to write the character from memory using only the pinyin and English. Press "Reveal" to check your answer, then mark "I Know This" or "I Forgot".</>
                 ) : (
@@ -10478,10 +10688,10 @@ Rules:
     };
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-4 sm:p-6">
+      <div className={`min-h-screen p-4 sm:p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-white to-violet-50'}`}>
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <button onClick={() => { resetAiTest(); setCurrentView('home'); }} className="text-gray-600 hover:text-gray-800 flex items-center gap-2 font-semibold">← Home</button>
+            <button onClick={() => { resetAiTest(); setCurrentView('home'); }} className={`flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}>← Home</button>
             <h1 className="text-2xl font-bold text-gray-800">AI Test Practice</h1>
             <div />
           </div>
@@ -10490,6 +10700,7 @@ Rules:
           {aiTestSetupStep === 'selectMode' && (
             <div className="space-y-3">
               <p className="text-gray-500 text-sm mb-4">Choose a practice mode that matches your CHI108 assessments:</p>
+              <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-4">✨ AI Test Practice uses <strong>Puter.js</strong> — you'll be prompted to create a free account on first use.</p>
               {Object.entries(modeInfo).map(([mode, info]) => (
                 <button key={mode} onClick={() => { setAiTestMode(mode); setAiTestSetupStep('selectDecks'); }}
                   className={`w-full text-left p-5 rounded-xl bg-gradient-to-r ${info.color} text-white hover:shadow-lg transition-all`}>
@@ -10857,11 +11068,11 @@ Rules:
   // ==========================================
   if (currentView === 'studyGuides') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 p-4 sm:p-6">
+      <div className={`min-h-screen p-4 sm:p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-rose-50 via-white to-pink-50'}`}>
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <button onClick={() => setCurrentView('home')} className="text-gray-600 hover:text-gray-800 flex items-center gap-2 font-semibold">← Home</button>
-            <h1 className="text-2xl font-bold text-gray-800">Study Guides</h1>
+            <button onClick={() => setCurrentView('home')} className={`flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}>← Home</button>
+            <h1 className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Study Guides</h1>
             <div />
           </div>
 
@@ -10869,6 +11080,7 @@ Rules:
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <h2 className="font-bold text-gray-800 mb-3">Generate Study Guide</h2>
             <p className="text-sm text-gray-500 mb-4">Pick a deck and AI will create a comprehensive study guide based on its vocabulary{' '}and 课文 (if attached).</p>
+            <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-4">✨ Study Guides use <strong>Puter.js</strong> AI — you'll be prompted to create a free account on first use.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {decks.filter(d => d.cards.length > 0).map(deck => (
                 <button
@@ -10977,10 +11189,10 @@ Rules:
     // No-kewen gate screen
     if (sentencePracticeDeck.noKewen) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-6 flex items-center justify-center">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+        <div className={`min-h-screen p-6 flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-teal-50 via-white to-cyan-50'}`}>
+          <div className={`rounded-2xl shadow-xl p-8 max-w-md w-full text-center ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
             <div className="text-5xl mb-4">📄</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-3">No 课文 attached</h2>
+            <h2 className={`text-2xl font-bold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>No 课文 attached</h2>
             <p className="text-gray-500 mb-4 leading-relaxed">
               This deck doesn't have a 课文 reading text attached yet. To use Sentence Writing, you need the full deck JSON with 课文 included.
             </p>
@@ -11022,16 +11234,16 @@ Rules:
     const progress = totalSentences > 0 ? ((sentenceIndex + 1) / totalSentences) * 100 : 0;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 p-4 sm:p-6">
+      <div className={`min-h-screen p-4 sm:p-6 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-teal-50 via-white to-cyan-50'}`}>
         <div className="max-w-3xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => { setSentencePracticeDeck(null); setCurrentView('home'); window.speechSynthesis?.cancel(); }}
-              className="text-gray-600 hover:text-gray-800 flex items-center gap-2 font-semibold"
+              className={`flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
             >← Home</button>
             <div className="text-center">
-              <h1 className="text-lg font-bold text-gray-800">课文 Sentence Writing</h1>
+              <h1 className={`text-lg font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>课文 Sentence Writing</h1>
               <p className="text-xs text-gray-400">{deck.name}</p>
             </div>
             <button
@@ -11048,7 +11260,7 @@ Rules:
           <div className="text-xs text-gray-400 text-right mb-4">{sentenceIndex + 1} / {totalSentences}</div>
 
           {/* Sentence card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-4">
+          <div className={`rounded-2xl shadow-lg p-6 mb-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
 
             {/* English translation */}
             <div className="mb-5">
@@ -11061,7 +11273,7 @@ Rules:
                   Fetching translations...
                 </div>
               ) : (
-                <p className="text-base text-gray-700 leading-relaxed">{translation || '—'}</p>
+                <p className={`text-base leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{translation || '—'}</p>
               )}
             </div>
 
@@ -11072,22 +11284,22 @@ Rules:
                 <div className="flex gap-2" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
                   <button
                     onClick={() => speakChinese(currentSentence)}
-                    className="text-xs bg-teal-50 hover:bg-teal-100 text-teal-700 px-2.5 py-1 rounded-lg border border-teal-200 transition font-medium flex items-center gap-1"
+                    className={`text-xs px-2.5 py-1 rounded-lg border transition font-medium flex items-center gap-1 ${darkMode ? 'bg-teal-900 hover:bg-teal-800 text-teal-300 border-teal-700' : 'bg-teal-50 hover:bg-teal-100 text-teal-700 border-teal-200'}`}
                     style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                   >🔊 Pronounce</button>
                   <button
                     onClick={() => setSentenceRevealed(r => !r)}
-                    className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1 rounded-lg transition font-medium"
+                    className={`text-xs px-2.5 py-1 rounded-lg transition font-medium ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
                     style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                   >{sentenceRevealed ? '🙈 Hide' : '👁 Reveal'}</button>
                 </div>
               </div>
               {sentenceRevealed ? (
-                <p className="text-xl leading-relaxed text-gray-800 p-3 bg-teal-50 rounded-xl border border-teal-100" style={{ fontFamily: 'serif' }}>
+                <p className={`text-xl leading-relaxed p-3 rounded-xl border ${darkMode ? 'text-gray-100 bg-teal-900/40 border-teal-700' : 'text-gray-800 bg-teal-50 border-teal-100'}`} style={{ fontFamily: 'serif' }}>
                   {currentSentence}
                 </p>
               ) : (
-                <div className="h-10 bg-gray-100 rounded-xl flex items-center px-4">
+                <div className={`h-10 rounded-xl flex items-center px-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
                   <span className="text-gray-400 text-sm">Hidden — write it first, then reveal to check</span>
                 </div>
               )}
@@ -11097,12 +11309,12 @@ Rules:
             <div className="flex gap-2 mb-3" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
               <button
                 onClick={() => setSentenceInputMode('type')}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${sentenceInputMode === 'type' ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${sentenceInputMode === 'type' ? 'bg-teal-600 text-white' : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                 style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
               >⌨️ Type</button>
               <button
                 onClick={() => setSentenceInputMode('handwrite')}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${sentenceInputMode === 'handwrite' ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${sentenceInputMode === 'handwrite' ? 'bg-teal-600 text-white' : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                 style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
               >✍️ Handwrite</button>
             </div>
@@ -11184,6 +11396,45 @@ Rules:
         `}</style>
         <ChatFAB />
         <ChatSidebar />
+      </div>
+    );
+  }
+
+  // What's New modal — shown once per version
+  if (showWhatsNew) {
+    const wnBg = darkMode ? '#1f2937' : '#fff';
+    const wnHeading = darkMode ? '#f3f4f6' : '#1a1a1a';
+    const wnSub = darkMode ? '#9ca3af' : '#6b7280';
+    return (
+      <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+        <div style={{ background: wnBg, borderRadius: '1rem', padding: '2rem', maxWidth: '480px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', color: wnHeading }}>What's New in v{APP_VERSION} 🎉</h2>
+          <p style={{ fontSize: '0.875rem', color: wnSub, marginBottom: '1.25rem' }}>Here's what's been added:</p>
+          <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.25rem' }}>🌙</span>
+              <div><strong style={{ color: wnHeading }}>Dark mode</strong><br/><span style={{ color: wnSub, fontSize: '0.875rem' }}>Opt-in toggle in Settings — easy on the eyes at night.</span></div>
+            </li>
+            <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.25rem' }}>🧠</span>
+              <div><strong style={{ color: wnHeading }}>Anki-style SRS ratings</strong><br/><span style={{ color: wnSub, fontSize: '0.875rem' }}>Opt-in in Settings — Again / Hard / Good / Easy instead of binary buttons.</span></div>
+            </li>
+            <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.25rem' }}>✨</span>
+              <div><strong style={{ color: wnHeading }}>Clearer AI sign-in info</strong><br/><span style={{ color: wnSub, fontSize: '0.875rem' }}>AI features use Puter.js — you'll be prompted for a free account on first use.</span></div>
+            </li>
+            <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.25rem' }}>⚡</span>
+              <div><strong style={{ color: wnHeading }}>Performance improvements</strong><br/><span style={{ color: wnSub, fontSize: '0.875rem' }}>Removed debug logging and other optimizations.</span></div>
+            </li>
+          </ul>
+          <button
+            onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); }}
+            style={{ width: '100%', background: 'linear-gradient(135deg, #e11d48, #be123c)', color: '#fff', border: 'none', borderRadius: '0.75rem', padding: '0.875rem', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' }}
+          >
+            Got it!
+          </button>
+        </div>
       </div>
     );
   }
