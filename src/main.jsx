@@ -3738,15 +3738,27 @@ Grade this response.` },
     }, 300);
   };
 
-  // Count total steps for progress indicator
-  const getTutorialStepList = (isChi108) => {
-    const basePath = isChi108 === true ? ['welcome','chi108-path'] : isChi108 === false ? ['welcome','hsk-intro','hsk-browse'] : ['welcome'];
+  // Count total steps for progress indicator.
+  // Core steps: basePath + main study-mode tour.
+  // Extended steps: the optional advanced-features tour after extended-offer.
+  const getCoreStepList = (isChi108) => {
+    const basePath = isChi108 === true
+      ? ['welcome', 'chi108-path', 'chi108-drive', 'chi108-import']
+      : isChi108 === false
+      ? ['welcome', 'hsk-intro', 'hsk-browse']
+      : ['welcome'];
     const coreSteps = ['deck-ready','writing-strokes','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','extended-offer'];
     return [...basePath, ...coreSteps];
   };
-  const tutorialStepList = getTutorialStepList(tutorialIsChi108);
-  const tutorialStepNumber = Math.max(1, tutorialStepList.indexOf(tutorialStepId) + 1);
-  const tutorialTotalSteps = tutorialStepList.length;
+  const extendedStepList = ['expand-collapse','kewen-reader','sentence-practice','ai-test','puter-warning','settings-tour','folders-tour','stats-tour','done'];
+
+  const coreStepList = getCoreStepList(tutorialIsChi108);
+  const coreIdx = coreStepList.indexOf(tutorialStepId);
+  const extIdx  = extendedStepList.indexOf(tutorialStepId);
+  const tutorialStepNumber = coreIdx >= 0 ? coreIdx + 1 : extIdx >= 0 ? extIdx + 1 : 0;
+  const tutorialTotalSteps = coreIdx >= 0 ? coreStepList.length : extIdx >= 0 ? extendedStepList.length : 0;
+  // Keep legacy alias used elsewhere
+  const tutorialStepList = coreStepList;
 
   const startSentencePractice = (deck) => {
     if (!deck.kewen) {
@@ -11956,6 +11968,16 @@ Rules:
             return () => clearInterval(interval);
           }, [tutData?.step?.targetId, tutData?.stepId]);
 
+          // Collapse/expand state for the tutorial card — lets users shrink the card on mobile
+          // so they can see the screen content while following instructions.
+          const [cardCollapsed, setCardCollapsed] = React.useState(false);
+
+          // Auto-collapse on small screens when the step changes; expand on larger screens.
+          React.useEffect(() => {
+            const isMobile = (window.innerWidth || 400) < 480;
+            setCardCollapsed(isMobile);
+          }, [tutData?.stepId]);
+
           // Tutorial overlay rendering logic
           const renderTutorialOverlay = () => {
             if (!tutData) return null;
@@ -12090,31 +12112,47 @@ Rules:
                     </div>
                   ) : (<>
                   {/* Arrow pointing upward (toward target above card) */}
-                  {showArrowUp && (
+                  {showArrowUp && !cardCollapsed && (
                     <div style={{ textAlign: 'center', marginBottom: 6, fontSize: 28, color: '#f59e0b', animation: 'tutBounceUp 1s ease-in-out infinite' }}>
                       ▲
                     </div>
                   )}
 
-                  {/* Progress bar */}
-                  {stepNumber > 0 && totalSteps > 0 && (
-                    <div style={{ marginBottom: 10 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  {/* Header row: progress counter + title + collapse toggle + close */}
+                  <div style={{ marginBottom: cardCollapsed ? 0 : 8 }}>
+                    {/* Top row: step counter + action buttons */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: stepNumber > 0 && totalSteps > 0 && !cardCollapsed ? 4 : 0 }}>
+                      {stepNumber > 0 && totalSteps > 0 ? (
                         <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           Step {stepNumber} of {totalSteps}
                         </span>
-                        {/* Use dismissOverlay directly — bypasses unreliable cross-component onEnd chain */}
+                      ) : <div />}
+                      <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                        {/* Collapse / expand toggle — lets users shrink the card on mobile */}
+                        <button
+                          onClick={() => setCardCollapsed(c => !c)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 15, lineHeight: 1, padding: '0 3px' }}
+                          title={cardCollapsed ? 'Expand' : 'Minimise'}
+                        >
+                          {cardCollapsed ? '⊕' : '⊖'}
+                        </button>
                         <button onClick={dismissOverlay} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 18, lineHeight: 1, padding: 0 }} title="Close tour">✕</button>
                       </div>
+                    </div>
+                    {/* Progress bar — hidden when collapsed */}
+                    {stepNumber > 0 && totalSteps > 0 && !cardCollapsed && (
                       <div style={{ height: 4, background: '#e5e7eb', borderRadius: 4, overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${(stepNumber / totalSteps) * 100}%`, background: 'linear-gradient(90deg,#f59e0b,#ef4444)', borderRadius: 4, transition: 'width 0.4s ease' }} />
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
-                  {/* Title */}
-                  <h3 style={{ margin: '0 0 8px', fontSize: 17, fontWeight: 700, color: '#1f2937' }}>{step.title}</h3>
+                  {/* Title — always visible */}
+                  <h3 style={{ margin: cardCollapsed ? '0 0 6px' : '0 0 8px', fontSize: cardCollapsed ? 14 : 17, fontWeight: 700, color: '#1f2937' }}>{step.title}</h3>
 
+                  {/* Collapsible body: content + choices */}
+                  {!cardCollapsed && (
+                    <>
                   {/* Content */}
                   <p style={{ margin: '0 0 14px', fontSize: 14, color: '#4b5563', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{step.content}</p>
 
@@ -12157,9 +12195,30 @@ Rules:
                       ) : null}
                     </div>
                   )}
+                    </>
+                  )}
+
+                  {/* When collapsed: always show nav buttons so user can proceed without expanding */}
+                  {cardCollapsed && !step.choices && (
+                    <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
+                      {onBack && <button onClick={onBack} style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid #d1d5db', background: '#f9fafb', color: '#374151', fontWeight: 600, fontSize: 12, cursor: 'pointer' }}>← Back</button>}
+                      {step.finishButton ? (
+                        <button onClick={dismissOverlay} style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>🎊 Finish</button>
+                      ) : onNext ? (
+                        <button onClick={onNext} style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg,#f59e0b,#ef4444)', color: '#fff', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Next →</button>
+                      ) : null}
+                    </div>
+                  )}
+
+                  {/* When collapsed + choices: show a tap-to-expand hint */}
+                  {cardCollapsed && step.choices && (
+                    <button onClick={() => setCardCollapsed(false)} style={{ fontSize: 12, color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 600 }}>
+                      Tap ⊕ to expand and choose
+                    </button>
+                  )}
 
                   {/* Arrow pointing downward (toward target below card) */}
-                  {showArrowDown && (
+                  {showArrowDown && !cardCollapsed && (
                     <div style={{ textAlign: 'center', marginTop: 6, fontSize: 28, color: '#f59e0b', animation: 'tutBounceDown 1s ease-in-out infinite' }}>
                       ▼
                     </div>
