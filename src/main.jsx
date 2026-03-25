@@ -373,13 +373,12 @@ const TUTORIAL_STEPS = {
   },
   'chi108-browse': {
     title: 'Browse CHI 108 Decks 🔍',
-    content: '👆 Click "Browse Decks" to see all available CHI 108 weekly decks and pick this week\'s topic.',
+    content: 'Click "Browse Decks", find this week\'s CHI 108 deck, and click Import.\n\nAfter importing, close the panel (click ✕) — then click Next → below.',
     nextId: 'deck-ready',
     prevId: 'chi108-path',
-    targetId: 'tutorial-browse-btn',
-    arrowDir: 'up',
+    targetId: null,
     view: 'home',
-    noMask: true,
+    noOverlay: true,
   },
   'hsk-intro': {
     title: 'Getting Started 🚀',
@@ -392,13 +391,12 @@ const TUTORIAL_STEPS = {
   },
   'hsk-browse': {
     title: 'Browse Pre-loaded Decks 🔍',
-    content: '👆 Click "Browse Decks" to see all available decks. Pick any HSK deck that matches your level!\n\nOnce imported, you\'ll see it in your deck list.',
+    content: 'Click "Browse Decks", pick any HSK deck that matches your level, and click Import.\n\nAfter importing, close the panel (click ✕) — then click Next → below.',
     nextId: 'deck-ready',
     prevId: 'hsk-intro',
-    targetId: 'tutorial-browse-btn',
-    arrowDir: 'up',
+    targetId: null,
     view: 'home',
-    noMask: true,
+    noOverlay: true,
   },
   'deck-ready': {
     title: 'Your Deck is Ready! ✅',
@@ -438,12 +436,13 @@ const TUTORIAL_STEPS = {
   },
   'trouble-words': {
     title: 'Trouble Words 🔥',
-    content: '👇 These are your weakest cards — ones you\'ve marked "I Forgot" most often.\n\nGreat for quick targeted review before a test!',
+    content: 'The Trouble Words section shows your weakest cards — ones you\'ve marked "I Forgot" most often.\n\nClick "Start Practice" inside it to drill those cards!\n\nGreat for quick targeted review before a test.',
     nextId: 'learn-mode',
     prevId: null,
     targetId: 'tutorial-trouble-section',
     arrowDir: 'down',
     view: 'home',
+    noMask: true,
   },
   'learn-mode': {
     title: 'Learn Mode 🎓',
@@ -456,22 +455,21 @@ const TUTORIAL_STEPS = {
   },
   'match-mode': {
     title: 'Match Game 🎮',
-    content: '👇 Click matching Chinese–English pairs as fast as you can!\n\nBeat your best time and climb the leaderboard.',
+    content: 'Click the 🎮 Match button on your deck card to start the match game.\n\nClick matching Chinese–English pairs as fast as you can — beat your best time!',
     nextId: 'test-mode',
     prevId: 'learn-mode',
-    targetId: 'tutorial-first-deck-match',
-    arrowDir: 'down',
+    targetId: null,
     view: 'home',
-    noMask: true,
+    noOverlay: true,
   },
   'test-mode': {
     title: 'Test Mode 📝',
-    content: '👇 Customizable quiz — choose question count, types (multiple choice, written, true/false), and whether to answer in Chinese or English.',
+    content: 'Click the 📝 Test button on your deck card to set up a quiz.\n\nChoose question count, types (multiple choice, written, true/false), and whether to answer in Chinese or English.',
     nextId: 'extended-offer',
     prevId: 'match-mode',
-    targetId: 'tutorial-first-deck-test',
-    arrowDir: 'down',
+    targetId: null,
     view: 'home',
+    noOverlay: true,
   },
   'extended-offer': {
     title: 'Core Tour Complete! 🎉',
@@ -484,13 +482,13 @@ const TUTORIAL_STEPS = {
   },
   'expand-collapse': {
     title: 'Expand / Collapse All ⊕⊖',
-    content: '👇 Click "▼ Expand All" to reveal all the study buttons for every deck (Study, Write, Learn, Match, Test, 课文).\n\nClick "▲ Collapse All" to hide them again and keep the list tidy.',
+    content: 'Click "▼ Expand All" to reveal extra tools below each deck\'s main buttons — 课文 reader, Sentence Writing, Study Guide, and more.\n\nClick "▲ Collapse All" to tidy the list back up.',
     nextId: 'kewen-reader',
     prevId: null,
     targetId: 'tutorial-expand-btn',
     arrowDir: 'down',
     view: 'home',
-    noMask: true,
+    noOverlay: true,
   },
   'kewen-reader': {
     title: '课文 Reader 📖',
@@ -532,7 +530,7 @@ const TUTORIAL_STEPS = {
   },
   'settings-tour': {
     title: 'Settings & Account ⚙️',
-    content: '👆 Click the Account / Settings button to:\n• Toggle dark mode 🌙\n• Enable Anki-style ratings (Again / Hard / Good / Easy)\n• Toggle auto-play audio\n• Adjust trouble word display count',
+    content: 'Click the Account / Settings button (top-right header) to open settings. Inside you can:\n• Toggle dark mode 🌙\n• Enable Anki-style ratings (Again / Hard / Good / Easy)\n• Toggle auto-play audio\n• Adjust trouble word display count',
     nextId: 'folders-tour',
     prevId: 'puter-warning',
     targetId: 'tutorial-settings-btn',
@@ -11930,8 +11928,9 @@ Rules:
             const hasMask = hasBorder && !step.noMask;
             // hasSpot: any spotlight — drives card positioning
             const hasSpot = hasBorder;
-            // Floating card (top-right corner, no overlay) for steps with no target element
-            const isFloating = !step.targetId || step.noOverlay;
+            // Floating card (top-right corner, no overlay) when:
+            // - step has no targetId, OR noOverlay flag set, OR the targeted element has left the DOM
+            const isFloating = !step.targetId || step.noOverlay || !hasSpot;
             const vh = window.innerHeight || 600;
             const vw = window.innerWidth || 400;
 
