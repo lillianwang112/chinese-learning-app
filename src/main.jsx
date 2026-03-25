@@ -379,7 +379,7 @@ const TUTORIAL_STEPS = {
     targetId: 'tutorial-browse-btn',
     arrowDir: 'up',
     view: 'home',
-    noOverlay: true,
+    noMask: true,
   },
   'hsk-intro': {
     title: 'Getting Started 🚀',
@@ -398,7 +398,7 @@ const TUTORIAL_STEPS = {
     targetId: 'tutorial-browse-btn',
     arrowDir: 'up',
     view: 'home',
-    noOverlay: true,
+    noMask: true,
   },
   'deck-ready': {
     title: 'Your Deck is Ready! ✅',
@@ -410,8 +410,8 @@ const TUTORIAL_STEPS = {
     view: 'home',
   },
   'writing-strokes': {
-    title: 'Writing Practice — Stroke Animation ✍️',
-    content: '• You see the character with English/pinyin\n• Click "Animate Strokes" to watch the correct stroke order\n• Click "Trace" to get a faded guide to draw over\n• Draw in the canvas box below\n\nDo 2–3 cards to get the feel, then click ← Home to continue.',
+    title: 'Writing Practice ✍️',
+    content: 'First pick a practice mode from the 4 options:\n• 📝 Practice 10 — 10 random cards\n• 📚 Practice All — full deck\n• 🧪 Test 10 / Test All — character hidden, write from memory\n\nOnce inside:\n• Click "Strokes" to watch stroke order animation\n• Click "Trace" to draw over a faded guide\n\nTry a few cards, then click ← Home to continue.',
     nextId: 'study-intro',
     prevId: 'deck-ready',
     targetId: null,
@@ -429,7 +429,7 @@ const TUTORIAL_STEPS = {
   },
   'study-flip': {
     title: 'Flip & Rate Cards 🔄',
-    content: 'Tap the card to flip it and reveal the answer.\n\nThen rate yourself:\n• 😓 "I Forgot" → card comes back soon for retry\n• ✓ "I Know This" → card shown less often (spaced repetition)\n\nTry a few cards, then click ← Home to continue.',
+    content: 'Tap the card to flip it and reveal the answer.\n\nThen rate yourself:\n• 😓 "I Forgot" → card comes back soon\n• ✓ "I Know This" → shown less often (spaced repetition)\n\n💡 Tip: click 😓 "I Forgot" on at least one card — this unlocks the Trouble Words section!\n\nTry a few cards, then click ← Home to continue.',
     nextId: 'trouble-words',
     prevId: 'study-intro',
     targetId: null,
@@ -462,6 +462,7 @@ const TUTORIAL_STEPS = {
     targetId: 'tutorial-first-deck-match',
     arrowDir: 'down',
     view: 'home',
+    noMask: true,
   },
   'test-mode': {
     title: 'Test Mode 📝',
@@ -483,12 +484,13 @@ const TUTORIAL_STEPS = {
   },
   'expand-collapse': {
     title: 'Expand / Collapse All ⊕⊖',
-    content: '👇 Use the "Expand All / Collapse All" button to quickly show or hide all deck details.',
+    content: '👇 Click "▼ Expand All" to reveal all the study buttons for every deck (Study, Write, Learn, Match, Test, 课文).\n\nClick "▲ Collapse All" to hide them again and keep the list tidy.',
     nextId: 'kewen-reader',
     prevId: null,
     targetId: 'tutorial-expand-btn',
     arrowDir: 'down',
     view: 'home',
+    noMask: true,
   },
   'kewen-reader': {
     title: '课文 Reader 📖',
@@ -498,14 +500,17 @@ const TUTORIAL_STEPS = {
     targetId: 'tutorial-first-deck-kewen',
     arrowDir: 'down',
     view: 'home',
+    noMask: true,
   },
   'sentence-practice': {
     title: '课文 Sentence Writing ✍️',
-    content: 'In the 课文 reader, click "Sentence Writing" to practice writing each sentence.\n\nType or handwrite mode — great for composition practice!',
+    content: '👇 Click the "📝 课文 Sentence Writing" button on a deck card to practice writing full sentences.\n\nType or handwrite each sentence — great for composition practice!',
     nextId: 'ai-test',
     prevId: null,
-    targetId: null,
+    targetId: 'tutorial-sentence-writing-btn',
+    arrowDir: 'down',
     view: 'home',
+    noMask: true,
   },
   'ai-test': {
     title: 'AI Test Practice 🤖',
@@ -515,10 +520,11 @@ const TUTORIAL_STEPS = {
     targetId: 'tutorial-ai-test-btn',
     arrowDir: 'down',
     view: 'home',
+    noMask: true,
   },
   'puter-warning': {
     title: '⚠️ eduroam / University WiFi',
-    content: 'AI features (translations, AI Test, handwriting recognition) use Puter.js — a free AI service.\n\n⚠️ On eduroam (university WiFi)? Puter.js is often blocked.\n\nFix: switch to hotspot, use a VPN, or change your DNS (8.8.8.8).',
+    content: 'AI features (translations, AI Test, handwriting recognition) use Puter.js — a free AI service.\n\n⚠️ On eduroam (university WiFi) Puter.js is often blocked.\n\nFix: switch to hotspot, use a VPN, or change your DNS (8.8.8.8).',
     nextId: 'settings-tour',
     prevId: 'ai-test',
     targetId: null,
@@ -532,6 +538,7 @@ const TUTORIAL_STEPS = {
     targetId: 'tutorial-settings-btn',
     arrowDir: 'up',
     view: 'home',
+    noMask: true,
   },
   'folders-tour': {
     title: 'Folders & Organization 📁',
@@ -541,6 +548,7 @@ const TUTORIAL_STEPS = {
     targetId: 'tutorial-new-folder-btn',
     arrowDir: 'up',
     view: 'home',
+    noMask: true,
   },
   'stats-tour': {
     title: 'Stats & Progress 📊',
@@ -550,6 +558,7 @@ const TUTORIAL_STEPS = {
     targetId: 'tutorial-stats-btn',
     arrowDir: 'up',
     view: 'home',
+    noMask: true,
   },
   done: {
     title: 'Tour Complete! 🎊',
@@ -7311,6 +7320,7 @@ Rules:
                               </button>
                             </div>
                             <button
+                              id={deckIndex === 0 ? 'tutorial-sentence-writing-btn' : undefined}
                               onClick={(e) => { e.stopPropagation(); startSentencePractice(deck); }}
                               className="w-full bg-teal-50 text-teal-700 px-3 py-2 rounded-lg hover:bg-teal-100 transition-all border border-teal-200 flex items-center justify-center gap-2"
                             >
@@ -11873,23 +11883,31 @@ Rules:
             };
           }, []);
 
-          // Update spotlight rect when the targeted element changes
+          // Update spotlight rect when the targeted element changes.
+          // Polls every 150 ms so the overlay clears instantly when the element
+          // leaves the DOM (e.g. after the user navigates to a new view by clicking
+          // the highlighted button). Only calls setSpotRect when the value changes
+          // to avoid unnecessary re-renders.
           React.useEffect(() => {
-            if (!tutData?.step?.targetId) { setSpotRect(null); return; }
+            if (!tutData?.step?.targetId || tutData?.step?.noOverlay) { setSpotRect(null); return; }
+            let prevKey = null; // "top,left,width,height" string used for cheap equality check
             const update = () => {
               const el = document.getElementById(tutData.step.targetId);
               if (el) {
                 const r = el.getBoundingClientRect();
-                setSpotRect({ top: r.top, left: r.left, width: r.width, height: r.height });
-              } else {
+                const key = `${r.top},${r.left},${r.width},${r.height}`;
+                if (key !== prevKey) {
+                  prevKey = key;
+                  setSpotRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+                }
+              } else if (prevKey !== null) {
+                prevKey = null;
                 setSpotRect(null);
               }
             };
-            // Give a bit of time for any view transition to settle
-            const t = setTimeout(update, 350);
-            window.addEventListener('scroll', update, { passive: true });
-            window.addEventListener('resize', update, { passive: true });
-            return () => { clearTimeout(t); window.removeEventListener('scroll', update); window.removeEventListener('resize', update); };
+            update(); // immediate first check
+            const interval = setInterval(update, 150);
+            return () => clearInterval(interval);
           }, [tutData?.step?.targetId, tutData?.stepId]);
 
           // Tutorial overlay rendering logic
@@ -11906,9 +11924,13 @@ Rules:
             };
 
             const pad = 10;
-            // Only show spotlight when we have a rect AND the step didn't opt out of overlay
-            const hasSpot = !!spotRect && !step.noOverlay;
-            // Floating card (no dark overlay) for steps that show a different view or open modals
+            // hasBorder: glow ring around the target element (noMask skips dark SVG but keeps the ring)
+            const hasBorder = !!spotRect && !step.noOverlay;
+            // hasMask: dark SVG overlay (disabled for noMask and noOverlay steps)
+            const hasMask = hasBorder && !step.noMask;
+            // hasSpot: any spotlight — drives card positioning
+            const hasSpot = hasBorder;
+            // Floating card (top-right corner, no overlay) for steps with no target element
             const isFloating = !step.targetId || step.noOverlay;
             const vh = window.innerHeight || 600;
             const vw = window.innerWidth || 400;
@@ -11922,9 +11944,9 @@ Rules:
             const showArrowDown = hasSpot && !cardAtBottom;
 
             const cardStyle = isFloating ? {
-              // Compact floating card in bottom-right corner — doesn't block the view
+              // Compact floating card in top-right corner — stays out of the way of canvases/content
               position: 'fixed',
-              bottom: 20,
+              top: 20,
               right: 20,
               width: Math.min(vw - 24, 340),
               zIndex: 10001,
@@ -11949,8 +11971,8 @@ Rules:
 
             return createPortal(
               <div style={{ position: 'fixed', inset: 0, zIndex: 10000, pointerEvents: 'none' }}>
-                {/* Dark overlay with SVG spotlight cutout — only when there IS a spotlight target */}
-                {hasSpot && (
+                {/* Dark overlay with SVG spotlight cutout — only when hasMask (not for noMask steps) */}
+                {hasMask && (
                   <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} aria-hidden="true">
                     <defs>
                       <mask id="tut-mask">
@@ -11966,8 +11988,8 @@ Rules:
                   </svg>
                 )}
 
-                {/* Glowing border around spotlight target */}
-                {hasSpot && (
+                {/* Glowing border around spotlight target — shown for both mask and noMask steps */}
+                {hasBorder && (
                   <div style={{
                     position: 'absolute',
                     left: spotRect.left - pad,
