@@ -376,13 +376,13 @@ const TUTORIAL_STEPS = {
     content: 'Click "Browse Decks", find this week\'s CHI 108 deck, and click Import.\n\nAfter importing, close the panel (click ✕) — then click Next → below.',
     nextId: 'deck-ready',
     prevId: 'chi108-path',
-    targetId: null,
+    targetId: 'tutorial-browse-btn',
+    arrowDir: 'up',
     view: 'home',
-    noOverlay: true,
   },
   'hsk-intro': {
     title: 'Getting Started 🚀',
-    content: 'You have two options:\n\n• Create your own deck with custom vocabulary\n• Browse pre-loaded HSK (standard proficiency) decks\n\nLet\'s browse a pre-loaded deck to try the app!',
+    content: 'You have two options:\n\n• Create your own deck with custom vocabulary\n• Browse pre-loaded class decks\n\nLet\'s browse a pre-loaded deck to try the app!',
     nextId: 'hsk-browse',
     prevId: 'welcome',
     targetId: 'tutorial-browse-btn',
@@ -391,12 +391,12 @@ const TUTORIAL_STEPS = {
   },
   'hsk-browse': {
     title: 'Browse Pre-loaded Decks 🔍',
-    content: 'Click "Browse Decks", pick any HSK deck that matches your level, and click Import.\n\nAfter importing, close the panel (click ✕) — then click Next → below.',
+    content: 'Click "Browse Decks" to open the deck library, pick a deck, and click Import.\n\nAfter importing, close the panel (click ✕) — then click Next → below.',
     nextId: 'deck-ready',
     prevId: 'hsk-intro',
-    targetId: null,
+    targetId: 'tutorial-browse-btn',
+    arrowDir: 'up',
     view: 'home',
-    noOverlay: true,
   },
   'deck-ready': {
     title: 'Your Deck is Ready! ✅',
@@ -458,9 +458,8 @@ const TUTORIAL_STEPS = {
     nextId: 'test-mode',
     prevId: 'learn-mode',
     targetId: 'tutorial-first-deck-match',
+    arrowDir: 'down',
     view: 'home',
-    noMask: true,
-    topbar: true,
   },
   'test-mode': {
     title: 'Test Mode 📝',
@@ -468,9 +467,8 @@ const TUTORIAL_STEPS = {
     nextId: 'extended-offer',
     prevId: 'match-mode',
     targetId: 'tutorial-first-deck-test',
+    arrowDir: 'down',
     view: 'home',
-    noMask: true,
-    topbar: true,
   },
   'extended-offer': {
     title: 'Core Tour Complete! 🎉',
@@ -1381,14 +1379,46 @@ const ChineseLearningApp = () => {
     }
     const step = TUTORIAL_STEPS[tutorialStepId];
     if (!step) { window.__tutorialHide?.(); return; }
+
+    // Dynamic content overrides for steps whose UI depends on runtime state
+    const topTroubleCount = tutorialStepId === 'trouble-words'
+      ? getTopTroubleCards((userSettings.troubleWords?.topN) || 20).length : 0;
+    const dynamicStep = tutorialStepId === 'trouble-words' ? {
+      ...step,
+      targetId: topTroubleCount > 0 ? 'tutorial-trouble-section' : null,
+      noOverlay: topTroubleCount === 0,
+      content: topTroubleCount > 0
+        ? step.content
+        : 'You don\'t have any trouble words yet — they appear here once you\'ve studied some cards and clicked "I Forgot".\n\nLet\'s continue to Learn Mode!',
+    } : step;
+
+    // Per-step onNext overrides: pressing Next on deck-ready/study-intro actually
+    // launches the view (same as clicking the highlighted button) so the user never
+    // hits a black screen. expand-collapse auto-expands if the user forgot.
+    const onNext = (() => {
+      if (tutorialStepId === 'deck-ready') {
+        return decks.length > 0 ? () => startWritingPractice(decks[0]) : null;
+      }
+      if (tutorialStepId === 'study-intro') {
+        return decks.length > 0 ? () => startStudy(decks[0]) : null;
+      }
+      if (tutorialStepId === 'expand-collapse') {
+        return () => {
+          if (expandedDecks.size === 0) setExpandedDecks(new Set(decks.map(d => d.id)));
+          tutorialGoTo('kewen-reader');
+        };
+      }
+      return dynamicStep.nextId ? () => tutorialGoTo(dynamicStep.nextId) : null;
+    })();
+
     window.__tutorialUpdate?.({
-      step,
+      step: dynamicStep,
       stepId: tutorialStepId,
       isChi108: tutorialIsChi108,
       stepNumber: tutorialStepNumber,
       totalSteps: tutorialTotalSteps,
-      onNext: step.nextId ? () => tutorialGoTo(step.nextId) : null,
-      onBack: step.prevId ? () => tutorialGoTo(step.prevId) : null,
+      onNext,
+      onBack: dynamicStep.prevId ? () => tutorialGoTo(dynamicStep.prevId) : null,
       onChoice: (nextId, extraState) => tutorialGoTo(nextId, extraState || {}),
       onEnd: endTutorial,
     });
@@ -6467,7 +6497,10 @@ Rules:
                   </div>
                 </div>
                 <button
-                  onClick={() => setTroubleModal({ cards: topCards, deckId: null, deckName: null })}
+                  onClick={() => {
+                    setTroubleModal({ cards: topCards, deckId: null, deckName: null });
+                    if (tutorialActive && tutorialStepId === 'trouble-words') setTutorialPaused(true);
+                  }}
                   className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:from-orange-600 hover:to-red-600 transition-all shadow-md flex-shrink-0"
                 >
                   Practice All →
@@ -6527,7 +6560,12 @@ Rules:
               </button>
               <button
                 id="tutorial-browse-btn"
-                onClick={() => setShowBrowseDecks(true)}
+                onClick={() => {
+                  setShowBrowseDecks(true);
+                  if (tutorialActive && (tutorialStepId === 'chi108-browse' || tutorialStepId === 'hsk-browse')) {
+                    setTutorialPaused(true);
+                  }
+                }}
                 className="flex items-center gap-2 bg-gradient-to-r from-rose-500 to-rose-600 text-white px-6 py-3 rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
               >
                 <BookOpen size={20} />
@@ -7282,7 +7320,10 @@ Rules:
                             <div className="grid grid-cols-3 gap-2">
                               <button
                                 id={deckIndex === 0 ? 'tutorial-first-deck-match' : undefined}
-                                onClick={() => startMatchGame(deck)}
+                                onClick={() => {
+                                  startMatchGame(deck);
+                                  if (tutorialActive && tutorialStepId === 'match-mode') setTutorialPaused(true);
+                                }}
                                 disabled={totalCards < 4}
                                 className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white py-2 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-sm hover:shadow-md disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-xs font-semibold"
                               >
@@ -7290,7 +7331,10 @@ Rules:
                               </button>
                               <button
                                 id={deckIndex === 0 ? 'tutorial-first-deck-test' : undefined}
-                                onClick={() => startPracticeTest(deck)}
+                                onClick={() => {
+                                  startPracticeTest(deck);
+                                  if (tutorialActive && tutorialStepId === 'test-mode') setTutorialPaused(true);
+                                }}
                                 disabled={totalCards < 4}
                                 className="bg-gradient-to-r from-indigo-400 to-indigo-500 text-white py-2 rounded-lg hover:from-indigo-500 hover:to-indigo-600 transition-all shadow-sm hover:shadow-md disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-xs font-semibold"
                               >
