@@ -1583,7 +1583,7 @@ const ChineseLearningApp = () => {
   const handleAnkiFlashcard = (quality) => {
     if (!selectedDeck || currentView !== 'study') return;
     const currentCard = shuffledCards[currentCardIndex];
-    const direction = quality <= 2 ? 'left' : 'right';
+    const direction = quality <= 2 ? 'left' : quality === 4 ? 'left' : 'right';
     const snapshot = { direction, cardIndex: currentCardIndex, cards: [...shuffledCards], card: currentCard };
     setSwipeDirection(direction);
 
@@ -1591,17 +1591,8 @@ const ChineseLearningApp = () => {
       updateCardWithSpacedRepetition(selectedDeck.id, currentCard.id, quality, userSettings.flashcard.srOffset);
       setSwipeHistory(prev => [...prev, snapshot]);
 
-      if (quality <= 2) {
-        // Re-queue the card proportionally later
-        const newCards = [...shuffledCards];
-        newCards.splice(currentCardIndex, 1);
-        const remaining = newCards.length - currentCardIndex;
-        const proportionalOffset = Math.max(4, Math.floor(remaining * 0.15) + Math.floor(Math.random() * Math.max(1, Math.floor(remaining * 0.05))));
-        const reinsertPosition = Math.min(currentCardIndex + proportionalOffset, newCards.length);
-        newCards.splice(reinsertPosition, 0, currentCard);
-        setShuffledCards(newCards);
-        setIsFlipped(false);
-      } else {
+      if (quality === 5) {
+        // Easy — no re-queue, just advance
         if (currentCardIndex < shuffledCards.length - 1) {
           setCurrentCardIndex(currentCardIndex + 1);
           setIsFlipped(false);
@@ -1609,6 +1600,28 @@ const ChineseLearningApp = () => {
           alert('Great job! You\'ve finished studying this deck!');
           setCurrentView('home');
         }
+      } else {
+        // Again/Hard/Good — all re-queue at different distances
+        const newCards = [...shuffledCards];
+        newCards.splice(currentCardIndex, 1);
+        const remaining = newCards.length - currentCardIndex;
+
+        let offset;
+        if (quality === 1) {
+          // Again — very soon: ~5% ahead, min 2
+          offset = Math.max(2, Math.floor(remaining * 0.05) + Math.floor(Math.random() * 2));
+        } else if (quality === 2) {
+          // Hard — moderate: ~15% ahead, min 4
+          offset = Math.max(4, Math.floor(remaining * 0.15) + Math.floor(Math.random() * Math.max(1, Math.floor(remaining * 0.05))));
+        } else {
+          // Good — far: ~60% ahead, min 10
+          offset = Math.max(10, Math.floor(remaining * 0.6));
+        }
+
+        const reinsertPosition = Math.min(currentCardIndex + offset, newCards.length);
+        newCards.splice(reinsertPosition, 0, currentCard);
+        setShuffledCards(newCards);
+        setIsFlipped(false);
       }
       setSwipeDirection(null);
     }, 300);
@@ -9185,6 +9198,16 @@ Rules:
                 </>
               )}
             </div>
+          )}
+
+          {/* Anki ratings tip */}
+          {userSettings.flashcard.useAnkiRatings && isFlipped && !swipeDirection && (
+            <p className={`text-xs text-center mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              <span className="font-semibold text-red-500">Again</span> = see it very soon &nbsp;·&nbsp;
+              <span className="font-semibold text-orange-500">Hard</span> = see it again this session &nbsp;·&nbsp;
+              <span className="font-semibold text-blue-500">Good</span> = see it near end of deck &nbsp;·&nbsp;
+              <span className="font-semibold text-green-500">Easy</span> = done, move on
+            </p>
           )}
 
           {/* Navigation Buttons */}
