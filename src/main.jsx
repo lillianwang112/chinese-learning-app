@@ -328,6 +328,235 @@ import './index.css';
 
 const APP_VERSION = '1.1.0';
 
+// ── Guided Tutorial Step Definitions ────────────────────────────────────────
+// Each step: { title, content, targetId, nextId, prevId, choices, view, arrowDir }
+// choices: [{label, nextId, chi108: bool|undefined}]  — for branching steps (no Next/Back shown)
+// view: navigate to this view when entering the step
+// targetId: DOM element ID to spotlight
+const TUTORIAL_STEPS = {
+  welcome: {
+    title: 'Welcome to 中文 Learn! 👋',
+    content: 'Let\'s take a quick tour so you know how to use every feature.\n\nAre you a CHI 108 student?',
+    choices: [
+      { label: '✓ Yes, I\'m CHI 108', nextId: 'chi108-path', chi108: true },
+      { label: '◎ No, just exploring', nextId: 'hsk-intro', chi108: false },
+    ],
+    view: 'home',
+  },
+  'chi108-path': {
+    title: 'Getting Your CHI 108 Deck 📚',
+    content: 'Great! You can load your weekly vocab deck two ways:\n\n1. Download from Google Drive and import it\n2. Use a pre-loaded deck from Browse',
+    choices: [
+      { label: '☁️ Go to Google Drive', nextId: 'chi108-drive' },
+      { label: '🔍 Use pre-loaded deck', nextId: 'chi108-browse' },
+    ],
+    targetId: 'tutorial-drive-btn',
+    view: 'home',
+  },
+  'chi108-drive': {
+    title: 'Step 1: Download from Google Drive ☁️',
+    content: '👆 Click the "Download Decks" link above to open Google Drive.\n\nDownload the JSON file for this week\'s lesson, then come back here.',
+    nextId: 'chi108-import',
+    prevId: 'chi108-path',
+    targetId: 'tutorial-drive-btn',
+    arrowDir: 'up',
+    view: 'home',
+  },
+  'chi108-import': {
+    title: 'Step 2: Import Your Deck 📥',
+    content: '👆 Click "Import / Export" → "Import Decks from File", then select the JSON you downloaded.\n\nYour deck will appear in your list below!',
+    nextId: 'deck-ready',
+    prevId: 'chi108-drive',
+    targetId: 'tutorial-import-btn',
+    arrowDir: 'up',
+    view: 'home',
+  },
+  'chi108-browse': {
+    title: 'Browse CHI 108 Decks 🔍',
+    content: '👆 Click "Browse Decks" to see all available CHI 108 weekly decks and pick this week\'s topic.',
+    nextId: 'deck-ready',
+    prevId: 'chi108-path',
+    targetId: 'tutorial-browse-btn',
+    arrowDir: 'up',
+    view: 'home',
+  },
+  'hsk-intro': {
+    title: 'Getting Started 🚀',
+    content: 'You have two options:\n\n• Create your own deck with custom vocabulary\n• Browse pre-loaded HSK (standard proficiency) decks\n\nLet\'s browse a pre-loaded deck to try the app!',
+    nextId: 'hsk-browse',
+    prevId: 'welcome',
+    targetId: 'tutorial-browse-btn',
+    arrowDir: 'up',
+    view: 'home',
+  },
+  'hsk-browse': {
+    title: 'Browse Pre-loaded Decks 🔍',
+    content: '👆 Click "Browse Decks" to see all available decks. Pick any HSK deck that matches your level!\n\nOnce imported, you\'ll see it in your deck list.',
+    nextId: 'deck-ready',
+    prevId: 'hsk-intro',
+    targetId: 'tutorial-browse-btn',
+    arrowDir: 'up',
+    view: 'home',
+  },
+  'deck-ready': {
+    title: 'Your Deck is Ready! ✅',
+    content: 'You now have a deck loaded. Let\'s explore the study modes!\n\n👇 First up: Writing Practice. Click the "Write" button on a deck card.',
+    nextId: 'writing-strokes',
+    prevId: null,
+    targetId: 'tutorial-first-deck-write',
+    arrowDir: 'down',
+    view: 'home',
+  },
+  'writing-strokes': {
+    title: 'Writing Practice — Stroke Animation ✍️',
+    content: '• You see the character with English/pinyin\n• Click "Animate Strokes" to watch the correct stroke order\n• Click "Trace" to get a faded guide to draw over\n• Draw in the canvas box below\n\nDo 2–3 cards to get the feel, then click ← Home to continue.',
+    nextId: 'study-intro',
+    prevId: 'deck-ready',
+    targetId: null,
+    view: 'writing',
+  },
+  'study-intro': {
+    title: 'Flashcard Study 📚',
+    content: '👇 Click "Study" on a deck card to start flashcard review!',
+    nextId: 'study-flip',
+    prevId: null,
+    targetId: 'tutorial-first-deck-study',
+    arrowDir: 'down',
+    view: 'home',
+  },
+  'study-flip': {
+    title: 'Flip & Rate Cards 🔄',
+    content: 'Tap the card to flip it and reveal the answer.\n\nThen rate yourself:\n• 😓 "I Forgot" → card comes back soon for retry\n• ✓ "I Know This" → card shown less often (spaced repetition)\n\nTry a few cards, then click ← Home to continue.',
+    nextId: 'trouble-words',
+    prevId: 'study-intro',
+    targetId: null,
+    view: 'study',
+  },
+  'trouble-words': {
+    title: 'Trouble Words 🔥',
+    content: '👇 These are your weakest cards — ones you\'ve marked "I Forgot" most often.\n\nGreat for quick targeted review before a test!',
+    nextId: 'learn-mode',
+    prevId: null,
+    targetId: 'tutorial-trouble-section',
+    arrowDir: 'down',
+    view: 'home',
+  },
+  'learn-mode': {
+    title: 'Learn Mode 🎓',
+    content: '👇 Learn mode uses multiple-choice and fill-in-the-blank exercises.\n\nPerfect for learning new vocabulary before flashcard review.',
+    nextId: 'match-mode',
+    prevId: 'trouble-words',
+    targetId: 'tutorial-first-deck-learn',
+    arrowDir: 'down',
+    view: 'home',
+  },
+  'match-mode': {
+    title: 'Match Game 🎮',
+    content: '👇 Click matching Chinese–English pairs as fast as you can!\n\nBeat your best time and climb the leaderboard.',
+    nextId: 'test-mode',
+    prevId: 'learn-mode',
+    targetId: 'tutorial-first-deck-match',
+    arrowDir: 'down',
+    view: 'home',
+  },
+  'test-mode': {
+    title: 'Test Mode 📝',
+    content: '👇 Customizable quiz — choose question count, types (multiple choice, written, true/false), and whether to answer in Chinese or English.',
+    nextId: 'extended-offer',
+    prevId: 'match-mode',
+    targetId: 'tutorial-first-deck-test',
+    arrowDir: 'down',
+    view: 'home',
+  },
+  'extended-offer': {
+    title: 'Core Tour Complete! 🎉',
+    content: 'You\'ve seen the main study modes!\n\nWant to continue with a tour of the advanced features?',
+    choices: [
+      { label: '🚀 Show me everything!', nextId: 'expand-collapse' },
+      { label: '✓ I\'m good, thanks!', nextId: 'done' },
+    ],
+    view: 'home',
+  },
+  'expand-collapse': {
+    title: 'Expand / Collapse All ⊕⊖',
+    content: '👇 Use the "Expand All / Collapse All" button to quickly show or hide all deck details.',
+    nextId: 'kewen-reader',
+    prevId: null,
+    targetId: 'tutorial-expand-btn',
+    arrowDir: 'down',
+    view: 'home',
+  },
+  'kewen-reader': {
+    title: '课文 Reader 📖',
+    content: 'Every deck can have a 课文 (reading text) attached.\n\n• Click any word to see its definition\n• Toggle pinyin overlay above characters\n• Vocabulary from your deck glows yellow\n\nClick "课文" on a deck card (if available) to try it.',
+    nextId: 'sentence-practice',
+    prevId: null,
+    targetId: 'tutorial-first-deck-kewen',
+    arrowDir: 'down',
+    view: 'home',
+  },
+  'sentence-practice': {
+    title: '课文 Sentence Writing ✍️',
+    content: 'In the 课文 reader, click "Sentence Writing" to practice writing each sentence.\n\nType or handwrite mode — great for composition practice!',
+    nextId: 'ai-test',
+    prevId: null,
+    targetId: null,
+    view: 'home',
+  },
+  'ai-test': {
+    title: 'AI Test Practice 🤖',
+    content: '👇 Click "AI Test Practice" to generate a custom quiz from your decks.\n\nUses Claude AI to create unique questions tailored to your vocabulary.',
+    nextId: 'puter-warning',
+    prevId: null,
+    targetId: 'tutorial-ai-test-btn',
+    arrowDir: 'down',
+    view: 'home',
+  },
+  'puter-warning': {
+    title: '⚠️ eduroam / University WiFi',
+    content: 'AI features (translations, AI Test, handwriting recognition) use Puter.js — a free AI service.\n\n⚠️ On eduroam (university WiFi)? Puter.js is often blocked.\n\nFix: switch to hotspot, use a VPN, or change your DNS (8.8.8.8).',
+    nextId: 'settings-tour',
+    prevId: 'ai-test',
+    targetId: null,
+    view: 'home',
+  },
+  'settings-tour': {
+    title: 'Settings & Account ⚙️',
+    content: '👆 Click the Account / Settings button to:\n• Toggle dark mode 🌙\n• Enable Anki-style ratings (Again / Hard / Good / Easy)\n• Toggle auto-play audio\n• Adjust trouble word display count',
+    nextId: 'folders-tour',
+    prevId: 'puter-warning',
+    targetId: 'tutorial-settings-btn',
+    arrowDir: 'up',
+    view: 'home',
+  },
+  'folders-tour': {
+    title: 'Folders & Organization 📁',
+    content: '👆 Click "New Folder" to create a folder, then use "↕ Move" to drag decks into folders.\n\nClick the ↕ reorder icon inside a folder to rearrange decks.',
+    nextId: 'stats-tour',
+    prevId: 'settings-tour',
+    targetId: 'tutorial-new-folder-btn',
+    arrowDir: 'up',
+    view: 'home',
+  },
+  'stats-tour': {
+    title: 'Stats & Progress 📊',
+    content: '👆 Click "Stats" to view:\n• Your study streak 🔥\n• Card mastery by deck\n• Study calendar heat map\n• Due cards for today',
+    nextId: 'done',
+    prevId: 'folders-tour',
+    targetId: 'tutorial-stats-btn',
+    arrowDir: 'up',
+    view: 'home',
+  },
+  done: {
+    title: 'Tour Complete! 🎊',
+    content: 'You know all the key features of 中文 Learn!\n\nYou can replay this tour anytime by clicking the 🎓 Tour button in the header.',
+    nextId: null,
+    prevId: null,
+    finishButton: true,
+    view: 'home',
+  },
+};
+
 const ChineseLearningApp = () => {
   // Touch/swipe tracking (using ref to avoid re-renders that swallow click events on mobile)
   const touchRef = useRef(null);
@@ -562,6 +791,12 @@ const ChineseLearningApp = () => {
   const [sentenceIndex, setSentenceIndex] = useState(0);
   const [sentenceTranslations, setSentenceTranslations] = useState({}); // { sentence: englishTranslation }
   const [sentenceTransLoading, setSentenceTransLoading] = useState(false);
+  const [sentenceTransFromPuter, setSentenceTransFromPuter] = useState(false); // true = fetching from AI, false = loading from cache
+
+  // ── Guided Tutorial state ────────────────────────────────────────────────
+  const [tutorialActive, setTutorialActive] = useState(false);
+  const [tutorialStepId, setTutorialStepId] = useState('welcome');
+  const [tutorialIsChi108, setTutorialIsChi108] = useState(null); // null | true | false
   const [sentenceRevealed, setSentenceRevealed] = useState(false);
   const [sentenceResumeModal, setSentenceResumeModal] = useState(null); // { deck } | null
   const [sentenceAnswer, setSentenceAnswer] = useState('');
@@ -817,6 +1052,9 @@ const ChineseLearningApp = () => {
   // Bulk deck selection — set of deck ids selected in reorder mode for moving to a folder
   const [bulkMoveSelectedDecks, setBulkMoveSelectedDecks] = useState(new Set());
   const [showBulkMoveModal, setShowBulkMoveModal] = useState(false);
+  // Folder reorder modal selection — lifted from IIFE to comply with Rules of Hooks (was causing React error #310)
+  const [folderSelectedDecks, setFolderSelectedDecks] = useState(new Set());
+  const [showFolderMoveTarget, setShowFolderMoveTarget] = useState(false);
 
   // Multi-import state
   const [importedDecks, setImportedDecks] = useState([]); // parsed deck objects from files
@@ -1109,6 +1347,36 @@ const ChineseLearningApp = () => {
     }, 3000);
     return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
   }, [decks, learnProgress, studyStreak, bestMatchTimes, folders, lastStudied, userSettings, currentUser, reorderMode, bulkReorderFolderId, currentView, studyGuides, sentenceTranslations]);
+
+  // Reset folder reorder selection when the modal closes
+  useEffect(() => {
+    if (!bulkReorderFolderId) {
+      setFolderSelectedDecks(new Set());
+      setShowFolderMoveTarget(false);
+    }
+  }, [bulkReorderFolderId]);
+
+  // Sync tutorial state to the AppWithToast overlay whenever it changes
+  useEffect(() => {
+    if (!tutorialActive) {
+      window.__tutorialHide?.();
+      return;
+    }
+    const step = TUTORIAL_STEPS[tutorialStepId];
+    if (!step) { window.__tutorialHide?.(); return; }
+    window.__tutorialUpdate?.({
+      step,
+      stepId: tutorialStepId,
+      isChi108: tutorialIsChi108,
+      stepNumber: tutorialStepNumber,
+      totalSteps: tutorialTotalSteps,
+      onNext: step.nextId ? () => tutorialGoTo(step.nextId) : null,
+      onBack: step.prevId ? () => tutorialGoTo(step.prevId) : null,
+      onChoice: (nextId, extraState) => tutorialGoTo(nextId, extraState || {}),
+      onEnd: endTutorial,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tutorialActive, tutorialStepId, tutorialIsChi108]);
 
   // Skips sync-related state updates when drawing — prevents re-renders mid-stroke.
   const safeSetSyncStatus = (status) => {
@@ -3395,6 +3663,50 @@ Grade this response.` },
     } catch (e) { localStorage.removeItem('sentenceSession'); }
   };
 
+  // ── Tutorial helper functions ────────────────────────────────────────────
+  const startTutorial = () => {
+    setTutorialIsChi108(null);
+    setTutorialStepId('welcome');
+    setTutorialActive(true);
+    setCurrentView('home');
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+  };
+
+  const endTutorial = () => {
+    setTutorialActive(false);
+    // Notify AppWithToast overlay to hide
+    window.__tutorialHide?.();
+  };
+
+  const tutorialGoTo = (stepId, extraState = {}) => {
+    if (!stepId || !TUTORIAL_STEPS[stepId]) { endTutorial(); return; }
+    const step = TUTORIAL_STEPS[stepId];
+    if (extraState.chi108 !== undefined) setTutorialIsChi108(extraState.chi108);
+    setTutorialStepId(stepId);
+    // Navigate to the required view for this step
+    if (step.view) setCurrentView(step.view);
+    // Scroll to target after a short delay (allow view change to render)
+    setTimeout(() => {
+      if (step.targetId) {
+        const el = document.getElementById(step.targetId);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        else window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 300);
+  };
+
+  // Count total steps for progress indicator
+  const getTutorialStepList = (isChi108) => {
+    const basePath = isChi108 === true ? ['welcome','chi108-path'] : isChi108 === false ? ['welcome','hsk-intro','hsk-browse'] : ['welcome'];
+    const coreSteps = ['deck-ready','writing-strokes','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','extended-offer'];
+    return [...basePath, ...coreSteps];
+  };
+  const tutorialStepList = getTutorialStepList(tutorialIsChi108);
+  const tutorialStepNumber = Math.max(1, tutorialStepList.indexOf(tutorialStepId) + 1);
+  const tutorialTotalSteps = tutorialStepList.length;
+
   const startSentencePractice = (deck) => {
     if (!deck.kewen) {
       setSentencePracticeDeck({ deck, noKewen: true });
@@ -3451,7 +3763,8 @@ Grade this response.` },
       }
     } catch (e) { /* ignore parse errors, fall through to fetch */ }
 
-    // Cache miss or stale — fetch from AI
+    // Cache miss or stale — fetch from AI (Puter.js)
+    setSentenceTransFromPuter(true);
     setSentenceTransLoading(true);
     setSentenceTranslations({});
     try {
@@ -3480,6 +3793,7 @@ Grade this response.` },
       // Don't cache failures so next open retries
     } finally {
       setSentenceTransLoading(false);
+      setSentenceTransFromPuter(false);
     }
   };
 
@@ -6009,6 +6323,7 @@ Rules:
                     How to Use This App (GitHub Guide)
                   </a>
                   <a
+                    id="tutorial-drive-btn"
                     href="https://drive.google.com/drive/folders/11h7AetpBc2-AZqHWY8M3xm_z4YkOqYEf?usp=share_link"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -6048,6 +6363,17 @@ Rules:
                     </svg>
                     What's New in v{APP_VERSION}
                   </button>
+                  {/* Guided Tour button — always visible so users can replay the tutorial */}
+                  <button
+                    onClick={startTutorial}
+                    className="inline-flex items-center gap-2 text-white text-sm font-medium px-4 py-2 rounded-full transition-all"
+                    style={{background: 'rgba(255,220,100,0.25)', border: '1px solid rgba(255,220,100,0.6)', cursor: 'pointer'}}
+                    onMouseEnter={e => e.currentTarget.style.background='rgba(255,220,100,0.4)'}
+                    onMouseLeave={e => e.currentTarget.style.background='rgba(255,220,100,0.25)'}
+                  >
+                    <span>🎓</span>
+                    Take the Tour
+                  </button>
                 </div>
               </div>
               <div className="flex flex-col items-center gap-3">
@@ -6072,7 +6398,7 @@ Rules:
             const topCards = getTopTroubleCards(topN);
             if (topCards.length === 0) return null;
             return (
-              <div className={`mb-6 rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap border ${darkMode ? 'bg-gray-800 border-orange-900' : 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-200'}`}>
+              <div id="tutorial-trouble-section" className={`mb-6 rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap border ${darkMode ? 'bg-gray-800 border-orange-900' : 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-200'}`}>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-lg">🔥</span>
@@ -6133,6 +6459,7 @@ Rules:
                 Create Deck
               </button>
               <button
+                id="tutorial-import-btn"
                 onClick={() => setShowImportExportModal(true)}
                 className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer font-semibold"
               >
@@ -6140,6 +6467,7 @@ Rules:
                 Import / Export
               </button>
               <button
+                id="tutorial-browse-btn"
                 onClick={() => setShowBrowseDecks(true)}
                 className="flex items-center gap-2 bg-gradient-to-r from-rose-500 to-rose-600 text-white px-6 py-3 rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
               >
@@ -6147,6 +6475,7 @@ Rules:
                 Browse Decks
               </button>
               <button
+                id="tutorial-stats-btn"
                 onClick={() => setCurrentView('stats')}
                 className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
               >
@@ -6164,6 +6493,7 @@ Rules:
                 )}
               </button>
               <button
+                id="tutorial-ai-test-btn"
                 onClick={() => { resetAiTest(); setCurrentView('aiTestPractice'); }}
                 className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-6 py-3 rounded-xl hover:from-indigo-600 hover:to-violet-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
               >
@@ -6178,6 +6508,7 @@ Rules:
               </button>
               {decks.length > 0 && (
                 <button
+                  id="tutorial-expand-btn"
                   onClick={() => {
                     if (expandedDecks.size > 0) {
                       setExpandedDecks(new Set());
@@ -6191,6 +6522,7 @@ Rules:
                 </button>
               )}
               <button
+                id="tutorial-settings-btn"
                 onClick={() => setCurrentView('account')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold ${
                   currentUser
@@ -6237,6 +6569,7 @@ Rules:
                 </button>
               ) : (
                 <button
+                  id="tutorial-new-folder-btn"
                   onClick={() => setShowCreateFolder(true)}
                   className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
                 >
@@ -6331,8 +6664,6 @@ Rules:
             const folder = folders.find(f => f.id === bulkReorderFolderId);
             if (!folder) return null;
             const folderDecksList = folder.deckIds.map(id => decks.find(d => d.id === id)).filter(Boolean);
-            const [folderSelectedDecks, setFolderSelectedDecks] = React.useState(new Set());
-            const [showFolderMoveTarget, setShowFolderMoveTarget] = React.useState(false);
             const toggleFolderDeckSelect = (deckId) => setFolderSelectedDecks(prev => { const n = new Set(prev); n.has(deckId) ? n.delete(deckId) : n.add(deckId); return n; });
             const moveFolderSelectedTo = (targetFolderId) => {
               const selectedIds = [...folderSelectedDecks];
@@ -6869,6 +7200,7 @@ Rules:
                           <div className="space-y-2 mb-4">
                             <div className="grid grid-cols-2 gap-2">
                               <button
+                                id={deckIndex === 0 ? 'tutorial-first-deck-study' : undefined}
                                 onClick={() => startStudy(deck)}
                                 disabled={totalCards === 0}
                                 className="bg-gradient-to-r from-red-500 to-red-600 text-white py-2.5 rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-semibold text-sm"
@@ -6877,6 +7209,7 @@ Rules:
                                 Study
                               </button>
                               <button
+                                id={deckIndex === 0 ? 'tutorial-first-deck-learn' : undefined}
                                 onClick={() => startLearnMode(deck)}
                                 disabled={totalCards === 0}
                                 className="bg-gradient-to-r from-purple-500 to-purple-600 text-white py-2.5 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-semibold text-sm"
@@ -6889,6 +7222,7 @@ Rules:
                             {/* Secondary Actions */}
                             <div className="grid grid-cols-3 gap-2">
                               <button
+                                id={deckIndex === 0 ? 'tutorial-first-deck-match' : undefined}
                                 onClick={() => startMatchGame(deck)}
                                 disabled={totalCards < 4}
                                 className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white py-2 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-sm hover:shadow-md disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-xs font-semibold"
@@ -6896,6 +7230,7 @@ Rules:
                                 Match
                               </button>
                               <button
+                                id={deckIndex === 0 ? 'tutorial-first-deck-test' : undefined}
                                 onClick={() => startPracticeTest(deck)}
                                 disabled={totalCards < 4}
                                 className="bg-gradient-to-r from-indigo-400 to-indigo-500 text-white py-2 rounded-lg hover:from-indigo-500 hover:to-indigo-600 transition-all shadow-sm hover:shadow-md disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-xs font-semibold"
@@ -6903,6 +7238,7 @@ Rules:
                                 Test
                               </button>
                               <button
+                                id={deckIndex === 0 ? 'tutorial-first-deck-write' : undefined}
                                 onClick={() => startWritingPractice(deck)}
                                 disabled={totalCards === 0}
                                 className="bg-gradient-to-r from-pink-400 to-pink-500 text-white py-2 rounded-lg hover:from-pink-500 hover:to-pink-600 transition-all shadow-sm hover:shadow-md disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-xs font-semibold"
@@ -6949,6 +7285,7 @@ Rules:
                           <div className="space-y-2 pt-3 border-t border-gray-100">
                             <div className="grid grid-cols-2 gap-2">
                               <button
+                                id={deckIndex === 0 ? 'tutorial-first-deck-kewen' : undefined}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setKewenEditDeck(deck);
@@ -11355,11 +11692,16 @@ Rules:
             <div className="mb-5">
               <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">English</div>
               {sentenceTransLoading ? (
-                <div className="flex items-center gap-2 text-gray-400 text-sm">
-                  <div className="flex gap-1">{[0,1,2].map(i => (
-                    <div key={i} className="w-1.5 h-1.5 rounded-full bg-teal-400" style={{ animation: `chatBounce 1.2s ease-in-out ${i*0.15}s infinite` }} />
-                  ))}</div>
-                  Fetching translations...
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-gray-400 text-sm">
+                    <div className="flex gap-1">{[0,1,2].map(i => (
+                      <div key={i} className="w-1.5 h-1.5 rounded-full bg-teal-400" style={{ animation: `chatBounce 1.2s ease-in-out ${i*0.15}s infinite` }} />
+                    ))}</div>
+                    {sentenceTransFromPuter ? 'Asking AI to translate (15–30s)…' : 'Loading cached translations…'}
+                  </div>
+                  {sentenceTransFromPuter && (
+                    <p className="text-xs text-amber-500">On eduroam? AI may be blocked — try a hotspot.</p>
+                  )}
                 </div>
               ) : (
                 <p className={`text-base leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{translation || '—'}</p>
@@ -11501,6 +11843,10 @@ Rules:
           const [puterDownToast, setPuterDownToast] = React.useState(false);
           const puterDownTimerRef = React.useRef(null);
 
+          // Tutorial overlay state — driven by ChineseLearningApp via window globals
+          const [tutData, setTutData] = React.useState(null); // null = hidden
+          const [spotRect, setSpotRect] = React.useState(null);
+
           // Expose a global trigger so ChineseLearningApp can fire it
           React.useEffect(() => {
             window.__showEduroamToast = () => {
@@ -11513,12 +11859,199 @@ Rules:
               if (puterDownTimerRef.current) clearTimeout(puterDownTimerRef.current);
               puterDownTimerRef.current = setTimeout(() => setPuterDownToast(false), 12000);
             };
-            return () => { delete window.__showEduroamToast; delete window.__showPuterDownToast; };
+            window.__tutorialUpdate = (data) => setTutData(data);
+            window.__tutorialHide = () => { setTutData(null); setSpotRect(null); };
+            return () => {
+              delete window.__showEduroamToast;
+              delete window.__showPuterDownToast;
+              delete window.__tutorialUpdate;
+              delete window.__tutorialHide;
+            };
           }, []);
+
+          // Update spotlight rect when the targeted element changes
+          React.useEffect(() => {
+            if (!tutData?.step?.targetId) { setSpotRect(null); return; }
+            const update = () => {
+              const el = document.getElementById(tutData.step.targetId);
+              if (el) {
+                const r = el.getBoundingClientRect();
+                setSpotRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+              } else {
+                setSpotRect(null);
+              }
+            };
+            // Give a bit of time for any view transition to settle
+            const t = setTimeout(update, 350);
+            window.addEventListener('scroll', update, { passive: true });
+            window.addEventListener('resize', update, { passive: true });
+            return () => { clearTimeout(t); window.removeEventListener('scroll', update); window.removeEventListener('resize', update); };
+          }, [tutData?.step?.targetId, tutData?.stepId]);
+
+          // Tutorial overlay rendering logic
+          const renderTutorialOverlay = () => {
+            if (!tutData) return null;
+            const { step, stepId, isChi108, stepNumber, totalSteps, onNext, onBack, onChoice, onEnd } = tutData;
+            if (!step) return null;
+
+            const pad = 10;
+            const hasSpot = !!spotRect;
+            const vh = window.innerHeight || 600;
+            const vw = window.innerWidth || 400;
+
+            // Card position: prefer bottom if target is in upper 60%, top if lower
+            const targetCenterY = hasSpot ? spotRect.top + spotRect.height / 2 : vh / 2;
+            const cardAtBottom = !hasSpot || targetCenterY < vh * 0.55;
+
+            // Arrow direction: up-arrow when card is BELOW target (card at bottom), down-arrow when card is ABOVE target
+            const showArrowUp = hasSpot && cardAtBottom;
+            const showArrowDown = hasSpot && !cardAtBottom;
+
+            const cardStyle = {
+              position: 'fixed',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: Math.min(vw - 32, 420),
+              zIndex: 10001,
+              background: '#fff',
+              borderRadius: 16,
+              boxShadow: '0 8px 40px rgba(0,0,0,0.35)',
+              padding: '20px 22px',
+              border: '2px solid #f59e0b',
+              ...(cardAtBottom ? { bottom: 24 } : { top: 24 }),
+            };
+
+            return createPortal(
+              <div style={{ position: 'fixed', inset: 0, zIndex: 10000, pointerEvents: 'none' }}>
+                {/* Dark overlay with SVG spotlight cutout */}
+                <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} aria-hidden="true">
+                  {hasSpot ? (
+                    <>
+                      <defs>
+                        <mask id="tut-mask">
+                          <rect width="100%" height="100%" fill="white" />
+                          <rect
+                            x={spotRect.left - pad} y={spotRect.top - pad}
+                            width={spotRect.width + pad * 2} height={spotRect.height + pad * 2}
+                            rx="10" fill="black"
+                          />
+                        </mask>
+                      </defs>
+                      <rect width="100%" height="100%" fill="rgba(0,0,0,0.72)" mask="url(#tut-mask)" />
+                    </>
+                  ) : (
+                    <rect width="100%" height="100%" fill="rgba(0,0,0,0.72)" />
+                  )}
+                </svg>
+
+                {/* Glowing border around spotlight target */}
+                {hasSpot && (
+                  <div style={{
+                    position: 'absolute',
+                    left: spotRect.left - pad,
+                    top: spotRect.top - pad,
+                    width: spotRect.width + pad * 2,
+                    height: spotRect.height + pad * 2,
+                    borderRadius: 10,
+                    border: '2.5px solid #fbbf24',
+                    boxShadow: '0 0 0 4px rgba(251,191,36,0.25), 0 0 24px rgba(251,191,36,0.5)',
+                    pointerEvents: 'none',
+                    animation: 'tutPulse 2s ease-in-out infinite',
+                  }} />
+                )}
+
+                {/* Step card */}
+                <div style={{ ...cardStyle, pointerEvents: 'all' }}>
+                  {/* Arrow pointing upward (toward target above card) */}
+                  {showArrowUp && (
+                    <div style={{ textAlign: 'center', marginBottom: 6, fontSize: 28, color: '#f59e0b', animation: 'tutBounceUp 1s ease-in-out infinite' }}>
+                      ▲
+                    </div>
+                  )}
+
+                  {/* Progress bar */}
+                  {stepNumber > 0 && totalSteps > 0 && (
+                    <div style={{ marginBottom: 10 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Step {stepNumber} of {totalSteps}
+                        </span>
+                        <button onClick={onEnd} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 18, lineHeight: 1, padding: 0 }} title="Close tour">✕</button>
+                      </div>
+                      <div style={{ height: 4, background: '#e5e7eb', borderRadius: 4, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${(stepNumber / totalSteps) * 100}%`, background: 'linear-gradient(90deg,#f59e0b,#ef4444)', borderRadius: 4, transition: 'width 0.4s ease' }} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Title */}
+                  <h3 style={{ margin: '0 0 8px', fontSize: 17, fontWeight: 700, color: '#1f2937' }}>{step.title}</h3>
+
+                  {/* Content */}
+                  <p style={{ margin: '0 0 14px', fontSize: 14, color: '#4b5563', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{step.content}</p>
+
+                  {/* Choice buttons */}
+                  {step.choices ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {step.choices.map((choice, i) => (
+                        <button
+                          key={i}
+                          onClick={() => onChoice(choice.nextId, choice.chi108 !== undefined ? { chi108: choice.chi108 } : {})}
+                          style={{
+                            padding: '10px 16px', borderRadius: 10, border: '2px solid #f59e0b',
+                            background: i === 0 ? 'linear-gradient(135deg,#f59e0b,#ef4444)' : '#fff',
+                            color: i === 0 ? '#fff' : '#374151',
+                            fontWeight: 700, fontSize: 14, cursor: 'pointer', textAlign: 'left',
+                            transition: 'all 0.15s',
+                          }}
+                        >
+                          {choice.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    /* Next / Back / Finish nav */
+                    <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', alignItems: 'center' }}>
+                      {onBack ? (
+                        <button onClick={onBack} style={{ padding: '9px 16px', borderRadius: 10, border: '1px solid #d1d5db', background: '#f9fafb', color: '#374151', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
+                          ← Back
+                        </button>
+                      ) : <div />}
+                      {step.finishButton ? (
+                        <button onClick={onEnd} style={{ padding: '9px 20px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg,#10b981,#059669)', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+                          🎊 Finish Tour
+                        </button>
+                      ) : onNext ? (
+                        <button onClick={onNext} style={{ padding: '9px 20px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg,#f59e0b,#ef4444)', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+                          Next →
+                        </button>
+                      ) : null}
+                    </div>
+                  )}
+
+                  {/* Arrow pointing downward (toward target below card) */}
+                  {showArrowDown && (
+                    <div style={{ textAlign: 'center', marginTop: 6, fontSize: 28, color: '#f59e0b', animation: 'tutBounceDown 1s ease-in-out infinite' }}>
+                      ▼
+                    </div>
+                  )}
+                </div>
+
+                {/* Keyframe styles */}
+                <style>{`
+                  @keyframes tutPulse { 0%,100%{box-shadow:0 0 0 4px rgba(251,191,36,0.25),0 0 24px rgba(251,191,36,0.5)} 50%{box-shadow:0 0 0 8px rgba(251,191,36,0.15),0 0 40px rgba(251,191,36,0.7)} }
+                  @keyframes tutBounceUp { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+                  @keyframes tutBounceDown { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
+                `}</style>
+              </div>,
+              document.body
+            );
+          };
 
           return (
             <React.Fragment>
               <ChineseLearningApp />
+              {renderTutorialOverlay()}
               {puterDownToast && (
                 <div style={{
                   position: 'fixed', bottom: toast ? 100 : 24, left: '50%', transform: 'translateX(-50%)',
