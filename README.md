@@ -93,6 +93,9 @@ Progress saves locally even when installed — or sign in with an account to syn
 | 🔍 **Deck Search** | Search across all decks and vocabulary instantly |
 | 📈 **Stats & Streaks** | Study calendar heatmap, streak tracking, and unique character count |
 | ⌨️ **Keyboard Shortcuts** | Full keyboard navigation for flashcards, test mode, and learn mode |
+| 🌙 **Dark Mode** | Full dark theme, toggle in Account & Settings |
+| 🃏 **Anki Ratings Mode** | Optional 4-button rating (Again / Hard / Good / Easy) instead of binary for flashcards |
+| ⚠️ **Trouble Words** | Cross-deck analysis of your most-struggled vocabulary for focused review |
 | 📱 **Works Everywhere** | Desktop, tablet, phone — no installation needed |
 | 💯 **100% Free** | No ads, no paywalls, no subscriptions |
 
@@ -421,6 +424,17 @@ Select one or multiple decks to pull vocabulary from (and their attached 课文 
 </details>
 
 <details>
+<summary><strong>⚠️ Trouble Words</strong></summary>
+<br>
+
+- **Trouble Words** panel (accessible from the home screen) surfaces the vocabulary you struggle with most across all your decks
+- Ranks cards by difficulty based on your answer history — words you've gotten wrong most often appear at the top
+- Shows the top N words (configurable in Settings) so you can focus your review where it matters most
+- Click any trouble word to jump straight to its deck for targeted practice
+
+</details>
+
+<details>
 <summary><strong>📋 Deck Management</strong></summary>
 <br>
 
@@ -443,9 +457,11 @@ Select one or multiple decks to pull vocabulary from (and their attached 课文 
 Accessible from the Account (👤) button; settings sync to cloud when signed in:
 
 - **Spaced Repetition Speed** — separate sliders for flashcard and writing modes, from "Much sooner" (aggressive drilling) to "Much later" (relaxed spacing)
+- **Anki Ratings Mode** — switch flashcard ratings from the default two-button layout (Still Learning / I Know This) to a four-button Anki-style layout (Again · Hard · Good · Easy) for finer-grained difficulty control
 - **Auto-play audio** — automatically pronounce each word when a card appears; configurable separately for flashcard and writing modes
 - **Writing hints** — toggle pinyin and/or English hints on/off during writing practice (at least one must stay visible)
 - **Trace animation speed** — Slow / Normal / Fast; controls how quickly the stroke-by-stroke tracing animates and how long it lingers before fading
+- **Dark mode** — toggle a dark theme from Account & Settings; preference saves locally and syncs to cloud
 
 </details>
 
