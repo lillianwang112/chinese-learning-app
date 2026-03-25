@@ -401,17 +401,53 @@ const TUTORIAL_STEPS = {
   'deck-ready': {
     title: 'Your Deck is Ready! ✅',
     content: 'You now have a deck loaded. Let\'s explore the study modes!\n\n👇 First up: Writing Practice. Click the "Write" button on a deck card.',
-    nextId: 'writing-strokes',
+    nextId: 'writing-practice-select',
     prevId: null,
     targetId: 'tutorial-first-deck-write',
     arrowDir: 'down',
     view: 'home',
   },
-  'writing-strokes': {
-    title: 'Writing Practice ✍️',
-    content: 'First pick a practice mode from the 4 options:\n• 📝 Practice 10 — 10 random cards\n• 📚 Practice All — full deck\n• 🧪 Test 10 / Test All — character hidden, write from memory\n\nOnce inside:\n• Click "Strokes" to watch stroke order animation\n• Click "Trace" to draw over a faded guide\n\nTry a few cards, then click ← Home to continue.',
-    nextId: 'study-intro',
-    prevId: 'deck-ready',
+  'writing-practice-select': {
+    title: 'Writing Practice ✍️ — Learn First',
+    content: 'This is the mode selection screen.\n\n👇 Click "Practice 10" — you\'ll see each character and practice writing it.\n\nThis is great for building muscle memory when you\'re first learning how to write words.',
+    nextId: 'writing-practice-active',
+    prevId: null,
+    targetId: 'tutorial-writing-practice10-btn',
+    arrowDir: 'up',
+    view: 'writing',
+  },
+  'writing-practice-active': {
+    title: 'Practice Writing ✍️',
+    content: 'Write the character shown!\n\n• Click "Strokes" to watch the stroke order animation\n• Click "Trace" to draw over a faded guide — perfect for tracing when you\'re still learning\n\nTry a few cards to get a feel for it, then click "← Home" to continue.',
+    nextId: null,
+    prevId: null,
+    targetId: null,
+    view: 'writing',
+    noOverlay: true,
+  },
+  'writing-test-ready': {
+    title: 'Now Try Test Mode! 🧪',
+    content: 'Nice work! Now let\'s try Test Mode — the character is hidden and you write purely from memory.\n\n👇 Click the "Write" button on the deck again.',
+    nextId: 'writing-test-select',
+    prevId: null,
+    targetId: 'tutorial-first-deck-write',
+    arrowDir: 'down',
+    view: 'home',
+  },
+  'writing-test-select': {
+    title: 'Test Mode — Active Recall 🧪',
+    content: 'Perfect for exam prep!\n\n👇 Click "Test 10" — only pinyin and English are shown, you write the character from memory.\n\nStrokes and Trace guides are still available if you need a hint.',
+    nextId: 'writing-test-active',
+    prevId: null,
+    targetId: 'tutorial-writing-test10-btn',
+    arrowDir: 'up',
+    view: 'writing',
+  },
+  'writing-test-active': {
+    title: 'Test Mode 🎯',
+    content: 'The character is hidden — write it from memory!\n\n• "Strokes" and "Trace" are still here if you need them\n• This builds the active recall needed for exams\n\nTry a few cards, then click "← Home" to continue.',
+    nextId: null,
+    prevId: null,
     targetId: null,
     view: 'writing',
     noOverlay: true,
@@ -1392,12 +1428,32 @@ const ChineseLearningApp = () => {
         : 'You don\'t have any trouble words yet — they appear here once you\'ve studied some cards and clicked "I Forgot".\n\nLet\'s continue to Learn Mode!',
     } : step;
 
-    // Per-step onNext overrides: pressing Next on deck-ready/study-intro actually
-    // launches the view (same as clicking the highlighted button) so the user never
-    // hits a black screen. expand-collapse auto-expands if the user forgot.
+    // Per-step onNext overrides: pressing Next on highlighted-button steps launches
+    // the same action as clicking the button — no black screens ever.
     const onNext = (() => {
       if (tutorialStepId === 'deck-ready') {
+        // Next = same as clicking Write button on first deck
         return decks.length > 0 ? () => startWritingPractice(decks[0]) : null;
+      }
+      if (tutorialStepId === 'writing-practice-select') {
+        // Next = same as clicking Practice 10
+        return () => { startPractice10(); tutorialGoTo('writing-practice-active'); };
+      }
+      if (tutorialStepId === 'writing-practice-active') {
+        // Next = same as clicking ← Home; auto-advance effect then goes to writing-test-ready
+        return () => setCurrentView('home');
+      }
+      if (tutorialStepId === 'writing-test-ready') {
+        // Next = same as clicking Write button; auto-advance effect goes to writing-test-select
+        return decks.length > 0 ? () => startWritingPractice(decks[0]) : null;
+      }
+      if (tutorialStepId === 'writing-test-select') {
+        // Next = same as clicking Test 10
+        return () => { startWritingTest(); tutorialGoTo('writing-test-active'); };
+      }
+      if (tutorialStepId === 'writing-test-active') {
+        // Next = same as clicking ← Home; auto-advance effect then goes to study-intro
+        return () => setCurrentView('home');
       }
       if (tutorialStepId === 'study-intro') {
         return decks.length > 0 ? () => startStudy(decks[0]) : null;
@@ -1425,13 +1481,17 @@ const ChineseLearningApp = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tutorialActive, tutorialPaused, tutorialStepId, tutorialIsChi108]);
 
-  // Auto-advance tutorial when user navigates by clicking a highlighted button.
-  // deck-ready  → writing-strokes : fires when user clicks Write on a deck.
-  // study-intro → study-flip      : fires when user clicks Study on a deck.
+  // Auto-advance tutorial when user navigates by clicking a highlighted button or ← Home.
   useEffect(() => {
     if (!tutorialActive) return;
     if (tutorialStepId === 'deck-ready' && currentView === 'writing') {
-      tutorialGoTo('writing-strokes');
+      tutorialGoTo('writing-practice-select');
+    } else if (tutorialStepId === 'writing-practice-active' && currentView === 'home') {
+      tutorialGoTo('writing-test-ready');
+    } else if (tutorialStepId === 'writing-test-ready' && currentView === 'writing') {
+      tutorialGoTo('writing-test-select');
+    } else if (tutorialStepId === 'writing-test-active' && currentView === 'home') {
+      tutorialGoTo('study-intro');
     } else if (tutorialStepId === 'study-intro' && currentView === 'study') {
       tutorialGoTo('study-flip');
     }
@@ -3809,7 +3869,7 @@ Grade this response.` },
       : isChi108 === false
       ? ['welcome', 'hsk-intro', 'hsk-browse']
       : ['welcome'];
-    const coreSteps = ['deck-ready','writing-strokes','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','extended-offer'];
+    const coreSteps = ['deck-ready','writing-practice-select','writing-practice-active','writing-test-ready','writing-test-select','writing-test-active','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','extended-offer'];
     return [...basePath, ...coreSteps];
   };
   const extendedStepList = ['expand-collapse','kewen-reader','sentence-practice','ai-test','puter-warning','settings-tour','folders-tour','stats-tour','done'];
@@ -6594,7 +6654,13 @@ Rules:
                 id="tutorial-browse-btn"
                 onClick={() => {
                   setShowBrowseDecks(true);
-                  if (tutorialActive && (tutorialStepId === 'chi108-browse' || tutorialStepId === 'hsk-browse')) {
+                  if (tutorialActive && tutorialStepId === 'hsk-intro') {
+                    // Immediately hide the overlay and advance to hsk-browse so the
+                    // user can see the panel clearly; showBrowseDecks effect advances
+                    // to deck-ready when they close it.
+                    setTutorialPaused(true);
+                    tutorialGoTo('hsk-browse');
+                  } else if (tutorialActive && (tutorialStepId === 'chi108-browse' || tutorialStepId === 'hsk-browse')) {
                     setTutorialPaused(true);
                   }
                 }}
@@ -10913,7 +10979,11 @@ Rules:
                 );
               })()}
               <button
-                onClick={startPractice10}
+                id="tutorial-writing-practice10-btn"
+                onClick={() => {
+                  startPractice10();
+                  if (tutorialActive && tutorialStepId === 'writing-practice-select') tutorialGoTo('writing-practice-active');
+                }}
                 className="w-full bg-pink-600 text-white px-8 py-6 rounded-lg hover:bg-pink-700 transition text-left"
               >
                 <div className="text-2xl font-bold mb-2">📝 Practice 10</div>
@@ -10931,7 +11001,11 @@ Rules:
                 </div>
               </button>
               <button
-                onClick={startWritingTest}
+                id="tutorial-writing-test10-btn"
+                onClick={() => {
+                  startWritingTest();
+                  if (tutorialActive && tutorialStepId === 'writing-test-select') tutorialGoTo('writing-test-active');
+                }}
                 className="w-full bg-orange-600 text-white px-8 py-6 rounded-lg hover:bg-orange-700 transition text-left"
               >
                 <div className="text-2xl font-bold mb-2">🧪 Test 10</div>
