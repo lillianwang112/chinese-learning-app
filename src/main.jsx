@@ -5313,7 +5313,7 @@ Rules:
       writer.animateCharacter({
         onComplete: () => {
           overlayDiv.style.transition = 'opacity ' + fadeDuration + 's';
-          overlayDiv.style.opacity = '0.25';
+          overlayDiv.style.opacity = darkMode ? '0.55' : '0.25';
         }
       });
     } catch(e) {
@@ -6010,6 +6010,18 @@ Rules:
                     </svg>
                     Share Feedback / Ideas
                   </a>
+                  <button
+                    onClick={() => setShowWhatsNew(true)}
+                    className="inline-flex items-center gap-2 text-white text-sm font-medium px-4 py-2 rounded-full transition-all"
+                    style={{background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,220,150,0.4)', cursor: 'pointer'}}
+                    onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.25)'}
+                    onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.15)'}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    What's New in v{APP_VERSION}
+                  </button>
                 </div>
               </div>
               <div className="flex flex-col items-center gap-3">
@@ -8112,6 +8124,41 @@ Rules:
         {/* Floating Chat Button */}
         <ChatFAB />
         <ChatSidebar />
+
+        {/* What's New modal — portal so it overlays everything */}
+        {showWhatsNew && createPortal(
+          <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); }}>
+            <div style={{ background: darkMode ? '#1f2937' : '#fff', borderRadius: '1rem', padding: '2rem', maxWidth: '480px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>What's New in v{APP_VERSION} 🎉</h2>
+              <p style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: '1.25rem' }}>Here's what's been added:</p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: '1.25rem' }}>🌙</span>
+                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Dark mode</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>Opt-in toggle in Settings — easy on the eyes at night.</span></div>
+                </li>
+                <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: '1.25rem' }}>🧠</span>
+                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Anki-style SRS ratings</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>Opt-in in Settings — Again / Hard / Good / Easy instead of binary buttons.</span></div>
+                </li>
+                <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: '1.25rem' }}>✨</span>
+                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Clearer AI sign-in info</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>AI features use Puter.js — you'll be prompted for a free account on first use.</span></div>
+                </li>
+                <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: '1.25rem' }}>⚡</span>
+                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Performance improvements</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>Removed debug logging and other optimizations.</span></div>
+                </li>
+              </ul>
+              <button
+                onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); }}
+                style={{ width: '100%', background: 'linear-gradient(135deg, #e11d48, #be123c)', color: '#fff', border: 'none', borderRadius: '0.75rem', padding: '0.875rem', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Got it!
+              </button>
+            </div>
+          </div>,
+          document.body
+        )}
       </div>
     );
   }
@@ -11396,45 +11443,6 @@ Rules:
         `}</style>
         <ChatFAB />
         <ChatSidebar />
-      </div>
-    );
-  }
-
-  // What's New modal — shown once per version
-  if (showWhatsNew) {
-    const wnBg = darkMode ? '#1f2937' : '#fff';
-    const wnHeading = darkMode ? '#f3f4f6' : '#1a1a1a';
-    const wnSub = darkMode ? '#9ca3af' : '#6b7280';
-    return (
-      <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-        <div style={{ background: wnBg, borderRadius: '1rem', padding: '2rem', maxWidth: '480px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', color: wnHeading }}>What's New in v{APP_VERSION} 🎉</h2>
-          <p style={{ fontSize: '0.875rem', color: wnSub, marginBottom: '1.25rem' }}>Here's what's been added:</p>
-          <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '1.25rem' }}>🌙</span>
-              <div><strong style={{ color: wnHeading }}>Dark mode</strong><br/><span style={{ color: wnSub, fontSize: '0.875rem' }}>Opt-in toggle in Settings — easy on the eyes at night.</span></div>
-            </li>
-            <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '1.25rem' }}>🧠</span>
-              <div><strong style={{ color: wnHeading }}>Anki-style SRS ratings</strong><br/><span style={{ color: wnSub, fontSize: '0.875rem' }}>Opt-in in Settings — Again / Hard / Good / Easy instead of binary buttons.</span></div>
-            </li>
-            <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '1.25rem' }}>✨</span>
-              <div><strong style={{ color: wnHeading }}>Clearer AI sign-in info</strong><br/><span style={{ color: wnSub, fontSize: '0.875rem' }}>AI features use Puter.js — you'll be prompted for a free account on first use.</span></div>
-            </li>
-            <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '1.25rem' }}>⚡</span>
-              <div><strong style={{ color: wnHeading }}>Performance improvements</strong><br/><span style={{ color: wnSub, fontSize: '0.875rem' }}>Removed debug logging and other optimizations.</span></div>
-            </li>
-          </ul>
-          <button
-            onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); }}
-            style={{ width: '100%', background: 'linear-gradient(135deg, #e11d48, #be123c)', color: '#fff', border: 'none', borderRadius: '0.75rem', padding: '0.875rem', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' }}
-          >
-            Got it!
-          </button>
-        </div>
       </div>
     );
   }
