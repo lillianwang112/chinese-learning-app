@@ -355,7 +355,7 @@ const TUTORIAL_STEPS = {
   },
   'chi108-drive': {
     title: 'Step 1: Download from Google Drive ☁️',
-    content: '👆 Click the "Download Decks" link above to open Google Drive.\n\nDownload the JSON file for this week\'s lesson, then come back here.',
+    content: '👆 Click the "Download Decks" link above to open Google Drive.\n\nDownload the JSON file for all CHI 108 lessons, then come back here.',
     nextId: 'chi108-import',
     prevId: 'chi108-path',
     targetId: 'tutorial-drive-btn',
