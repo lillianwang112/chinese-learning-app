@@ -3898,6 +3898,7 @@ Grade this response.` },
       ? ['welcome', 'hsk-intro', 'hsk-browse']
       : ['welcome'];
     const coreSteps = ['deck-ready','writing-practice-select','writing-practice-active','writing-test-ready','writing-test-select','writing-test-reveal','writing-test-hide','writing-test-explore','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','extended-offer'];
+    const coreSteps = ['deck-ready','writing-strokes','study-intro','study-flip','trouble-words','learn-mode','match-mode','test-mode','extended-offer'];
     return [...basePath, ...coreSteps];
   };
   const extendedStepList = ['expand-collapse','kewen-reader','sentence-practice','ai-test','puter-warning','settings-tour','folders-tour','stats-tour','done'];
