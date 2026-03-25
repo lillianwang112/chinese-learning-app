@@ -586,6 +586,7 @@ const ChineseLearningApp = () => {
 
   // What's New modal state
   const [showWhatsNew, setShowWhatsNew] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   const [swipeDirection, setSwipeDirection] = useState(null);
   const cardRef = useRef(null);
@@ -2090,10 +2091,11 @@ const ChineseLearningApp = () => {
     }
   }, [darkMode]);
 
-  // Show "What's New" modal once per version
+  // Show "What's New" modal once per version; detect brand-new users
   useEffect(() => {
     const storedVersion = localStorage.getItem('zhongwen_app_version');
     if (storedVersion !== APP_VERSION) {
+      if (storedVersion === null) setIsNewUser(true);
       setShowWhatsNew(true);
     }
   }, []);
@@ -8537,9 +8539,21 @@ Rules:
                   <span style={{ fontSize: '1.25rem' }}>⚡</span>
                   <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Performance improvements</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>Removed debug logging and other optimizations.</span></div>
                 </li>
+                <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: '1.25rem' }}>🎓</span>
+                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Guided Tour</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>New to the app? Take the guided tour to learn all the key features — you can replay it anytime from the header.</span></div>
+                </li>
               </ul>
+              {isNewUser && (
+                <button
+                  onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); setIsNewUser(false); startTutorial(); }}
+                  style={{ width: '100%', background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff', border: 'none', borderRadius: '0.75rem', padding: '0.875rem', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', marginBottom: '0.75rem' }}
+                >
+                  🎓 Take the Tour
+                </button>
+              )}
               <button
-                onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); }}
+                onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); setIsNewUser(false); }}
                 style={{ width: '100%', background: 'linear-gradient(135deg, #e11d48, #be123c)', color: '#fff', border: 'none', borderRadius: '0.75rem', padding: '0.875rem', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' }}
               >
                 Got it!
