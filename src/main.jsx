@@ -4036,7 +4036,7 @@ Grade this response.` },
       if (cached) {
         const { hash, translations } = JSON.parse(cached);
         if (hash === kewenHash) {
-          setSentenceTranslations(translations);
+          setSentenceTranslations(prev => ({ ...prev, ...translations }));
           setSentenceTransLoading(false);
           return; // localStorage cache hit — no AI call needed
         }
@@ -4046,7 +4046,8 @@ Grade this response.` },
     // Cache miss or stale — fetch from AI (Puter.js)
     setSentenceTransFromPuter(true);
     setSentenceTransLoading(true);
-    setSentenceTranslations({});
+    // Note: do NOT clear sentenceTranslations here — other decks' translations stay intact
+    // and clearing would trigger a cloud sync that could wipe Firebase with an empty object.
     try {
       if (!window.puter || !window.puter.ai) throw new Error('Puter not ready');
       const list = sentences.map((s, i) => `${i+1}. ${s}`).join('\n');
@@ -4059,7 +4060,7 @@ Grade this response.` },
       const parsed = JSON.parse(clean);
       const map = {};
       sentences.forEach((s, i) => { map[s] = parsed[String(i+1)] || ''; });
-      setSentenceTranslations(map);
+      setSentenceTranslations(prev => ({ ...prev, ...map }));
       // Save to localStorage cache
       try {
         localStorage.setItem(cacheKey, JSON.stringify({ hash: kewenHash, translations: map }));
@@ -4069,7 +4070,7 @@ Grade this response.` },
       showEduroamToast();
       const fallback = {};
       sentences.forEach(s => { fallback[s] = '(Translation unavailable — check AI connection)'; });
-      setSentenceTranslations(fallback);
+      setSentenceTranslations(prev => ({ ...prev, ...fallback }));
       // Don't cache failures so next open retries
     } finally {
       setSentenceTransLoading(false);
