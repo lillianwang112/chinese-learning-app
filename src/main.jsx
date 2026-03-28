@@ -669,22 +669,24 @@ function hslToHex(h, s, l) {
   return '#' + [f(0), f(8), f(4)].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('');
 }
 
-// intensity: 0–100. 70 = default (slightly muted), 100 = full vivid.
+// intensity: 0–100. 100 = full vivid.
+// Palette runs from very light pastel (50) all the way to deep dark shade (900)
+// so e.g. rose gives blush pink → bright rose → deep maroon.
 function generateColorPalette(baseColor, intensity) {
   const [h, baseSat] = hexToHSL(baseColor);
   const factor = intensity / 100;
   const S = (pct) => Math.min(100, Math.round(baseSat * factor * pct));
   return {
-    50:  hslToHex(h, S(0.22), 96),
-    100: hslToHex(h, S(0.35), 92),
-    200: hslToHex(h, S(0.50), 84),
-    300: hslToHex(h, S(0.65), 73),
-    400: hslToHex(h, S(0.80), 62),
-    500: hslToHex(h, S(0.90), 52),
-    600: hslToHex(h, S(1.00), 43),
-    700: hslToHex(h, S(1.00), 36),
-    800: hslToHex(h, S(1.00), 29),
-    900: hslToHex(h, S(1.00), 23),
+    50:  hslToHex(h, S(0.15), 97),
+    100: hslToHex(h, S(0.25), 94),
+    200: hslToHex(h, S(0.40), 87),
+    300: hslToHex(h, S(0.58), 76),
+    400: hslToHex(h, S(0.75), 63),
+    500: hslToHex(h, S(0.90), 50),
+    600: hslToHex(h, S(1.00), 40),
+    700: hslToHex(h, S(1.00), 30),
+    800: hslToHex(h, S(0.95), 21),
+    900: hslToHex(h, S(0.85), 13),
   };
 }
 
@@ -706,15 +708,26 @@ const MULTICOLOR = 'multicolor';
 // Tailwind colours are restored.
 function applyColorTheme(baseColor, intensity) {
   try {
-    // Multicolor mode — remove overrides and restore original colours
+    const root = document.documentElement;
+
+    // Multicolor mode — clear class overrides but still set CSS variables to the
+    // default rose palette so inline-style elements (hero banner, chat bubbles,
+    // etc.) always show their original red/rose appearance instead of persisting
+    // whatever the last picked colour was.
     if (baseColor === MULTICOLOR) {
+      const defaultPalette = generateColorPalette(DEFAULT_COLOR_THEME.baseColor, intensity);
+      Object.entries(defaultPalette).forEach(([shade, color]) => {
+        root.style.setProperty(`--p-${shade}`, color);
+      });
+      root.style.setProperty('--p-gradient-start', defaultPalette[600]);
+      root.style.setProperty('--p-gradient-mid',   defaultPalette[700]);
+      root.style.setProperty('--p-gradient-dark',  defaultPalette[900]);
       const el = document.getElementById('ct-overrides');
       if (el) el.textContent = '';
       return;
     }
 
     const palette = generateColorPalette(baseColor, intensity);
-    const root = document.documentElement;
 
     // Update CSS variables
     Object.entries(palette).forEach(([shade, color]) => {
@@ -761,7 +774,8 @@ function applyColorTheme(baseColor, intensity) {
 
 const COLOR_PRESETS = [
   { label: 'Multicolor (Original)', color: MULTICOLOR, multicolor: true },
-  { label: 'Rose / Pink',    color: '#e11d48' },
+  { label: 'Hot Pink',       color: '#ec4899' },
+  { label: 'Rose / Red',     color: '#e11d48' },
   { label: 'Warm Red',       color: '#dc2626' },
   { label: 'Sunset Orange',  color: '#ea580c' },
   { label: 'Amber Gold',     color: '#d97706' },
@@ -773,7 +787,7 @@ const COLOR_PRESETS = [
   { label: 'Slate (Soft)',   color: '#475569' },
 ];
 
-const DEFAULT_COLOR_THEME = { baseColor: '#e11d48', intensity: 70 };
+const DEFAULT_COLOR_THEME = { baseColor: '#e11d48', intensity: 100 };
 
 // Apply theme immediately on module load — before React's first render —
 // so there is no flash of un-themed colours.
@@ -6715,13 +6729,13 @@ Rules:
                                 }}
                               />
                             ))}
-                            {colorTheme.baseColor !== MULTICOLOR && (
-                              <label title="Custom color" style={{ width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', position: 'relative', overflow: 'hidden', border: '2px dashed #9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#9ca3af', flexShrink: 0 }}>
-                                +<input type="color" value={colorTheme.baseColor} onChange={e => setColorTheme(t => ({ ...t, baseColor: e.target.value }))} style={{ position: 'absolute', opacity: 0, width: '200%', height: '200%', cursor: 'pointer', top: '-50%', left: '-50%' }} />
-                              </label>
-                            )}
+                            <label
+                              title="Custom color"
+                              style={{ width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', position: 'relative', overflow: 'hidden', border: '2px dashed #9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#9ca3af', flexShrink: 0, fontWeight: 600 }}
+                            >
+                              +<input type="color" value={colorTheme.baseColor === MULTICOLOR ? '#e11d48' : colorTheme.baseColor} onChange={e => setColorTheme(t => ({ ...t, baseColor: e.target.value }))} style={{ position: 'absolute', opacity: 0, width: '200%', height: '200%', cursor: 'pointer', top: '-50%', left: '-50%' }} />
+                            </label>
                           </div>
-                          {colorTheme.baseColor !== MULTICOLOR && (
                           <div>
                             <div className="flex justify-between text-xs text-gray-400 mb-1"><span>Soft</span><span>Vivid</span></div>
                             <input
@@ -6729,14 +6743,13 @@ Rules:
                               value={colorTheme.intensity}
                               onChange={e => setColorTheme(t => ({ ...t, intensity: parseInt(e.target.value) }))}
                               className="w-full"
-                              style={{ accentColor: colorTheme.baseColor }}
+                              style={{ accentColor: colorTheme.baseColor === MULTICOLOR ? '#e11d48' : colorTheme.baseColor }}
                             />
                             <div className="flex justify-between text-xs text-gray-400 mt-0.5">
                               <span>Color intensity</span>
-                              <span className="font-semibold" style={{ color: colorTheme.baseColor }}>{colorTheme.intensity}%</span>
+                              <span className="font-semibold" style={{ color: colorTheme.baseColor === MULTICOLOR ? '#e11d48' : colorTheme.baseColor }}>{colorTheme.intensity}%</span>
                             </div>
                           </div>
-                          )}
                           {(colorTheme.baseColor !== DEFAULT_COLOR_THEME.baseColor || colorTheme.intensity !== DEFAULT_COLOR_THEME.intensity) && (
                             <button onClick={() => setColorTheme(DEFAULT_COLOR_THEME)} className="text-xs text-gray-400 hover:text-gray-600 transition underline">Reset to default</button>
                           )}
@@ -6884,13 +6897,13 @@ Rules:
                                 }}
                               />
                             ))}
-                            {colorTheme.baseColor !== MULTICOLOR && (
-                              <label title="Custom color" style={{ width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', position: 'relative', overflow: 'hidden', border: '2px dashed #9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#9ca3af', flexShrink: 0 }}>
-                                +<input type="color" value={colorTheme.baseColor} onChange={e => setColorTheme(t => ({ ...t, baseColor: e.target.value }))} style={{ position: 'absolute', opacity: 0, width: '200%', height: '200%', cursor: 'pointer', top: '-50%', left: '-50%' }} />
-                              </label>
-                            )}
+                            <label
+                              title="Custom color"
+                              style={{ width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', position: 'relative', overflow: 'hidden', border: '2px dashed #9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#9ca3af', flexShrink: 0, fontWeight: 600 }}
+                            >
+                              +<input type="color" value={colorTheme.baseColor === MULTICOLOR ? '#e11d48' : colorTheme.baseColor} onChange={e => setColorTheme(t => ({ ...t, baseColor: e.target.value }))} style={{ position: 'absolute', opacity: 0, width: '200%', height: '200%', cursor: 'pointer', top: '-50%', left: '-50%' }} />
+                            </label>
                           </div>
-                          {colorTheme.baseColor !== MULTICOLOR && (
                           <div>
                             <div className="flex justify-between text-xs text-gray-400 mb-1"><span>Soft</span><span>Vivid</span></div>
                             <input
@@ -6898,14 +6911,13 @@ Rules:
                               value={colorTheme.intensity}
                               onChange={e => setColorTheme(t => ({ ...t, intensity: parseInt(e.target.value) }))}
                               className="w-full"
-                              style={{ accentColor: colorTheme.baseColor }}
+                              style={{ accentColor: colorTheme.baseColor === MULTICOLOR ? '#e11d48' : colorTheme.baseColor }}
                             />
                             <div className="flex justify-between text-xs text-gray-400 mt-0.5">
                               <span>Color intensity</span>
-                              <span className="font-semibold" style={{ color: colorTheme.baseColor }}>{colorTheme.intensity}%</span>
+                              <span className="font-semibold" style={{ color: colorTheme.baseColor === MULTICOLOR ? '#e11d48' : colorTheme.baseColor }}>{colorTheme.intensity}%</span>
                             </div>
                           </div>
-                          )}
                           {(colorTheme.baseColor !== DEFAULT_COLOR_THEME.baseColor || colorTheme.intensity !== DEFAULT_COLOR_THEME.intensity) && (
                             <button onClick={() => setColorTheme(DEFAULT_COLOR_THEME)} className="text-xs text-gray-400 hover:text-gray-600 transition underline">Reset to default</button>
                           )}
