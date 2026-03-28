@@ -1826,7 +1826,12 @@ const ChineseLearningApp = () => {
     try {
       setAuthError('');
       const provider = new firebase.auth.GoogleAuthProvider();
-      await firebaseAuth.signInWithPopup(provider);
+      const result = await firebaseAuth.signInWithPopup(provider);
+      if (result.additionalUserInfo && result.additionalUserInfo.isNewUser) {
+        await result.user.delete();
+        setAuthError('New account creation is currently disabled. If you did not create an account before March 27, 2026, you will not be able to sign up until the app receives funding to support more users.');
+        return;
+      }
       setCurrentView('home');
     } catch (e) {
       setAuthError(e.message.replace('Firebase: ', '').replace(/\(auth\/.*\)\.?/, '').trim());
@@ -6123,14 +6128,6 @@ Rules:
           {/* Action buttons */}
           <div className="w-full space-y-3">
             <button
-              onClick={() => { setAuthMode('signup'); setAuthError(''); setCurrentView('loginForm'); }}
-              className="w-full py-4 rounded-2xl font-bold text-white text-sm tracking-widest transition-all active:scale-95 hover:opacity-90"
-              style={{ background: '#5b4fcf', letterSpacing: '0.13em' }}
-            >
-              CREATE ACCOUNT
-            </button>
-
-            <button
               onClick={() => { setAuthMode('login'); setAuthError(''); setCurrentView('loginForm'); }}
               className="w-full py-4 rounded-2xl font-bold text-sm tracking-widest transition-all active:scale-95 hover:bg-gray-50"
               style={{ background: 'white', color: '#222', border: '1.5px solid #ddd5f5', letterSpacing: '0.13em' }}
@@ -6161,7 +6158,11 @@ Rules:
               CONTINUE AS GUEST
             </button>
 
-            <p className="text-center text-xs text-gray-400 leading-relaxed pt-1">
+            <p className="text-center text-xs leading-relaxed pt-1" style={{ color: '#b84c1e' }}>
+              New account creation is currently disabled. If you did not create an account before March 27, 2026, you will not be able to sign up until the app receives funding to support more users.
+            </p>
+
+            <p className="text-center text-xs text-gray-400 leading-relaxed">
               Guest mode saves locally in your browser only.<br />Sign in to sync across devices.
             </p>
           </div>
@@ -6277,14 +6278,9 @@ Rules:
           </button>
 
           <div className="mt-6 text-center">
-            <button
-              onClick={() => { setAuthMode(authMode === 'login' ? 'signup' : 'login'); setAuthError(''); }}
-              className="text-sm text-orange-600 hover:text-orange-700 font-medium"
-            >
-              {authMode === 'login'
-                ? "Don't have an account? Sign up"
-                : 'Already have an account? Sign in'}
-            </button>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              New account creation is currently disabled. If you did not create an account before March 27, 2026, you will not be able to sign up until the app receives funding to support more users.
+            </p>
           </div>
         </div>
       </div>
