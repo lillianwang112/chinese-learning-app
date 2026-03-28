@@ -697,10 +697,22 @@ const ALL_COLOR_FAMILIES = [
 ];
 const SHADE_LEVELS = [50,100,200,300,400,500,600,700,800,900];
 
+// Special sentinel value — means "use original Tailwind multicolour, no overrides"
+const MULTICOLOR = 'multicolor';
+
 // Builds and injects a <style> tag that maps every Tailwind colour utility
 // (bg, text, border, ring, from, to, hover:*, focus:*) to the primary palette.
+// When baseColor === MULTICOLOR the override tag is cleared so all original
+// Tailwind colours are restored.
 function applyColorTheme(baseColor, intensity) {
   try {
+    // Multicolor mode — remove overrides and restore original colours
+    if (baseColor === MULTICOLOR) {
+      const el = document.getElementById('ct-overrides');
+      if (el) el.textContent = '';
+      return;
+    }
+
     const palette = generateColorPalette(baseColor, intensity);
     const root = document.documentElement;
 
@@ -748,6 +760,7 @@ function applyColorTheme(baseColor, intensity) {
 }
 
 const COLOR_PRESETS = [
+  { label: 'Multicolor (Original)', color: MULTICOLOR, multicolor: true },
   { label: 'Rose / Pink',    color: '#e11d48' },
   { label: 'Warm Red',       color: '#dc2626' },
   { label: 'Sunset Orange',  color: '#ea580c' },
@@ -6691,7 +6704,10 @@ Rules:
                                 title={preset.label}
                                 onClick={() => setColorTheme(t => ({ ...t, baseColor: preset.color }))}
                                 style={{
-                                  width: 28, height: 28, borderRadius: '50%', background: preset.color,
+                                  width: 28, height: 28, borderRadius: '50%',
+                                  background: preset.multicolor
+                                    ? 'conic-gradient(red, orange, yellow, green, cyan, blue, violet, red)'
+                                    : preset.color,
                                   border: colorTheme.baseColor === preset.color ? '3px solid #1f2937' : '2px solid rgba(0,0,0,0.1)',
                                   outline: colorTheme.baseColor === preset.color ? '2px solid white' : 'none',
                                   outlineOffset: -1,
@@ -6699,10 +6715,13 @@ Rules:
                                 }}
                               />
                             ))}
-                            <label title="Custom color" style={{ width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', position: 'relative', overflow: 'hidden', border: '2px dashed #9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#9ca3af', flexShrink: 0 }}>
-                              +<input type="color" value={colorTheme.baseColor} onChange={e => setColorTheme(t => ({ ...t, baseColor: e.target.value }))} style={{ position: 'absolute', opacity: 0, width: '200%', height: '200%', cursor: 'pointer', top: '-50%', left: '-50%' }} />
-                            </label>
+                            {colorTheme.baseColor !== MULTICOLOR && (
+                              <label title="Custom color" style={{ width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', position: 'relative', overflow: 'hidden', border: '2px dashed #9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#9ca3af', flexShrink: 0 }}>
+                                +<input type="color" value={colorTheme.baseColor} onChange={e => setColorTheme(t => ({ ...t, baseColor: e.target.value }))} style={{ position: 'absolute', opacity: 0, width: '200%', height: '200%', cursor: 'pointer', top: '-50%', left: '-50%' }} />
+                              </label>
+                            )}
                           </div>
+                          {colorTheme.baseColor !== MULTICOLOR && (
                           <div>
                             <div className="flex justify-between text-xs text-gray-400 mb-1"><span>Soft</span><span>Vivid</span></div>
                             <input
@@ -6717,6 +6736,7 @@ Rules:
                               <span className="font-semibold" style={{ color: colorTheme.baseColor }}>{colorTheme.intensity}%</span>
                             </div>
                           </div>
+                          )}
                           {(colorTheme.baseColor !== DEFAULT_COLOR_THEME.baseColor || colorTheme.intensity !== DEFAULT_COLOR_THEME.intensity) && (
                             <button onClick={() => setColorTheme(DEFAULT_COLOR_THEME)} className="text-xs text-gray-400 hover:text-gray-600 transition underline">Reset to default</button>
                           )}
@@ -6853,7 +6873,10 @@ Rules:
                                 title={preset.label}
                                 onClick={() => setColorTheme(t => ({ ...t, baseColor: preset.color }))}
                                 style={{
-                                  width: 28, height: 28, borderRadius: '50%', background: preset.color,
+                                  width: 28, height: 28, borderRadius: '50%',
+                                  background: preset.multicolor
+                                    ? 'conic-gradient(red, orange, yellow, green, cyan, blue, violet, red)'
+                                    : preset.color,
                                   border: colorTheme.baseColor === preset.color ? '3px solid #1f2937' : '2px solid rgba(0,0,0,0.1)',
                                   outline: colorTheme.baseColor === preset.color ? '2px solid white' : 'none',
                                   outlineOffset: -1,
@@ -6861,10 +6884,13 @@ Rules:
                                 }}
                               />
                             ))}
-                            <label title="Custom color" style={{ width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', position: 'relative', overflow: 'hidden', border: '2px dashed #9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#9ca3af', flexShrink: 0 }}>
-                              +<input type="color" value={colorTheme.baseColor} onChange={e => setColorTheme(t => ({ ...t, baseColor: e.target.value }))} style={{ position: 'absolute', opacity: 0, width: '200%', height: '200%', cursor: 'pointer', top: '-50%', left: '-50%' }} />
-                            </label>
+                            {colorTheme.baseColor !== MULTICOLOR && (
+                              <label title="Custom color" style={{ width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', position: 'relative', overflow: 'hidden', border: '2px dashed #9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#9ca3af', flexShrink: 0 }}>
+                                +<input type="color" value={colorTheme.baseColor} onChange={e => setColorTheme(t => ({ ...t, baseColor: e.target.value }))} style={{ position: 'absolute', opacity: 0, width: '200%', height: '200%', cursor: 'pointer', top: '-50%', left: '-50%' }} />
+                              </label>
+                            )}
                           </div>
+                          {colorTheme.baseColor !== MULTICOLOR && (
                           <div>
                             <div className="flex justify-between text-xs text-gray-400 mb-1"><span>Soft</span><span>Vivid</span></div>
                             <input
@@ -6879,6 +6905,7 @@ Rules:
                               <span className="font-semibold" style={{ color: colorTheme.baseColor }}>{colorTheme.intensity}%</span>
                             </div>
                           </div>
+                          )}
                           {(colorTheme.baseColor !== DEFAULT_COLOR_THEME.baseColor || colorTheme.intensity !== DEFAULT_COLOR_THEME.intensity) && (
                             <button onClick={() => setColorTheme(DEFAULT_COLOR_THEME)} className="text-xs text-gray-400 hover:text-gray-600 transition underline">Reset to default</button>
                           )}
