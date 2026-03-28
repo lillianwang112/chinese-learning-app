@@ -782,6 +782,7 @@ const ChineseLearningApp = () => {
   const [writingCards, setWritingCards] = useState([]);
   const [currentWritingIndex, setCurrentWritingIndex] = useState(0);
   const canvasRef = useRef(null);
+  const writingBgCanvasRef = useRef(null); // background canvas for 田字格 grid overlay
 
   // AI Chat state
   const [chatMessages, setChatMessages] = useState([]);
@@ -1117,6 +1118,8 @@ const ChineseLearningApp = () => {
         showPinyin: true,
         showEnglish: true,
         traceSpeed: 1, // 0.4=slow, 1=normal, 2=fast; also controls fade
+        showTianzige: false, // show 田字格 grid overlay on the practice canvas
+        tianzigeWithDiagonals: false, // also draw diagonal guide lines in the grid
       },
       // Trouble words
       troubleWords: {
@@ -1368,6 +1371,19 @@ const ChineseLearningApp = () => {
       document.removeEventListener('pointercancel', onPointerCancel);
     };
   }, [currentView, writingMode]);
+
+  // Draw or clear the 田字格 grid overlay whenever the setting, dark mode, or view changes
+  useEffect(() => {
+    if (currentView !== 'writing' || !writingMode) return;
+    const bgCanvas = writingBgCanvasRef.current;
+    if (!bgCanvas) return;
+    if (userSettings.writing?.showTianzige) {
+      drawTianzige();
+    } else {
+      const ctx = bgCanvas.getContext('2d');
+      ctx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+    }
+  }, [currentView, writingMode, userSettings.writing?.showTianzige, userSettings.writing?.tianzigeWithDiagonals, darkMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Save writing session state to localStorage — fires on card navigation AND queue changes.
   // writingCards is included so Forgot re-insertions are always captured.
@@ -5898,6 +5914,46 @@ Rules:
     setWritingFeedback(null);
   };
 
+  // Draw 田字格 (four-square character grid) on the background canvas.
+  // The background canvas sits behind the main drawing canvas, so the grid
+  // persists through Clear All, Clear Traces, and card navigation.
+  const drawTianzige = () => {
+    const bgCanvas = writingBgCanvasRef.current;
+    if (!bgCanvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const cssSize = 500; // matches drawCtrl.init fixed buffer size
+    bgCanvas.width = cssSize * dpr;
+    bgCanvas.height = cssSize * dpr;
+    const ctx = bgCanvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    // Dashed lines in a muted color
+    ctx.strokeStyle = darkMode ? '#4b5563' : '#d1d5db';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([10, 8]);
+    // Horizontal center line
+    ctx.beginPath();
+    ctx.moveTo(0, cssSize / 2);
+    ctx.lineTo(cssSize, cssSize / 2);
+    ctx.stroke();
+    // Vertical center line
+    ctx.beginPath();
+    ctx.moveTo(cssSize / 2, 0);
+    ctx.lineTo(cssSize / 2, cssSize);
+    ctx.stroke();
+    // Optional diagonal guide lines
+    if (userSettings.writing?.tianzigeWithDiagonals) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(cssSize, cssSize);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cssSize, 0);
+      ctx.lineTo(0, cssSize);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+  };
+
   // Draw a character stroke-by-stroke on the user's practice canvas using HanziWriter
   const canvasOverlayRef = React.useRef(null); // ref to the absolute overlay div inside canvas wrapper
 
@@ -6430,6 +6486,25 @@ Rules:
                             ))}
                           </div>
                         </div>
+                        <div className="space-y-2">
+                          <SettingToggle
+                            label="田字格 grid overlay"
+                            checked={userSettings.writing.showTianzige || false}
+                            onChange={() => setUserSettings(s => ({ ...s, writing: { ...s.writing, showTianzige: !(s.writing.showTianzige || false) } }))}
+                          />
+                          <p className="text-xs text-gray-400">Shows dashed center lines on the practice canvas to guide character proportions</p>
+                          {(userSettings.writing.showTianzige) && (
+                            <label className="flex items-center gap-3 cursor-pointer pl-4">
+                              <input
+                                type="checkbox"
+                                checked={userSettings.writing.tianzigeWithDiagonals || false}
+                                onChange={() => setUserSettings(s => ({ ...s, writing: { ...s.writing, tianzigeWithDiagonals: !(s.writing.tianzigeWithDiagonals || false) } }))}
+                                className="w-4 h-4 accent-red-500"
+                              />
+                              <span className="text-sm text-gray-600">Include diagonal guide lines</span>
+                            </label>
+                          )}
+                        </div>
                       </div>
                       {/* Trouble Words Settings */}
                       <div className="bg-gray-50 rounded-xl p-4 space-y-3">
@@ -6533,7 +6608,25 @@ Rules:
                             </label>
                           </div>
                         </div>
-
+                        <div className="space-y-2">
+                          <SettingToggle
+                            label="田字格 grid overlay"
+                            checked={userSettings.writing.showTianzige || false}
+                            onChange={() => setUserSettings(s => ({ ...s, writing: { ...s.writing, showTianzige: !(s.writing.showTianzige || false) } }))}
+                          />
+                          <p className="text-xs text-gray-400">Shows dashed center lines on the practice canvas to guide character proportions</p>
+                          {(userSettings.writing.showTianzige) && (
+                            <label className="flex items-center gap-3 cursor-pointer pl-4">
+                              <input
+                                type="checkbox"
+                                checked={userSettings.writing.tianzigeWithDiagonals || false}
+                                onChange={() => setUserSettings(s => ({ ...s, writing: { ...s.writing, tianzigeWithDiagonals: !(s.writing.tianzigeWithDiagonals || false) } }))}
+                                className="w-4 h-4 accent-red-500"
+                              />
+                              <span className="text-sm text-gray-600">Include diagonal guide lines</span>
+                            </label>
+                          )}
+                        </div>
                       </div>
                       {/* Trouble Words Settings */}
                       <div className="bg-gray-50 rounded-xl p-4 space-y-3">
@@ -11334,11 +11427,20 @@ Rules:
                 </div>
               )}
               {/* Wrapper is position:relative so the absolute overlay stays locked to canvas on scroll */}
-              <div className="relative mx-auto" style={{ width: '100%', maxWidth: '500px' }}>
+              <div
+                className={`relative mx-auto rounded-lg writing-canvas-wrapper ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
+                style={{ width: '100%', maxWidth: '500px', aspectRatio: '1' }}
+              >
+                {/* Background canvas: holds 田字格 grid lines when enabled; never cleared by user drawing */}
+                <canvas
+                  ref={writingBgCanvasRef}
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', pointerEvents: 'none', borderRadius: '6px' }}
+                />
+                {/* Foreground canvas: transparent background so the grid shows through */}
                 <canvas
                   ref={canvasRef}
-                  className={`border-4 rounded-lg cursor-crosshair touch-none block w-full writing-canvas-dark ${darkMode ? 'bg-gray-800' : 'bg-white'} ${canvasHanziChar ? 'border-purple-400' : 'border-gray-300'}`}
-                  style={{ height: 'auto', aspectRatio: '1', touchAction: 'none' }}
+                  className={`border-4 rounded-lg cursor-crosshair touch-none ${canvasHanziChar ? 'border-purple-400' : 'border-gray-300'}`}
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', touchAction: 'none', background: 'transparent' }}
                 />
                 {/* HanziWriter draws into this div; position:absolute keeps it locked to canvas */}
                 <div

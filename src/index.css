@@ -69,8 +69,8 @@ body.dark-mode input::placeholder,
 body.dark-mode textarea::placeholder {
   color: #9ca3af !important;
 }
-/* Writing canvas dark mode */
-body.dark-mode canvas.writing-canvas-dark {
+/* Writing canvas dark mode — background is on the wrapper div, canvas is transparent */
+body.dark-mode .writing-canvas-wrapper {
   background: #1e1e1e;
 }
 /* details/summary dark mode */
