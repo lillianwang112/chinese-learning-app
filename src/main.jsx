@@ -640,6 +640,87 @@ const TUTORIAL_STEPS = {
   },
 };
 
+// ─── Color Theme Utilities ───────────────────────────────────────────────────
+
+function hexToHSL(hex) {
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0;
+  const l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+      case g: h = ((b - r) / d + 2) / 6; break;
+      case b: h = ((r - g) / d + 4) / 6; break;
+    }
+  }
+  return [h * 360, s * 100, l * 100];
+}
+
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return '#' + [f(0), f(8), f(4)].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('');
+}
+
+// intensity: 0–100. 70 = default (slightly muted), 100 = full vivid.
+function generateColorPalette(baseColor, intensity) {
+  const [h, baseSat] = hexToHSL(baseColor);
+  const factor = intensity / 100;
+  const S = (pct) => Math.min(100, Math.round(baseSat * factor * pct));
+  return {
+    50:  hslToHex(h, S(0.22), 96),
+    100: hslToHex(h, S(0.35), 92),
+    200: hslToHex(h, S(0.50), 84),
+    300: hslToHex(h, S(0.65), 73),
+    400: hslToHex(h, S(0.80), 62),
+    500: hslToHex(h, S(0.90), 52),
+    600: hslToHex(h, S(1.00), 43),
+    700: hslToHex(h, S(1.00), 36),
+    800: hslToHex(h, S(1.00), 29),
+    900: hslToHex(h, S(1.00), 23),
+  };
+}
+
+function applyColorTheme(baseColor, intensity) {
+  try {
+    const palette = generateColorPalette(baseColor, intensity);
+    const root = document.documentElement;
+    Object.entries(palette).forEach(([shade, color]) => {
+      root.style.setProperty(`--p-${shade}`, color);
+    });
+    // Expose gradient stops for inline styles
+    root.style.setProperty('--p-gradient-start', palette[600]);
+    root.style.setProperty('--p-gradient-mid',   palette[700]);
+    root.style.setProperty('--p-gradient-dark',  palette[900]);
+  } catch (e) {
+    console.warn('applyColorTheme error:', e);
+  }
+}
+
+const COLOR_PRESETS = [
+  { label: 'Rose / Pink',    color: '#e11d48' },
+  { label: 'Warm Red',       color: '#dc2626' },
+  { label: 'Sunset Orange',  color: '#ea580c' },
+  { label: 'Amber Gold',     color: '#d97706' },
+  { label: 'Forest Green',   color: '#16a34a' },
+  { label: 'Ocean Blue',     color: '#2563eb' },
+  { label: 'Sky Blue',       color: '#0284c7' },
+  { label: 'Royal Purple',   color: '#7c3aed' },
+  { label: 'Teal',           color: '#0d9488' },
+  { label: 'Slate (Soft)',   color: '#475569' },
+];
+
+const DEFAULT_COLOR_THEME = { baseColor: '#e11d48', intensity: 70 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 const ChineseLearningApp = () => {
   // Touch/swipe tracking (using ref to avoid re-renders that swallow click events on mobile)
   const touchRef = useRef(null);
@@ -654,6 +735,14 @@ const ChineseLearningApp = () => {
     } catch(e) { return false; }
   });
   const darkModeRef = useRef(darkMode);
+
+  // Color theme — persisted to localStorage
+  const [colorTheme, setColorTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem('colorTheme');
+      return saved ? JSON.parse(saved) : DEFAULT_COLOR_THEME;
+    } catch(e) { return DEFAULT_COLOR_THEME; }
+  });
 
   // What's New modal state
   const [showWhatsNew, setShowWhatsNew] = useState(false);
@@ -2334,6 +2423,15 @@ const ChineseLearningApp = () => {
     chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, chatLoading]);
 
+  // Apply colour theme to CSS variables and persist
+  useEffect(() => {
+    applyColorTheme(colorTheme.baseColor, colorTheme.intensity);
+    localStorage.setItem('colorTheme', JSON.stringify(colorTheme));
+  }, [colorTheme]);
+
+  // Apply on first render (before paint)
+  useEffect(() => { applyColorTheme(colorTheme.baseColor, colorTheme.intensity); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Apply/remove dark-mode class on body and persist preference
   useEffect(() => {
     darkModeRef.current = darkMode;
@@ -2445,7 +2543,7 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
     <button
       onClick={openChat}
       className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl hover:scale-110 active:scale-95 transition-all z-50"
-      style={{ background: 'linear-gradient(135deg, #e11d48, #be123c)', boxShadow: '0 4px 20px rgba(225,29,72,0.4)' }}
+      style={{ background: 'linear-gradient(135deg, var(--p-600), var(--p-700))', boxShadow: '0 4px 20px rgba(225,29,72,0.4)' }}
       title="AI Chinese Tutor (requires free Puter.js account — sign-in prompt appears on first use)"
     >
       <MessageCircle size={24} />
@@ -2495,7 +2593,7 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
           {/* Header */}
           <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(225,29,72,0.15)', background: 'rgba(225,29,72,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg, #e11d48, #be123c)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 17 }}>中</div>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg, var(--p-600), var(--p-700))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 17 }}>中</div>
               <div>
                 <div style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>Chinese Tutor</div>
                 <div style={{ fontSize: 11, color: puterServiceDown ? '#f97316' : (puterReady ? '#4ade80' : (window.puter ? '#fbbf24' : '#888')) }}>
@@ -2541,7 +2639,7 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
           <div className="chat-scroll" style={{ flex: 1, overflowY: 'auto', padding: '16px 14px' }}>
             {chatMessages.length === 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', padding: '20px 10px' }}>
-                <div style={{ fontSize: 48, fontWeight: 700, background: 'linear-gradient(135deg, #e11d48, #fb7185)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: 8 }}>你好</div>
+                <div style={{ fontSize: 48, fontWeight: 700, background: 'linear-gradient(135deg, var(--p-600), var(--p-400))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: 8 }}>你好</div>
                 <p style={{ color: '#777', fontSize: 13, maxWidth: 260, lineHeight: 1.5, marginBottom: 16 }}>Ask me about vocabulary, grammar, example sentences, or anything Chinese!</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', maxWidth: 360 }}>
                   {CHAT_SUGGESTED.map((prompt, i) => (
@@ -2557,12 +2655,12 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
             {chatMessages.map((msg, i) => (
               <div key={i} style={{ display: 'flex', marginBottom: 10, justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                 {msg.role === 'assistant' && (
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, #e11d48, #be123c)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 13, marginRight: 8, flexShrink: 0, marginTop: 2 }}>字</div>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, var(--p-600), var(--p-700))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 13, marginRight: 8, flexShrink: 0, marginTop: 2 }}>字</div>
                 )}
                 <div style={{
                   maxWidth: '80%', padding: '8px 12px', fontSize: 13, lineHeight: 1.6,
                   borderRadius: msg.role === 'user' ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
-                  background: msg.role === 'user' ? 'linear-gradient(135deg, #e11d48, #be123c)' : '#1a1a2e',
+                  background: msg.role === 'user' ? 'linear-gradient(135deg, var(--p-600), var(--p-700))' : '#1a1a2e',
                   color: msg.role === 'user' ? '#fff' : '#e0e0ec',
                   border: msg.role === 'user' ? 'none' : '1px solid rgba(225,29,72,0.15)',
                   wordBreak: 'break-word',
@@ -2574,10 +2672,10 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
 
             {chatLoading && (
               <div style={{ display: 'flex', marginBottom: 10, justifyContent: 'flex-start' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, #e11d48, #be123c)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 13, marginRight: 8, flexShrink: 0 }}>字</div>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, var(--p-600), var(--p-700))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 13, marginRight: 8, flexShrink: 0 }}>字</div>
                 <div style={{ padding: '10px 14px', borderRadius: '14px 14px 14px 4px', background: '#1a1a2e', border: '1px solid rgba(225,29,72,0.15)' }}>
                   <div style={{ display: 'flex', gap: 4 }}>
-                    {[0,1,2].map(j => (<div key={j} style={{ width: 6, height: 6, borderRadius: '50%', background: '#e11d48', animation: `chatBounce 1.2s ease-in-out ${j*0.15}s infinite`, opacity: 0.5 }} />))}
+                    {[0,1,2].map(j => (<div key={j} style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--p-600)', animation: `chatBounce 1.2s ease-in-out ${j*0.15}s infinite`, opacity: 0.5 }} />))}
                   </div>
                 </div>
               </div>
@@ -2614,7 +2712,7 @@ You can also help with: chengyu (成语) explanations, character decomposition, 
                   }
                 }}
                 disabled={chatLoading}
-                style={{ width: 38, height: 38, borderRadius: 10, border: 'none', background: !chatLoading ? 'linear-gradient(135deg, #e11d48, #be123c)' : 'rgba(225,29,72,0.15)', color: !chatLoading ? '#fff' : '#555', cursor: !chatLoading ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 16 }}>
+                style={{ width: 38, height: 38, borderRadius: 10, border: 'none', background: !chatLoading ? 'linear-gradient(135deg, var(--p-600), var(--p-700))' : 'rgba(0,0,0,0.15)', color: !chatLoading ? '#fff' : '#555', cursor: !chatLoading ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 16 }}>
                 <SendIcon size={16} />
               </button>
             </div>
@@ -2828,7 +2926,7 @@ Keep it concise and practical.`,
           const writer = window.HanziWriter.create(div, char, {
             width: 150, height: 150, padding: 10,
             showOutline: true, showCharacter: false,
-            strokeColor: '#e11d48', outlineColor: '#d1d5db',
+            strokeColor: getComputedStyle(document.documentElement).getPropertyValue('--p-600').trim() || '#e11d48', outlineColor: '#d1d5db',
             strokeAnimationSpeed: speedRef.current,
             delayBetweenStrokes: 300,
             onLoadCharDataSuccess: () => { loadedCount++; if (loadedCount >= totalChars) tryStart(); },
@@ -2889,11 +2987,11 @@ Keep it concise and practical.`,
           <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', marginBottom:'14px' }}>
             <span style={{ fontSize:'13px', color:'#6b7280', fontWeight:600 }}>Speed:</span>
             {[{l:'🐢 Slow',v:0.5},{l:'▶ Normal',v:1},{l:'⚡ Fast',v:2}].map(s => (
-              <button key={s.v} onClick={() => handleSpeed(s.v)} style={{ padding:'6px 12px', borderRadius:'8px', border:'none', cursor:'pointer', fontSize:'13px', fontWeight:600, background: speed===s.v ? '#e11d48' : '#f3f4f6', color: speed===s.v ? '#fff' : '#374151' }}>{s.l}</button>
+              <button key={s.v} onClick={() => handleSpeed(s.v)} style={{ padding:'6px 12px', borderRadius:'8px', border:'none', cursor:'pointer', fontSize:'13px', fontWeight:600, background: speed===s.v ? 'var(--p-600)' : '#f3f4f6', color: speed===s.v ? '#fff' : '#374151' }}>{s.l}</button>
             ))}
           </div>
           <div style={{ display:'flex', flexWrap:'wrap', gap:'8px', justifyContent:'center' }}>
-            <button onClick={() => startAnim(0)} style={{ background:'#e11d48', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 20px', fontWeight:700, fontSize:'14px', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px' }}>
+            <button onClick={() => startAnim(0)} style={{ background:'var(--p-600)', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 20px', fontWeight:700, fontSize:'14px', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px' }}>
               {isAnimating ? <><span style={{ display:'inline-block', width:'14px', height:'14px', border:'2px solid #fff', borderTopColor:'transparent', borderRadius:'50%', animation:'hw-spin 0.7s linear infinite' }}/> Animating…</> : '↺ Replay'}
             </button>
             <button onClick={showAll} style={{ background:'#f3f4f6', color:'#374151', border:'none', borderRadius:'8px', padding:'10px 20px', fontWeight:600, fontSize:'14px', cursor:'pointer' }}>Show All</button>
@@ -5998,8 +6096,8 @@ Rules:
         padding: Math.round(size * 0.06),
         showOutline: false,
         showCharacter: false,
-        strokeColor: '#e11d48',
-        radicalColor: '#be123c',
+        strokeColor: getComputedStyle(document.documentElement).getPropertyValue('--p-600').trim() || '#e11d48',
+        radicalColor: getComputedStyle(document.documentElement).getPropertyValue('--p-700').trim() || '#be123c',
         strokeAnimationSpeed: spd,
         delayBetweenStrokes: spd >= 2 ? 150 : spd <= 0.4 ? 600 : 350,
       });
@@ -6524,12 +6622,52 @@ Rules:
 
                       {/* Appearance */}
                       <div className="bg-gray-50 rounded-xl p-4 space-y-4">
-                        <h3 className="font-bold text-gray-800 flex items-center gap-2">🌙 Appearance</h3>
+                        <h3 className="font-bold text-gray-800 flex items-center gap-2">🎨 Appearance</h3>
                         <SettingToggle
                           label="Dark mode"
                           checked={darkMode}
                           onChange={() => setDarkMode(d => !d)}
                         />
+                        {/* Color theme */}
+                        <div className="space-y-3 pt-2 border-t border-gray-200">
+                          <p className="text-sm font-medium text-gray-700">Color theme</p>
+                          <div className="flex flex-wrap gap-2">
+                            {COLOR_PRESETS.map(preset => (
+                              <button
+                                key={preset.color}
+                                title={preset.label}
+                                onClick={() => setColorTheme(t => ({ ...t, baseColor: preset.color }))}
+                                style={{
+                                  width: 28, height: 28, borderRadius: '50%', background: preset.color,
+                                  border: colorTheme.baseColor === preset.color ? '3px solid #1f2937' : '2px solid rgba(0,0,0,0.1)',
+                                  outline: colorTheme.baseColor === preset.color ? '2px solid white' : 'none',
+                                  outlineOffset: -1,
+                                  cursor: 'pointer', flexShrink: 0,
+                                }}
+                              />
+                            ))}
+                            <label title="Custom color" style={{ width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', position: 'relative', overflow: 'hidden', border: '2px dashed #9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#9ca3af', flexShrink: 0 }}>
+                              +<input type="color" value={colorTheme.baseColor} onChange={e => setColorTheme(t => ({ ...t, baseColor: e.target.value }))} style={{ position: 'absolute', opacity: 0, width: '200%', height: '200%', cursor: 'pointer', top: '-50%', left: '-50%' }} />
+                            </label>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-xs text-gray-400 mb-1"><span>Soft</span><span>Vivid</span></div>
+                            <input
+                              type="range" min="30" max="100" step="5"
+                              value={colorTheme.intensity}
+                              onChange={e => setColorTheme(t => ({ ...t, intensity: parseInt(e.target.value) }))}
+                              className="w-full"
+                              style={{ accentColor: colorTheme.baseColor }}
+                            />
+                            <div className="flex justify-between text-xs text-gray-400 mt-0.5">
+                              <span>Color intensity</span>
+                              <span className="font-semibold" style={{ color: colorTheme.baseColor }}>{colorTheme.intensity}%</span>
+                            </div>
+                          </div>
+                          {(colorTheme.baseColor !== DEFAULT_COLOR_THEME.baseColor || colorTheme.intensity !== DEFAULT_COLOR_THEME.intensity) && (
+                            <button onClick={() => setColorTheme(DEFAULT_COLOR_THEME)} className="text-xs text-gray-400 hover:text-gray-600 transition underline">Reset to default</button>
+                          )}
+                        </div>
                       </div>
 
                       {/* Advanced Study */}
@@ -6646,12 +6784,52 @@ Rules:
 
                       {/* Appearance */}
                       <div className="bg-gray-50 rounded-xl p-4 space-y-4">
-                        <h3 className="font-bold text-gray-800 flex items-center gap-2">🌙 Appearance</h3>
+                        <h3 className="font-bold text-gray-800 flex items-center gap-2">🎨 Appearance</h3>
                         <SettingToggle
                           label="Dark mode"
                           checked={darkMode}
                           onChange={() => setDarkMode(d => !d)}
                         />
+                        {/* Color theme */}
+                        <div className="space-y-3 pt-2 border-t border-gray-200">
+                          <p className="text-sm font-medium text-gray-700">Color theme</p>
+                          <div className="flex flex-wrap gap-2">
+                            {COLOR_PRESETS.map(preset => (
+                              <button
+                                key={preset.color}
+                                title={preset.label}
+                                onClick={() => setColorTheme(t => ({ ...t, baseColor: preset.color }))}
+                                style={{
+                                  width: 28, height: 28, borderRadius: '50%', background: preset.color,
+                                  border: colorTheme.baseColor === preset.color ? '3px solid #1f2937' : '2px solid rgba(0,0,0,0.1)',
+                                  outline: colorTheme.baseColor === preset.color ? '2px solid white' : 'none',
+                                  outlineOffset: -1,
+                                  cursor: 'pointer', flexShrink: 0,
+                                }}
+                              />
+                            ))}
+                            <label title="Custom color" style={{ width: 28, height: 28, borderRadius: '50%', cursor: 'pointer', position: 'relative', overflow: 'hidden', border: '2px dashed #9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#9ca3af', flexShrink: 0 }}>
+                              +<input type="color" value={colorTheme.baseColor} onChange={e => setColorTheme(t => ({ ...t, baseColor: e.target.value }))} style={{ position: 'absolute', opacity: 0, width: '200%', height: '200%', cursor: 'pointer', top: '-50%', left: '-50%' }} />
+                            </label>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-xs text-gray-400 mb-1"><span>Soft</span><span>Vivid</span></div>
+                            <input
+                              type="range" min="30" max="100" step="5"
+                              value={colorTheme.intensity}
+                              onChange={e => setColorTheme(t => ({ ...t, intensity: parseInt(e.target.value) }))}
+                              className="w-full"
+                              style={{ accentColor: colorTheme.baseColor }}
+                            />
+                            <div className="flex justify-between text-xs text-gray-400 mt-0.5">
+                              <span>Color intensity</span>
+                              <span className="font-semibold" style={{ color: colorTheme.baseColor }}>{colorTheme.intensity}%</span>
+                            </div>
+                          </div>
+                          {(colorTheme.baseColor !== DEFAULT_COLOR_THEME.baseColor || colorTheme.intensity !== DEFAULT_COLOR_THEME.intensity) && (
+                            <button onClick={() => setColorTheme(DEFAULT_COLOR_THEME)} className="text-xs text-gray-400 hover:text-gray-600 transition underline">Reset to default</button>
+                          )}
+                        </div>
                       </div>
 
                       {/* Advanced Study */}
@@ -6679,7 +6857,7 @@ Rules:
     return (
       <div className="min-h-screen" style={{background: darkMode ? '#111827' : 'linear-gradient(160deg, #fdf3ee 0%, #fef9f5 60%, #fdf3ee 100%)'}}>
         {/* Hero Section */}
-        <div className="text-white py-12 px-6 shadow-2xl" style={{background: 'linear-gradient(120deg, #7a0d0d 0%, #a01515 25%, #c0310d 55%, #8b1a08 80%, #5c0a0a 100%)'}}>
+        <div className="text-white py-12 px-6 shadow-2xl" style={{background: 'linear-gradient(120deg, var(--p-900) 0%, var(--p-800) 25%, var(--p-700) 55%, var(--p-800) 80%, var(--p-900) 100%)'}}>
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center justify-between flex-wrap gap-6">
               <div className="flex-1">
@@ -8449,7 +8627,7 @@ Rules:
                               fontSize: '0.45em',
                               color: isHighlighted
                                 ? (darkMode ? '#fbbf24' : '#92400e')
-                                : (darkMode ? '#f87171' : '#e11d48'),
+                                : 'var(--p-600)',
                               fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
                               fontWeight: 600,
                               letterSpacing: 0,
@@ -8541,7 +8719,7 @@ Rules:
                       >
                         {kewenPinyinLoading ? (
                           <React.Fragment>
-                            <span className="flex gap-0.5">{[0,1,2].map(ii => <span key={ii} style={{ width:5, height:5, borderRadius:'50%', background: kewenPinyinOverlay ? '#fff' : '#e11d48', animation:`chatBounce 0.9s ease-in-out ${ii*0.15}s infinite`, display:'inline-block' }} />)}</span>
+                            <span className="flex gap-0.5">{[0,1,2].map(ii => <span key={ii} style={{ width:5, height:5, borderRadius:'50%', background: kewenPinyinOverlay ? '#fff' : 'var(--p-600)', animation:`chatBounce 0.9s ease-in-out ${ii*0.15}s infinite`, display:'inline-block' }} />)}</span>
                             Loading…
                           </React.Fragment>
                         ) : (
@@ -8599,7 +8777,7 @@ Rules:
                           <div style={{ position:'absolute', top:-7, left:'50%', transform:'translateX(-50%)', width:0, height:0, borderLeft:'7px solid transparent', borderRight:'7px solid transparent', borderBottom:'7px solid #1a1a2e' }} />
                           {kewenPopup.loading ? (
                             <div style={{ display:'flex', alignItems:'center', gap:8, padding:'4px 0' }}>
-                              <div style={{ display:'flex', gap:3 }}>{[0,1,2].map(ii=><div key={ii} style={{ width:6, height:6, borderRadius:'50%', background:'#e11d48', animation:`chatBounce 1.2s ease-in-out ${ii*0.15}s infinite`, opacity:0.6 }} />)}</div>
+                              <div style={{ display:'flex', gap:3 }}>{[0,1,2].map(ii=><div key={ii} style={{ width:6, height:6, borderRadius:'50%', background:'var(--p-600)', animation:`chatBounce 1.2s ease-in-out ${ii*0.15}s infinite`, opacity:0.6 }} />)}</div>
                               <span style={{ fontSize:13, color:'#aaa' }}>Looking up {kewenPopup.text}…</span>
                             </div>
                           ) : (
@@ -8938,7 +9116,7 @@ Rules:
               )}
               <button
                 onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); setIsNewUser(false); }}
-                style={{ width: '100%', background: 'linear-gradient(135deg, #e11d48, #be123c)', color: '#fff', border: 'none', borderRadius: '0.75rem', padding: '0.875rem', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' }}
+                style={{ width: '100%', background: 'linear-gradient(135deg, var(--p-600), var(--p-700))', color: '#fff', border: 'none', borderRadius: '0.75rem', padding: '0.875rem', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' }}
               >
                 Got it!
               </button>
