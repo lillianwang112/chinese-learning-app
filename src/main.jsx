@@ -688,17 +688,60 @@ function generateColorPalette(baseColor, intensity) {
   };
 }
 
+// Every Tailwind colour family whose classes we want to remap to the primary palette.
+const ALL_COLOR_FAMILIES = [
+  'red','rose','pink','fuchsia',
+  'orange','amber','yellow','lime',
+  'green','emerald','teal','cyan','sky',
+  'blue','indigo','violet','purple',
+];
+const SHADE_LEVELS = [50,100,200,300,400,500,600,700,800,900];
+
+// Builds and injects a <style> tag that maps every Tailwind colour utility
+// (bg, text, border, ring, from, to, hover:*, focus:*) to the primary palette.
 function applyColorTheme(baseColor, intensity) {
   try {
     const palette = generateColorPalette(baseColor, intensity);
     const root = document.documentElement;
+
+    // Update CSS variables
     Object.entries(palette).forEach(([shade, color]) => {
       root.style.setProperty(`--p-${shade}`, color);
     });
-    // Expose gradient stops for inline styles
     root.style.setProperty('--p-gradient-start', palette[600]);
     root.style.setProperty('--p-gradient-mid',   palette[700]);
     root.style.setProperty('--p-gradient-dark',  palette[900]);
+
+    // Generate CSS overrides for ALL colour families so every hue on
+    // the page becomes a shade of the chosen colour.
+    let css = '';
+    for (const shade of SHADE_LEVELS) {
+      const c = palette[shade];
+      const sel  = (prefix, suffix='') => ALL_COLOR_FAMILIES.map(f => `.${prefix}${f}-${shade}${suffix}`).join(',');
+      const hSel = (prefix, suffix=':hover') => ALL_COLOR_FAMILIES.map(f => `.hover\\:${prefix}${f}-${shade}${suffix}`).join(',');
+      const fSel = (prefix, suffix=':focus') => ALL_COLOR_FAMILIES.map(f => `.focus\\:${prefix}${f}-${shade}${suffix}`).join(',');
+
+      css += `${sel('bg-')}{background-color:${c}!important}\n`;
+      css += `${sel('text-')}{color:${c}!important}\n`;
+      css += `${sel('border-')}{border-color:${c}!important}\n`;
+      css += `${sel('ring-')}{--tw-ring-color:${c}}\n`;
+      css += `${sel('from-')}{--tw-gradient-from:${c};--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to,transparent)}\n`;
+      css += `${sel('via-')}{--tw-gradient-via:${c}}\n`;
+      css += `${sel('to-')}{--tw-gradient-to:${c}}\n`;
+      // hover
+      css += `${hSel('bg-')}{background-color:${c}!important}\n`;
+      css += `${hSel('text-')}{color:${c}!important}\n`;
+      css += `${hSel('border-')}{border-color:${c}!important}\n`;
+      css += `${hSel('from-')}{--tw-gradient-from:${c}}\n`;
+      css += `${hSel('to-')}{--tw-gradient-to:${c}}\n`;
+      // focus
+      css += `${fSel('border-')}{border-color:${c}!important}\n`;
+      css += `${fSel('ring-')}{--tw-ring-color:${c}}\n`;
+    }
+
+    let el = document.getElementById('ct-overrides');
+    if (!el) { el = document.createElement('style'); el.id = 'ct-overrides'; document.head.appendChild(el); }
+    el.textContent = css;
   } catch (e) {
     console.warn('applyColorTheme error:', e);
   }
@@ -718,6 +761,16 @@ const COLOR_PRESETS = [
 ];
 
 const DEFAULT_COLOR_THEME = { baseColor: '#e11d48', intensity: 70 };
+
+// Apply theme immediately on module load — before React's first render —
+// so there is no flash of un-themed colours.
+(function initColorTheme() {
+  try {
+    const saved = localStorage.getItem('colorTheme');
+    const t = saved ? JSON.parse(saved) : DEFAULT_COLOR_THEME;
+    applyColorTheme(t.baseColor, t.intensity);
+  } catch(e) {}
+})();
 
 // ─────────────────────────────────────────────────────────────────────────────
 
