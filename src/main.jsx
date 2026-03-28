@@ -1119,6 +1119,7 @@ const ChineseLearningApp = () => {
         showEnglish: true,
         traceSpeed: 1, // 0.4=slow, 1=normal, 2=fast; also controls fade
         showTianzige: false, // show 田字格 grid overlay on the practice canvas
+        tianzigeWithDiagonals: false, // also draw diagonal guide lines in the grid
       },
       // Trouble words
       troubleWords: {
@@ -1382,7 +1383,7 @@ const ChineseLearningApp = () => {
       const ctx = bgCanvas.getContext('2d');
       ctx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
     }
-  }, [currentView, writingMode, userSettings.writing?.showTianzige, darkMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentView, writingMode, userSettings.writing?.showTianzige, userSettings.writing?.tianzigeWithDiagonals, darkMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Save writing session state to localStorage — fires on card navigation AND queue changes.
   // writingCards is included so Forgot re-insertions are always captured.
@@ -5925,7 +5926,7 @@ Rules:
     bgCanvas.height = cssSize * dpr;
     const ctx = bgCanvas.getContext('2d');
     ctx.scale(dpr, dpr);
-    // Dashed center lines in a muted color
+    // Dashed lines in a muted color
     ctx.strokeStyle = darkMode ? '#4b5563' : '#d1d5db';
     ctx.lineWidth = 1;
     ctx.setLineDash([10, 8]);
@@ -5939,6 +5940,17 @@ Rules:
     ctx.moveTo(cssSize / 2, 0);
     ctx.lineTo(cssSize / 2, cssSize);
     ctx.stroke();
+    // Optional diagonal guide lines
+    if (userSettings.writing?.tianzigeWithDiagonals) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(cssSize, cssSize);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cssSize, 0);
+      ctx.lineTo(0, cssSize);
+      ctx.stroke();
+    }
     ctx.setLineDash([]);
   };
 
@@ -6474,12 +6486,25 @@ Rules:
                             ))}
                           </div>
                         </div>
-                        <SettingToggle
-                          label="田字格 grid overlay"
-                          checked={userSettings.writing.showTianzige || false}
-                          onChange={() => setUserSettings(s => ({ ...s, writing: { ...s.writing, showTianzige: !(s.writing.showTianzige || false) } }))}
-                        />
-                        <p className="text-xs text-gray-400 -mt-2">Shows dashed center lines on the practice canvas to guide character proportions</p>
+                        <div className="space-y-2">
+                          <SettingToggle
+                            label="田字格 grid overlay"
+                            checked={userSettings.writing.showTianzige || false}
+                            onChange={() => setUserSettings(s => ({ ...s, writing: { ...s.writing, showTianzige: !(s.writing.showTianzige || false) } }))}
+                          />
+                          <p className="text-xs text-gray-400">Shows dashed center lines on the practice canvas to guide character proportions</p>
+                          {(userSettings.writing.showTianzige) && (
+                            <label className="flex items-center gap-3 cursor-pointer pl-4">
+                              <input
+                                type="checkbox"
+                                checked={userSettings.writing.tianzigeWithDiagonals || false}
+                                onChange={() => setUserSettings(s => ({ ...s, writing: { ...s.writing, tianzigeWithDiagonals: !(s.writing.tianzigeWithDiagonals || false) } }))}
+                                className="w-4 h-4 accent-red-500"
+                              />
+                              <span className="text-sm text-gray-600">Include diagonal guide lines</span>
+                            </label>
+                          )}
+                        </div>
                       </div>
                       {/* Trouble Words Settings */}
                       <div className="bg-gray-50 rounded-xl p-4 space-y-3">
@@ -6583,12 +6608,25 @@ Rules:
                             </label>
                           </div>
                         </div>
-                        <SettingToggle
-                          label="田字格 grid overlay"
-                          checked={userSettings.writing.showTianzige || false}
-                          onChange={() => setUserSettings(s => ({ ...s, writing: { ...s.writing, showTianzige: !(s.writing.showTianzige || false) } }))}
-                        />
-                        <p className="text-xs text-gray-400 -mt-2">Shows dashed center lines on the practice canvas to guide character proportions</p>
+                        <div className="space-y-2">
+                          <SettingToggle
+                            label="田字格 grid overlay"
+                            checked={userSettings.writing.showTianzige || false}
+                            onChange={() => setUserSettings(s => ({ ...s, writing: { ...s.writing, showTianzige: !(s.writing.showTianzige || false) } }))}
+                          />
+                          <p className="text-xs text-gray-400">Shows dashed center lines on the practice canvas to guide character proportions</p>
+                          {(userSettings.writing.showTianzige) && (
+                            <label className="flex items-center gap-3 cursor-pointer pl-4">
+                              <input
+                                type="checkbox"
+                                checked={userSettings.writing.tianzigeWithDiagonals || false}
+                                onChange={() => setUserSettings(s => ({ ...s, writing: { ...s.writing, tianzigeWithDiagonals: !(s.writing.tianzigeWithDiagonals || false) } }))}
+                                className="w-4 h-4 accent-red-500"
+                              />
+                              <span className="text-sm text-gray-600">Include diagonal guide lines</span>
+                            </label>
+                          )}
+                        </div>
                       </div>
                       {/* Trouble Words Settings */}
                       <div className="bg-gray-50 rounded-xl p-4 space-y-3">
