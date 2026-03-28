@@ -1829,7 +1829,7 @@ const ChineseLearningApp = () => {
       const result = await firebaseAuth.signInWithPopup(provider);
       if (result.additionalUserInfo && result.additionalUserInfo.isNewUser) {
         await result.user.delete();
-        setAuthError('New account creation is currently disabled. If you did not create an account before March 27, 2026, you will not be able to sign up until the app receives funding to support more users.');
+        setAuthError('New account creation is currently disabled. If you did not create an account before March 27, 2026, you will not be able to sign up until the app receives funding to support more users. You can still use the app as a guest — your progress will be saved locally in your browser on this device.');
         return;
       }
       setCurrentView('home');
@@ -6163,7 +6163,8 @@ Rules:
             </p>
 
             <p className="text-center text-xs text-gray-400 leading-relaxed">
-              Guest mode saves locally in your browser only.<br />Sign in to sync across devices.
+              <strong>Already have an account?</strong> Sign in to sync your progress across devices — your decks and scores will follow you wherever you open the app.<br /><br />
+              <strong>No account?</strong> You can still use the app as a guest. Your progress will be saved locally in your browser on this device, meaning it stays here — it won't carry over if you switch devices or clear your browser data.
             </p>
           </div>
         </div>
@@ -6279,7 +6280,8 @@ Rules:
 
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-400 leading-relaxed">
-              New account creation is currently disabled. If you did not create an account before March 27, 2026, you will not be able to sign up until the app receives funding to support more users.
+              New account creation is currently disabled. If you did not create an account before March 27, 2026, you will not be able to sign up until the app receives funding to support more users.<br /><br />
+              You can still use the app as a guest — your progress will be saved locally in your browser on this device, meaning it stays here and won't carry over if you switch devices or clear your browser data.
             </p>
           </div>
         </div>
