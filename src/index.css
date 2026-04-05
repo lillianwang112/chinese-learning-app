@@ -15,6 +15,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color-scheme: light;
+    forced-color-adjust: none;
 }
 #root {
     min-height: 100vh;
@@ -27,6 +28,7 @@ input,
 select,
 textarea {
     color-scheme: light;
+    forced-color-adjust: none;
 }
 
 button {
