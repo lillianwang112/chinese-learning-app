@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-    /* Advertise explicit light/dark theme support so Chrome does not apply
-       heuristic Auto Dark Mode transformations to controls. */
-    color-scheme: light dark;
+    /* Keep browser-native control painting in light mode to avoid Chrome
+       Auto Dark heuristics flattening custom button colors. */
+    color-scheme: light;
 }
 
 body {
@@ -26,13 +26,14 @@ button,
 input,
 select,
 textarea {
-    color-scheme: inherit;
+    color-scheme: light;
 }
 
 button {
     -webkit-appearance: none;
     appearance: none;
     -webkit-text-fill-color: currentColor;
+    forced-color-adjust: none;
 }
 /* Prevent zoom on input focus on iOS */
 input[type="text"],
@@ -52,7 +53,7 @@ canvas {
 body.dark-mode {
   background-color: #1a1a1a;
   color: #f3f4f6;
-  color-scheme: dark;
+  color-scheme: light;
 }
 body.dark-mode .bg-white {
   background-color: #2d2d2d !important;
