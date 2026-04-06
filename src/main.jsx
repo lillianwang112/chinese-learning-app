@@ -1170,7 +1170,7 @@ const ChineseLearningApp = () => {
 
   // All available built-in vocab decks hosted on GitHub Pages alongside the app
   const BUILT_IN_DECKS = [
-    { filename: '108vocab/写字比赛 Vocab.json',              name: '写字比赛 Vocabulary',                  cards: 829, topic: 'CHI103 + CHI108 Review', highlight: true },
+    { filename: '108vocab/写字比赛 Vocab.json',              name: '写字比赛 Vocabulary (CHI103 + CHI108)', cards: 829, topic: 'CHI103 + CHI108 Review', highlight: true },
     { filename: '108vocab/Privacy.json',                    name: 'Privacy 隐私',                       cards: 43,  topic: 'Lesson 11' },
     { filename: '108vocab/走后门.json',                      name: '走后门',                              cards: 35,  topic: 'Lesson 12' },
     { filename: '108vocab/到时候再说吧.json',                 name: '到时候再说吧',                         cards: 44,  topic: 'ANC Lesson 18' },
