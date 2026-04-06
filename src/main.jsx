@@ -1170,6 +1170,7 @@ const ChineseLearningApp = () => {
 
   // All available built-in vocab decks hosted on GitHub Pages alongside the app
   const BUILT_IN_DECKS = [
+    { filename: '108vocab/写字比赛 Vocab.json',              name: '写字比赛 Vocabulary',                  cards: 829, topic: 'CHI103 + CHI108 Review', highlight: true },
     { filename: '108vocab/Privacy.json',                    name: 'Privacy 隐私',                       cards: 43,  topic: 'Lesson 11' },
     { filename: '108vocab/走后门.json',                      name: '走后门',                              cards: 35,  topic: 'Lesson 12' },
     { filename: '108vocab/到时候再说吧.json',                 name: '到时候再说吧',                         cards: 44,  topic: 'ANC Lesson 18' },
@@ -7930,10 +7931,14 @@ Rules:
                   const isLoading = browseLoading === deck.filename;
                   const isDone = browseLoading === ('done-' + deck.filename);
                   return (
-                    <div key={deck.filename} className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-gray-50 transition group">
+                    <div key={deck.filename} className={`flex items-center justify-between px-4 py-3 rounded-xl transition group ${deck.highlight ? 'bg-amber-50 hover:bg-amber-100 border border-amber-200' : 'hover:bg-gray-50'}`}>
                       <div className="flex-1 min-w-0 mr-3">
-                        <div className="font-semibold text-gray-800 text-sm">{deck.name}</div>
-                        <div className="text-xs text-gray-400">{deck.topic}{deck.cards ? ` · ${deck.cards} cards` : ''}</div>
+                        <div className={`font-semibold text-sm flex items-center gap-1.5 ${deck.highlight ? 'text-amber-800' : 'text-gray-800'}`}>
+                          {deck.highlight && <span>⭐</span>}
+                          {deck.name}
+                          {deck.highlight && <span className="text-xs font-medium px-1.5 py-0.5 bg-amber-200 text-amber-800 rounded-full">New</span>}
+                        </div>
+                        <div className={`text-xs ${deck.highlight ? 'text-amber-600' : 'text-gray-400'}`}>{deck.topic}{deck.cards ? ` · ${deck.cards} cards` : ''}</div>
                       </div>
                       <button
                         onClick={() => !alreadyAdded && !isLoading && importBuiltInDeck(deck)}
@@ -8907,6 +8912,10 @@ Rules:
               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>What's New in v{APP_VERSION} 🎉</h2>
               <p style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: '1.25rem' }}>Here's what's been added:</p>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', background: 'linear-gradient(135deg, #fef3c7, #fde68a)', borderRadius: '0.75rem', padding: '0.75rem', border: '1px solid #f59e0b' }}>
+                  <span style={{ fontSize: '1.25rem' }}>✍️</span>
+                  <div><strong style={{ color: '#92400e' }}>Get ready for 写字比赛 — this Friday, Apr 10!</strong><br/><span style={{ color: '#b45309', fontSize: '0.875rem' }}>The 写字比赛 vocab deck (829 cards, CHI103 + CHI108) is now available — find it <strong>first in Browse Decks</strong>.</span></div>
+                </li>
                 <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
                   <span style={{ fontSize: '1.25rem' }}>🌙</span>
                   <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Dark mode</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>Opt-in toggle in Settings — easy on the eyes at night.</span></div>
