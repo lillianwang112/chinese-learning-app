@@ -715,7 +715,14 @@ const ChineseLearningApp = () => {
   const [editCardValues, setEditCardValues] = useState({ chinese: '', pinyin: '', english: '' });
   const [bulkSelectedCards, setBulkSelectedCards] = useState(new Set()); // Set of card IDs for bulk delete
   const [bulkSelectMode, setBulkSelectMode] = useState(false);
+  const [subsetSelectMode, setSubsetSelectMode] = useState(false);
+  const [subsetSelectedCards, setSubsetSelectedCards] = useState(new Set());
+  const [subsetDeckName, setSubsetDeckName] = useState('');
+  const [subsetRangeStart, setSubsetRangeStart] = useState('');
+  const [subsetRangeEnd, setSubsetRangeEnd] = useState('');
   const [shuffledCards, setShuffledCards] = useState([]);
+  const [showStudyStartAtPicker, setShowStudyStartAtPicker] = useState(false);
+  const [studyStartAtInput, setStudyStartAtInput] = useState('1');
 
   // Learn Mode state
   const [learnMode, setLearnMode] = useState('multiple-choice'); // multiple-choice, fill-blank
@@ -781,6 +788,8 @@ const ChineseLearningApp = () => {
   // Character writing practice state
   const [writingCards, setWritingCards] = useState([]);
   const [currentWritingIndex, setCurrentWritingIndex] = useState(0);
+  const [showWritingStartAtPicker, setShowWritingStartAtPicker] = useState(false);
+  const [writingStartAtInput, setWritingStartAtInput] = useState('1');
   const canvasRef = useRef(null);
   const writingBgCanvasRef = useRef(null); // background canvas for 田字格 grid overlay
 
@@ -4832,11 +4841,48 @@ Rules:
     setBulkSelectMode(false);
   };
 
+  const applySubsetRangeSelection = () => {
+    if (!editingDeck || editingDeck.cards.length === 0) return;
+    const total = editingDeck.cards.length;
+    const start = Number.parseInt(subsetRangeStart, 10);
+    const end = Number.parseInt(subsetRangeEnd, 10);
+    if (Number.isNaN(start) || Number.isNaN(end)) {
+      alert(`Please enter a valid range between 1 and ${total}.`);
+      return;
+    }
+    const lo = Math.max(1, Math.min(start, end));
+    const hi = Math.min(total, Math.max(start, end));
+    const newSet = new Set(subsetSelectedCards);
+    for (let i = lo - 1; i < hi; i++) newSet.add(editingDeck.cards[i].id);
+    setSubsetSelectedCards(newSet);
+  };
+
+  const createSubsetDeckFromSelection = () => {
+    if (!editingDeck || subsetSelectedCards.size === 0) return;
+    const selectedCards = editingDeck.cards.filter(card => subsetSelectedCards.has(card.id));
+    if (selectedCards.length === 0) return;
+    const deckName = subsetDeckName.trim() || `${editingDeck.name} (Subset)`;
+    const timestamp = Date.now();
+    const newDeck = {
+      id: `deck-${timestamp}`,
+      name: deckName,
+      cards: selectedCards.map((card, idx) => ({ ...card, id: `${timestamp}-${idx}-${Math.random()}` }))
+    };
+    setDecks(prev => [...prev, newDeck]);
+    setSubsetDeckName('');
+    setSubsetRangeStart('');
+    setSubsetRangeEnd('');
+    setSubsetSelectedCards(new Set());
+    setSubsetSelectMode(false);
+    alert(`Created "${deckName}" with ${selectedCards.length} card${selectedCards.length !== 1 ? 's' : ''}.`);
+  };
+
   // Delete deck
   const deleteDeck = (deckId, deckName) => {
     const confirmed = window.confirm(`Are you sure you want to delete "${deckName}"?\n\nThis action cannot be undone.`);
     if (confirmed) {
       setDecks(decks.filter(deck => deck.id !== deckId));
+      setFolders(prev => prev.map(f => ({ ...f, deckIds: f.deckIds.filter(id => id !== deckId) })));
       // Also delete from cloud
       if (currentUser && FIREBASE_ENABLED) {
         CloudSync.deleteDeckFromCloud(currentUser.uid, deckId).catch(e => console.error('Cloud delete error:', e));
@@ -5165,7 +5211,7 @@ Rules:
             // Single deck - just import directly
             setDecks(prev => [...prev, parsed[0]]);
             if (importTargetFolder) {
-              setFolders(prev => prev.map(f => f.id === importTargetFolder ? { ...f, deckIds: [...f.deckIds, parsed[0].id] } : f));
+              setFolders(prev => prev.map(f => String(f.id) === String(importTargetFolder) ? { ...f, deckIds: [...f.deckIds, parsed[0].id] } : f));
             }
             // Track the imported deck so the tour spotlights it instead of the HSK sample
             if (tutorialActive && tutorialStepId === 'chi108-import') {
@@ -5189,7 +5235,7 @@ Rules:
     setDecks(prev => [...prev, ...importedDecks]);
     if (importTargetFolder) {
       const newIds = importedDecks.map(d => d.id);
-      setFolders(prev => prev.map(f => f.id === importTargetFolder ? { ...f, deckIds: [...f.deckIds, ...newIds] } : f));
+      setFolders(prev => prev.map(f => String(f.id) === String(importTargetFolder) ? { ...f, deckIds: [...f.deckIds, ...newIds] } : f));
     }
     // Track the first imported deck so the tour spotlights it instead of the HSK sample
     if (tutorialActive && tutorialStepId === 'chi108-import' && firstId) {
@@ -5218,7 +5264,7 @@ Rules:
     };
     setDecks(prev => [...prev, combined]);
     if (importTargetFolder) {
-      setFolders(prev => prev.map(f => f.id === importTargetFolder ? { ...f, deckIds: [...f.deckIds, combined.id] } : f));
+      setFolders(prev => prev.map(f => String(f.id) === String(importTargetFolder) ? { ...f, deckIds: [...f.deckIds, combined.id] } : f));
     }
     // Track the combined deck so the tour spotlights it instead of the HSK sample
     if (tutorialActive && tutorialStepId === 'chi108-import') {
@@ -5247,12 +5293,26 @@ Rules:
     }
   };
 
+  const bulkDeleteSelectedDecks = () => {
+    if (bulkMoveSelectedDecks.size === 0) return;
+    const idsToDelete = new Set(bulkMoveSelectedDecks);
+    const count = idsToDelete.size;
+    const confirmed = window.confirm(`Delete ${count} selected deck${count !== 1 ? 's' : ''}?\n\nThis cannot be undone.`);
+    if (!confirmed) return;
+    setDecks(prev => prev.filter(deck => !idsToDelete.has(deck.id)));
+    setFolders(prev => prev.map(f => ({ ...f, deckIds: f.deckIds.filter(id => !idsToDelete.has(id)) })));
+    setBulkMoveSelectedDecks(new Set());
+    setReorderMode(false);
+  };
+
   // Start studying a deck
   const startStudy = (deck) => {
     setLastStudied(prev => ({...prev, [deck.id]: { timestamp: Date.now(), mode: 'study' }}));
     setSelectedDeck(deck);
     setShuffledCards([...deck.cards]); // Start with original order
     setCurrentCardIndex(0);
+    setStudyStartAtInput('1');
+    setShowStudyStartAtPicker(false);
     setIsFlipped(false);
     setSwipeHistory([]);
     setCurrentView('study');
@@ -5265,6 +5325,20 @@ Rules:
     setShuffledCards(shuffled);
     setCurrentCardIndex(0);
     setIsFlipped(false);
+  };
+
+  const applyStudyStartAt = (rawValue) => {
+    if (!shuffledCards.length) return;
+    const parsed = Number.parseInt(rawValue, 10);
+    if (Number.isNaN(parsed)) return;
+    const startCard = Math.min(Math.max(parsed, 1), shuffledCards.length);
+    const remainingCards = shuffledCards.slice(startCard - 1);
+    setStudyStartAtInput(String(startCard));
+    setShuffledCards(remainingCards.length > 0 ? remainingCards : [shuffledCards[shuffledCards.length - 1]]);
+    setCurrentCardIndex(0);
+    setIsFlipped(false);
+    setSwipeHistory([]);
+    setShowStudyStartAtPicker(false);
   };
 
   // Start Match Game
@@ -5517,6 +5591,8 @@ Rules:
     setSelectedDeck(deck);
     setCurrentView('writing');
     setWritingMode(null); // Show mode selection screen
+    setWritingStartAtInput('1');
+    setShowWritingStartAtPicker(false);
     setWritingUndoHistory([]);
   };
 
@@ -5583,6 +5659,8 @@ Rules:
     setWritingFeedback(null);
     setWritingSessionComplete(false);
     setWritingMode('practiceAll');
+    setWritingStartAtInput('1');
+    setShowWritingStartAtPicker(false);
     setWritingUndoHistory([]);
     setCurrentView('writing');
     updateStudyStreak();
@@ -5603,6 +5681,8 @@ Rules:
     setWritingSessionComplete(false);
     setTestRevealed(false);
     setWritingMode('testAll');
+    setWritingStartAtInput('1');
+    setShowWritingStartAtPicker(false);
     setWritingUndoHistory([]);
     setCurrentView('writing');
     updateStudyStreak();
@@ -5634,6 +5714,8 @@ Rules:
   
       setWritingFeedback(null);
       setTestRevealed(false);
+      setWritingStartAtInput('1');
+      setShowWritingStartAtPicker(false);
       setWritingUndoHistory([]);
       setCurrentView('writing');
       setLastStudied(prev => ({...prev, [deck.id]: { timestamp: Date.now(), mode: 'writing' }}));
@@ -5673,6 +5755,8 @@ Rules:
     setWritingFeedback(null);
     setWritingSessionComplete(false);
     setWritingMode('practice10');
+    setWritingStartAtInput('1');
+    setShowWritingStartAtPicker(false);
     updateStudyStreak();
   };
 
@@ -5691,6 +5775,8 @@ Rules:
     setWritingFeedback(null);
     setWritingSessionComplete(false);
     setWritingMode('practiceAll');
+    setWritingStartAtInput('1');
+    setShowWritingStartAtPicker(false);
     updateStudyStreak();
   };
 
@@ -5711,6 +5797,8 @@ Rules:
     setWritingSessionComplete(false);
     setTestRevealed(false);
     setWritingMode('test');
+    setWritingStartAtInput('1');
+    setShowWritingStartAtPicker(false);
     updateStudyStreak();
   };
 
@@ -5730,6 +5818,8 @@ Rules:
     setWritingSessionComplete(false);
     setTestRevealed(false);
     setWritingMode('testAll');
+    setWritingStartAtInput('1');
+    setShowWritingStartAtPicker(false);
     updateStudyStreak();
   };
 
@@ -5795,6 +5885,29 @@ Rules:
       // For Practice 10 and Test: get a new set of 10
       getNewWritingSet();
       setTestRevealed(false);
+    }
+  };
+
+  const applyWritingStartAt = (rawValue) => {
+    if (!writingCards.length) return;
+    const parsed = Number.parseInt(rawValue, 10);
+    if (Number.isNaN(parsed)) return;
+    const startCard = Math.min(Math.max(parsed, 1), writingCards.length);
+    const remainingCards = writingCards.slice(startCard - 1);
+
+    setWritingStartAtInput(String(startCard));
+    setWritingCards(remainingCards.length > 0 ? remainingCards : [writingCards[writingCards.length - 1]]);
+    setCurrentWritingIndex(0);
+    drawCtrl.current.strokeCount = 0;
+    canvasReadyRef.current = false;
+    drawCtrl.current.currentStroke = null;
+    setWritingFeedback(null);
+    setWritingSessionComplete(false);
+    setTestRevealed(false);
+    setShowWritingStartAtPicker(false);
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     }
   };
 
@@ -6078,6 +6191,13 @@ Rules:
   // Edit deck
   const startEditDeck = (deck) => {
     setEditingDeck(deck);
+    setBulkSelectMode(false);
+    setBulkSelectedCards(new Set());
+    setSubsetSelectMode(false);
+    setSubsetSelectedCards(new Set());
+    setSubsetDeckName('');
+    setSubsetRangeStart('');
+    setSubsetRangeEnd('');
     setCurrentView('edit');
   };
 
@@ -6948,6 +7068,10 @@ Rules:
               {(decks.length >= 2 || folders.length >= 2) && (
                 <button
                   onClick={() => {
+                    if (reorderMode && bulkMoveSelectedDecks.size > 0) {
+                      bulkDeleteSelectedDecks();
+                      return;
+                    }
                     if (reorderMode) {
                       setBulkMoveSelectedDecks(new Set());
                       if (currentUser && FIREBASE_ENABLED && cloudLoadedRef.current) {
@@ -6962,17 +7086,26 @@ Rules:
                       : 'bg-gradient-to-r from-gray-500 to-gray-600 text-white hover:from-gray-600 hover:to-gray-700'
                   }`}
                 >
-                  {reorderMode ? '✓ Done' : '↕ Move'}
+                  {reorderMode && bulkMoveSelectedDecks.size > 0 ? `🗑 Delete ${bulkMoveSelectedDecks.size}` : (reorderMode ? '✓ Done' : '☑ Select')}
                 </button>
               )}
               {reorderMode && bulkMoveSelectedDecks.size > 0 ? (
-                <button
-                  onClick={() => setShowBulkMoveModal(true)}
-                  className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
-                >
-                  <span className="text-lg">📁</span>
-                  Move {bulkMoveSelectedDecks.size} to Folder
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowBulkMoveModal(true)}
+                    className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
+                  >
+                    <span className="text-lg">📁</span>
+                    Move {bulkMoveSelectedDecks.size} to Folder
+                  </button>
+                  <button
+                    onClick={bulkDeleteSelectedDecks}
+                    className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
+                  >
+                    <Trash2 size={18} />
+                    Delete Decks
+                  </button>
+                </div>
               ) : (
                 <button
                   id="tutorial-new-folder-btn"
@@ -9490,6 +9623,11 @@ Rules:
               setEditingDeck(null);
               setBulkSelectMode(false);
               setBulkSelectedCards(new Set());
+              setSubsetSelectMode(false);
+              setSubsetSelectedCards(new Set());
+              setSubsetDeckName('');
+              setSubsetRangeStart('');
+              setSubsetRangeEnd('');
               setCurrentView('home');
             }}
             className={`mb-6 flex items-center gap-2 font-semibold ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
@@ -9638,27 +9776,112 @@ Rules:
                           Cancel
                         </button>
                       </>
+                    ) : subsetSelectMode ? (
+                      <>
+                        <button
+                          onClick={() => {
+                            if (subsetSelectedCards.size === editingDeck.cards.length) {
+                              setSubsetSelectedCards(new Set());
+                            } else {
+                              setSubsetSelectedCards(new Set(editingDeck.cards.map(c => c.id)));
+                            }
+                          }}
+                          className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-medium"
+                        >
+                          {subsetSelectedCards.size === editingDeck.cards.length ? 'Deselect All' : 'Select All'}
+                        </button>
+                        <button
+                          onClick={() => { setSubsetSelectMode(false); setSubsetSelectedCards(new Set()); setSubsetRangeStart(''); setSubsetRangeEnd(''); }}
+                          className="px-3 py-1.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition text-sm font-medium"
+                        >
+                          Cancel
+                        </button>
+                      </>
                     ) : (
-                      <button
-                        onClick={() => setBulkSelectMode(true)}
-                        className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-medium"
-                      >
-                        Bulk Select
-                      </button>
+                      <>
+                        <button
+                          onClick={() => { setSubsetSelectMode(false); setSubsetSelectedCards(new Set()); setBulkSelectMode(true); }}
+                          className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-medium"
+                        >
+                          Bulk Delete
+                        </button>
+                        <button
+                          onClick={() => { setBulkSelectMode(false); setBulkSelectedCards(new Set()); setSubsetSelectMode(true); }}
+                          className="px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition text-sm font-medium"
+                        >
+                          Create Subset Deck
+                        </button>
+                      </>
                     )}
                   </div>
                 )}
               </div>
+
+              {subsetSelectMode && editingDeck.cards.length > 0 && (
+                <div className="mb-4 p-4 rounded-lg border border-indigo-200 bg-indigo-50">
+                  <p className="text-sm text-indigo-800 mb-3 font-medium">
+                    Select cards manually below, or select a range (min: 1, max: {editingDeck.cards.length}).
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-2">
+                    <input
+                      type="number"
+                      min="1"
+                      max={editingDeck.cards.length}
+                      value={subsetRangeStart}
+                      onChange={(e) => setSubsetRangeStart(e.target.value)}
+                      placeholder="Start #"
+                      className="px-3 py-2 border border-indigo-300 rounded-lg text-sm"
+                    />
+                    <input
+                      type="number"
+                      min="1"
+                      max={editingDeck.cards.length}
+                      value={subsetRangeEnd}
+                      onChange={(e) => setSubsetRangeEnd(e.target.value)}
+                      placeholder="End #"
+                      className="px-3 py-2 border border-indigo-300 rounded-lg text-sm"
+                    />
+                    <button
+                      onClick={applySubsetRangeSelection}
+                      className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium"
+                    >
+                      Select Range
+                    </button>
+                    <input
+                      type="text"
+                      value={subsetDeckName}
+                      onChange={(e) => setSubsetDeckName(e.target.value)}
+                      placeholder={`${editingDeck.name} (Subset)`}
+                      className="px-3 py-2 border border-indigo-300 rounded-lg text-sm md:col-span-2"
+                    />
+                  </div>
+                  <button
+                    onClick={createSubsetDeckFromSelection}
+                    disabled={subsetSelectedCards.size === 0}
+                    className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    Create Deck from Selected ({subsetSelectedCards.size})
+                  </button>
+                </div>
+              )}
               
               {editingDeck.cards.length === 0 ? (
                 <p className="text-gray-600 text-center py-8">No cards yet. Add your first card above!</p>
               ) : (
                 <div className="space-y-3">
-                  {editingDeck.cards.map(card => {
+                  {editingDeck.cards.map((card, cardIndex) => {
                     const isBulkSelected = bulkSelectedCards.has(card.id);
+                    const isSubsetSelected = subsetSelectedCards.has(card.id);
+                    const selectionMode = bulkSelectMode || subsetSelectMode;
                     return (
-                    <div key={card.id} className={`p-4 rounded-lg transition ${bulkSelectMode && isBulkSelected ? 'bg-red-50 border-2 border-red-300' : 'bg-gray-50 hover:bg-gray-100'}`}>
-                      {editingCardId === card.id && !bulkSelectMode ? (
+                    <div key={card.id} className={`p-4 rounded-lg transition ${
+                      bulkSelectMode && isBulkSelected
+                        ? 'bg-red-50 border-2 border-red-300'
+                        : subsetSelectMode && isSubsetSelected
+                          ? 'bg-indigo-50 border-2 border-indigo-300'
+                          : 'bg-gray-50 hover:bg-gray-100'
+                    }`}>
+                      {editingCardId === card.id && !selectionMode ? (
                         /* Editing mode */
                         <div>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
@@ -9702,22 +9925,31 @@ Rules:
                       ) : (
                         /* Display mode */
                         <div className="flex items-center justify-between">
-                          {bulkSelectMode && (
+                          {selectionMode && (
                             <button
                               onClick={() => {
-                                const newSet = new Set(bulkSelectedCards);
-                                if (isBulkSelected) { newSet.delete(card.id); } else { newSet.add(card.id); }
-                                setBulkSelectedCards(newSet);
+                                if (bulkSelectMode) {
+                                  const newSet = new Set(bulkSelectedCards);
+                                  if (isBulkSelected) { newSet.delete(card.id); } else { newSet.add(card.id); }
+                                  setBulkSelectedCards(newSet);
+                                } else {
+                                  const newSet = new Set(subsetSelectedCards);
+                                  if (isSubsetSelected) { newSet.delete(card.id); } else { newSet.add(card.id); }
+                                  setSubsetSelectedCards(newSet);
+                                }
                               }}
                               className={`w-6 h-6 rounded border-2 flex items-center justify-center mr-3 flex-shrink-0 transition ${
-                                isBulkSelected ? 'border-red-500 bg-red-500' : 'border-gray-300 hover:border-red-400'
+                                bulkSelectMode
+                                  ? (isBulkSelected ? 'border-red-500 bg-red-500' : 'border-gray-300 hover:border-red-400')
+                                  : (isSubsetSelected ? 'border-indigo-500 bg-indigo-500' : 'border-gray-300 hover:border-indigo-400')
                               }`}
                             >
-                              {isBulkSelected && <Check size={14} className="text-white" />}
+                              {(isBulkSelected || isSubsetSelected) && <Check size={14} className="text-white" />}
                             </button>
                           )}
                           <div className="flex-1 grid grid-cols-3 gap-4">
                             <div>
+                              <span className="text-xs text-gray-400 mr-2">#{cardIndex + 1}</span>
                               <span className="text-2xl font-bold text-gray-800">{card.chinese}</span>
                             </div>
                             <div>
@@ -9728,7 +9960,7 @@ Rules:
                             </div>
                           </div>
                           
-                          {!bulkSelectMode && (
+                          {!selectionMode && (
                             <div className="flex items-center gap-2">
                               {/* Card mastery status indicator */}
                               {card.masteryStatus === 'mastered' ? (
@@ -9877,6 +10109,55 @@ Rules:
               >
                 🔀 Shuffle
               </button>
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    setStudyStartAtInput('1');
+                    setShowStudyStartAtPicker(prev => !prev);
+                  }}
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                >
+                  🎯 Start At
+                </button>
+                {showStudyStartAtPicker && (
+                  <div className={`absolute right-0 mt-2 w-80 rounded-xl shadow-xl p-4 z-40 ${darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+                    <p className={`text-sm font-semibold mb-2 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Start this session from card…</p>
+                    <input
+                      type="number"
+                      min="1"
+                      max={shuffledCards.length}
+                      value={studyStartAtInput}
+                      onChange={(e) => setStudyStartAtInput(e.target.value)}
+                      className={`w-full px-3 py-2 rounded-lg border mb-3 ${darkMode ? 'bg-gray-900 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'}`}
+                    />
+                    <input
+                      type="range"
+                      min="1"
+                      max={Math.max(1, shuffledCards.length)}
+                      value={Math.min(Math.max(Number(studyStartAtInput) || 1, 1), Math.max(1, shuffledCards.length))}
+                      onChange={(e) => setStudyStartAtInput(e.target.value)}
+                      className="w-full mb-3"
+                    />
+                    <p className={`text-xs mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Cards before this are skipped for this session only.
+                    </p>
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => setShowStudyStartAtPicker(false)}
+                        className={`px-3 py-1.5 rounded-lg text-sm ${darkMode ? 'bg-gray-700 text-gray-200' : 'bg-gray-200 text-gray-700'}`}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => applyStudyStartAt(studyStartAtInput)}
+                        className="px-3 py-1.5 rounded-lg text-sm bg-indigo-600 text-white hover:bg-indigo-700"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="text-gray-600">
                 Card {currentCardIndex + 1} of {shuffledCards.length}
               </div>
@@ -11306,6 +11587,55 @@ Rules:
               >
                 🔀 {(writingMode === 'practiceAll' || writingMode === 'testAll') ? 'Shuffle' : 'New 10'}
               </button>
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    setWritingStartAtInput('1');
+                    setShowWritingStartAtPicker(prev => !prev);
+                  }}
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                >
+                  🎯 Start At
+                </button>
+                {showWritingStartAtPicker && (
+                  <div className={`absolute right-0 mt-2 w-80 rounded-xl shadow-xl p-4 z-40 ${darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+                    <p className={`text-sm font-semibold mb-2 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>Start this session from card…</p>
+                    <input
+                      type="number"
+                      min="1"
+                      max={writingCards.length}
+                      value={writingStartAtInput}
+                      onChange={(e) => setWritingStartAtInput(e.target.value)}
+                      className={`w-full px-3 py-2 rounded-lg border mb-3 ${darkMode ? 'bg-gray-900 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900'}`}
+                    />
+                    <input
+                      type="range"
+                      min="1"
+                      max={Math.max(1, writingCards.length)}
+                      value={Math.min(Math.max(Number(writingStartAtInput) || 1, 1), Math.max(1, writingCards.length))}
+                      onChange={(e) => setWritingStartAtInput(e.target.value)}
+                      className="w-full mb-3"
+                    />
+                    <p className={`text-xs mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Cards before this are treated as done for this session.
+                    </p>
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => setShowWritingStartAtPicker(false)}
+                        className={`px-3 py-1.5 rounded-lg text-sm ${darkMode ? 'bg-gray-700 text-gray-200' : 'bg-gray-200 text-gray-700'}`}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => applyWritingStartAt(writingStartAtInput)}
+                        className="px-3 py-1.5 rounded-lg text-sm bg-indigo-600 text-white hover:bg-indigo-700"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="text-gray-600">
                 Character {currentWritingIndex + 1} of {writingCards.length}
               </div>
