@@ -336,16 +336,16 @@ const APP_VERSION = '1.1.0';
 const TUTORIAL_STEPS = {
   welcome: {
     title: 'Welcome to 中文 Learn! 👋',
-    content: 'Let\'s take a quick tour so you know how to use every feature.\n\nAre you a CHI 108 student?',
+    content: 'Let\'s take a quick tour so you know how to use every feature.\n\nIf you are in Princeton\'s CHI 101, 102, or 108, click "Download Decks + 课文 (Princeton Only)" to get your course decks and readings.\n\nAre you a Princeton CHI student?',
     choices: [
-      { label: '✓ Yes, I\'m CHI 108', nextId: 'chi108-path', chi108: true },
+      { label: '✓ Yes, Princeton CHI 101/102/108', nextId: 'chi108-path', chi108: true },
       { label: '◎ No, just exploring', nextId: 'hsk-intro', chi108: false },
     ],
     view: 'home',
   },
   'chi108-path': {
-    title: 'Getting Your CHI 108 Deck 📚',
-    content: 'Great! You can load your weekly vocab deck two ways:\n\n1. Download from Google Drive and import it\n2. Use a pre-loaded deck from Browse',
+    title: 'Getting Your Princeton CHI Deck 📚',
+    content: 'Great! Click "Download Decks + 课文 (Princeton Only)" above to get your course decks and readings.\n\nYou can also load your vocab deck from Browse.',
     choices: [
       { label: '☁️ Go to Google Drive', nextId: 'chi108-drive' },
       { label: '🔍 Use pre-loaded deck', nextId: 'chi108-browse' },
