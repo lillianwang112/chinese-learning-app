@@ -336,16 +336,16 @@ const APP_VERSION = '1.1.0';
 const TUTORIAL_STEPS = {
   welcome: {
     title: 'Welcome to 中文 Learn! 👋',
-    content: 'Let\'s take a quick tour so you know how to use every feature.\n\nAre you a CHI 108 student?',
+    content: 'Let\'s take a quick tour so you know how to use every feature.\n\nIf you are in Princeton\'s CHI 101, 102, or 108, click "Download Decks + 课文 (Princeton Only)" to get your course decks and readings.\n\nAre you a Princeton CHI student?',
     choices: [
-      { label: '✓ Yes, I\'m CHI 108', nextId: 'chi108-path', chi108: true },
+      { label: '✓ Yes, Princeton CHI 101/102/108', nextId: 'chi108-path', chi108: true },
       { label: '◎ No, just exploring', nextId: 'hsk-intro', chi108: false },
     ],
     view: 'home',
   },
   'chi108-path': {
-    title: 'Getting Your CHI 108 Deck 📚',
-    content: 'Great! You can load your weekly vocab deck two ways:\n\n1. Download from Google Drive and import it\n2. Use a pre-loaded deck from Browse',
+    title: 'Getting Your Princeton CHI Deck 📚',
+    content: 'Great! Click "Download Decks + 课文 (Princeton Only)" above to get your course decks and readings.\n\nYou can also load your vocab deck from Browse.',
     choices: [
       { label: '☁️ Go to Google Drive', nextId: 'chi108-drive' },
       { label: '🔍 Use pre-loaded deck', nextId: 'chi108-browse' },
@@ -9046,8 +9046,8 @@ Rules:
               <p style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: '1.25rem' }}>Here's what's been added:</p>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', background: 'linear-gradient(135deg, #fef3c7, #fde68a)', borderRadius: '0.75rem', padding: '0.75rem', border: '1px solid #f59e0b' }}>
-                  <span style={{ fontSize: '1.25rem' }}>✍️</span>
-                  <div><strong style={{ color: '#92400e' }}>Get ready for 写字比赛 — this Friday, Apr 10!</strong><br/><span style={{ color: '#b45309', fontSize: '0.875rem' }}>The 写字比赛 vocab deck (829 cards, CHI103 + CHI108) is now available — find it <strong>first in Browse Decks</strong>.</span></div>
+                  <span style={{ fontSize: '1.25rem' }}>📚</span>
+                  <div><strong style={{ color: '#92400e' }}>Princeton CHI 101, 102, or 108?</strong><br/><span style={{ color: '#b45309', fontSize: '0.875rem' }}>Click <strong>"Download Decks + 课文 (Princeton Only)"</strong> — the button in the top bar — to get your course decks and readings.</span></div>
                 </li>
                 <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
                   <span style={{ fontSize: '1.25rem' }}>🌙</span>
