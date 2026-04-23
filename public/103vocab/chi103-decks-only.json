@@ -1,0 +1,3020 @@
+[
+  {
+    "name": "我的家在哪儿",
+    "id": "deck-OC_L2",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "家",
+        "pinyin": "jiā",
+        "english": "home; family"
+      },
+      {
+        "id": 2,
+        "chinese": "在",
+        "pinyin": "zài",
+        "english": "to be at/in; located at"
+      },
+      {
+        "id": 3,
+        "chinese": "哪儿",
+        "pinyin": "nǎr",
+        "english": "where"
+      },
+      {
+        "id": 4,
+        "chinese": "书房",
+        "pinyin": "shūfáng",
+        "english": "study; home office"
+      },
+      {
+        "id": 5,
+        "chinese": "里",
+        "pinyin": "lǐ",
+        "english": "inside; within"
+      },
+      {
+        "id": 6,
+        "chinese": "着",
+        "pinyin": "zhe",
+        "english": "aspect particle indicating ongoing state"
+      },
+      {
+        "id": 7,
+        "chinese": "小时候",
+        "pinyin": "xiǎoshíhou",
+        "english": "when one was young; childhood"
+      },
+      {
+        "id": 8,
+        "chinese": "他",
+        "pinyin": "tā",
+        "english": "he; him"
+      },
+      {
+        "id": 9,
+        "chinese": "常常",
+        "pinyin": "chángcháng",
+        "english": "often; frequently"
+      },
+      {
+        "id": 10,
+        "chinese": "觉得",
+        "pinyin": "juéde",
+        "english": "to feel; to think; to sense"
+      },
+      {
+        "id": 11,
+        "chinese": "很",
+        "pinyin": "hěn",
+        "english": "very; quite"
+      },
+      {
+        "id": 12,
+        "chinese": "怎么",
+        "pinyin": "zěnme",
+        "english": "how; why; what"
+      },
+      {
+        "id": 13,
+        "chinese": "会",
+        "pinyin": "huì",
+        "english": "can; to be likely to; will"
+      },
+      {
+        "id": 14,
+        "chinese": "后来",
+        "pinyin": "hòulái",
+        "english": "afterwards; later"
+      },
+      {
+        "id": 15,
+        "chinese": "才",
+        "pinyin": "cái",
+        "english": "only then; not until"
+      },
+      {
+        "id": 16,
+        "chinese": "知道",
+        "pinyin": "zhīdào",
+        "english": "to know"
+      },
+      {
+        "id": 17,
+        "chinese": "虽然",
+        "pinyin": "suīrán",
+        "english": "although; even though"
+      },
+      {
+        "id": 18,
+        "chinese": "来",
+        "pinyin": "lái",
+        "english": "to come"
+      },
+      {
+        "id": 19,
+        "chinese": "美国",
+        "pinyin": "Měiguó",
+        "english": "the United States; America"
+      },
+      {
+        "id": 20,
+        "chinese": "快",
+        "pinyin": "kuài",
+        "english": "fast; soon; nearly"
+      },
+      {
+        "id": 21,
+        "chinese": "总",
+        "pinyin": "zǒng",
+        "english": "always; in any case"
+      },
+      {
+        "id": 22,
+        "chinese": "还是",
+        "pinyin": "háishi",
+        "english": "still; or; had better"
+      },
+      {
+        "id": 23,
+        "chinese": "生",
+        "pinyin": "shēng",
+        "english": "to be born; to give birth"
+      },
+      {
+        "id": 24,
+        "chinese": "长",
+        "pinyin": "zhǎng",
+        "english": "to grow up; to grow"
+      },
+      {
+        "id": 25,
+        "chinese": "从小",
+        "pinyin": "cóngxiǎo",
+        "english": "from childhood; since one was young"
+      },
+      {
+        "id": 26,
+        "chinese": "就",
+        "pinyin": "jiù",
+        "english": "then; right away; as early as"
+      },
+      {
+        "id": 27,
+        "chinese": "跟",
+        "pinyin": "gēn",
+        "english": "with; to follow; and"
+      },
+      {
+        "id": 28,
+        "chinese": "中文",
+        "pinyin": "Zhōngwén",
+        "english": "Chinese language; Chinese"
+      },
+      {
+        "id": 29,
+        "chinese": "吃",
+        "pinyin": "chī",
+        "english": "to eat"
+      },
+      {
+        "id": 30,
+        "chinese": "菜",
+        "pinyin": "cài",
+        "english": "dish; vegetable; food"
+      },
+      {
+        "id": 31,
+        "chinese": "看",
+        "pinyin": "kàn",
+        "english": "to watch; to look; to read"
+      },
+      {
+        "id": 32,
+        "chinese": "星期",
+        "pinyin": "xīngqī",
+        "english": "week; day of the week"
+      },
+      {
+        "id": 33,
+        "chinese": "去",
+        "pinyin": "qù",
+        "english": "to go"
+      },
+      {
+        "id": 34,
+        "chinese": "附近",
+        "pinyin": "fùjìn",
+        "english": "nearby; in the vicinity"
+      },
+      {
+        "id": 35,
+        "chinese": "学校",
+        "pinyin": "xuéxiào",
+        "english": "school"
+      },
+      {
+        "id": 36,
+        "chinese": "同学",
+        "pinyin": "tóngxué",
+        "english": "classmate; fellow student"
+      },
+      {
+        "id": 37,
+        "chinese": "到底",
+        "pinyin": "dàodǐ",
+        "english": "in the end; after all; on earth"
+      },
+      {
+        "id": 38,
+        "chinese": "意思",
+        "pinyin": "yìsi",
+        "english": "meaning; idea"
+      }
+    ]
+  },
+  {
+    "name": "我们都是美国人",
+    "id": "deck-OC_L3",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "你",
+        "pinyin": "nǐ",
+        "english": "you"
+      },
+      {
+        "id": 2,
+        "chinese": "从",
+        "pinyin": "cóng",
+        "english": "from; since"
+      },
+      {
+        "id": 3,
+        "chinese": "看起来",
+        "pinyin": "kànqǐlái",
+        "english": "to look like; to appear"
+      },
+      {
+        "id": 4,
+        "chinese": "像",
+        "pinyin": "xiàng",
+        "english": "to resemble; to be like"
+      },
+      {
+        "id": 5,
+        "chinese": "真",
+        "pinyin": "zhēn",
+        "english": "really; truly"
+      },
+      {
+        "id": 6,
+        "chinese": "想",
+        "pinyin": "xiǎng",
+        "english": "to think; to want; to miss"
+      },
+      {
+        "id": 7,
+        "chinese": "吗",
+        "pinyin": "ma",
+        "english": "question particle"
+      },
+      {
+        "id": 8,
+        "chinese": "不一定",
+        "pinyin": "bù yīdìng",
+        "english": "not necessarily"
+      },
+      {
+        "id": 9,
+        "chinese": "但是",
+        "pinyin": "dànshì",
+        "english": "but; however"
+      },
+      {
+        "id": 10,
+        "chinese": "有",
+        "pinyin": "yǒu",
+        "english": "to have; there is/are"
+      },
+      {
+        "id": 11,
+        "chinese": "却",
+        "pinyin": "què",
+        "english": "yet; but; however"
+      },
+      {
+        "id": 12,
+        "chinese": "可以",
+        "pinyin": "kěyǐ",
+        "english": "can; may; it's okay"
+      },
+      {
+        "id": 13,
+        "chinese": "因为",
+        "pinyin": "yīnwèi",
+        "english": "because"
+      },
+      {
+        "id": 14,
+        "chinese": "所以",
+        "pinyin": "suǒyǐ",
+        "english": "therefore; so"
+      },
+      {
+        "id": 15,
+        "chinese": "有的",
+        "pinyin": "yǒude",
+        "english": "some (of them)"
+      },
+      {
+        "id": 16,
+        "chinese": "只要",
+        "pinyin": "zhǐyào",
+        "english": "as long as; provided that"
+      },
+      {
+        "id": 17,
+        "chinese": "得",
+        "pinyin": "děi",
+        "english": "must; have to"
+      }
+    ]
+  },
+  {
+    "name": "美国人学中文",
+    "id": "deck-OC_L4",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "女儿",
+        "pinyin": "nǚér",
+        "english": "daughter"
+      },
+      {
+        "id": 2,
+        "chinese": "妈妈",
+        "pinyin": "māma",
+        "english": "mom; mother"
+      },
+      {
+        "id": 3,
+        "chinese": "今天",
+        "pinyin": "jīntiān",
+        "english": "today"
+      },
+      {
+        "id": 4,
+        "chinese": "选",
+        "pinyin": "xuǎn",
+        "english": "to choose; to select"
+      },
+      {
+        "id": 5,
+        "chinese": "了",
+        "pinyin": "le",
+        "english": "completion particle; change-of-state particle"
+      },
+      {
+        "id": 6,
+        "chinese": "门",
+        "pinyin": "mén",
+        "english": "measure word for courses; door"
+      },
+      {
+        "id": 7,
+        "chinese": "课",
+        "pinyin": "kè",
+        "english": "class; lesson; course"
+      },
+      {
+        "id": 8,
+        "chinese": "讨厌",
+        "pinyin": "tǎoyàn",
+        "english": "to dislike; to hate; annoying"
+      },
+      {
+        "id": 9,
+        "chinese": "并不",
+        "pinyin": "bìngbù",
+        "english": "not at all; not really"
+      },
+      {
+        "id": 10,
+        "chinese": "只是",
+        "pinyin": "zhǐshì",
+        "english": "it is just that; only"
+      },
+      {
+        "id": 11,
+        "chinese": "喜欢",
+        "pinyin": "xǐhuān",
+        "english": "to like; to enjoy"
+      },
+      {
+        "id": 12,
+        "chinese": "逼",
+        "pinyin": "bī",
+        "english": "to force; to pressure"
+      },
+      {
+        "id": 13,
+        "chinese": "太",
+        "pinyin": "tài",
+        "english": "too; excessively"
+      },
+      {
+        "id": 14,
+        "chinese": "紧",
+        "pinyin": "jǐn",
+        "english": "tight; urgent; strict"
+      },
+      {
+        "id": 15,
+        "chinese": "没有",
+        "pinyin": "méiyǒu",
+        "english": "to not have; there is no"
+      },
+      {
+        "id": 16,
+        "chinese": "爸爸",
+        "pinyin": "bàba",
+        "english": "dad; father"
+      },
+      {
+        "id": 17,
+        "chinese": "听",
+        "pinyin": "tīng",
+        "english": "to listen; to hear"
+      },
+      {
+        "id": 18,
+        "chinese": "高兴",
+        "pinyin": "gāoxìng",
+        "english": "happy; pleased"
+      },
+      {
+        "id": 19,
+        "chinese": "告诉",
+        "pinyin": "gàosu",
+        "english": "to tell; to inform"
+      },
+      {
+        "id": 20,
+        "chinese": "要",
+        "pinyin": "yào",
+        "english": "to want; will; need to"
+      },
+      {
+        "id": 21,
+        "chinese": "不但",
+        "pinyin": "búdàn",
+        "english": "not only"
+      },
+      {
+        "id": 22,
+        "chinese": "人口",
+        "pinyin": "rénkǒu",
+        "english": "population"
+      },
+      {
+        "id": 23,
+        "chinese": "多",
+        "pinyin": "duō",
+        "english": "many; much; more"
+      },
+      {
+        "id": 24,
+        "chinese": "经济",
+        "pinyin": "jīngjì",
+        "english": "economy; economic"
+      },
+      {
+        "id": 25,
+        "chinese": "发达",
+        "pinyin": "fādá",
+        "english": "developed; advanced"
+      },
+      {
+        "id": 26,
+        "chinese": "做生意",
+        "pinyin": "zuò shēngyi",
+        "english": "to do business"
+      },
+      {
+        "id": 27,
+        "chinese": "越",
+        "pinyin": "yuè",
+        "english": "the more the more"
+      },
+      {
+        "id": 28,
+        "chinese": "为了",
+        "pinyin": "wèile",
+        "english": "for the sake of; in order to"
+      },
+      {
+        "id": 29,
+        "chinese": "买卖",
+        "pinyin": "mǎimài",
+        "english": "trade; buying and selling"
+      },
+      {
+        "id": 30,
+        "chinese": "不见得",
+        "pinyin": "bú jiàndé",
+        "english": "not necessarily; not likely"
+      },
+      {
+        "id": 31,
+        "chinese": "自己",
+        "pinyin": "zìjǐ",
+        "english": "oneself; self"
+      },
+      {
+        "id": 32,
+        "chinese": "更",
+        "pinyin": "gèng",
+        "english": "even more; further"
+      }
+    ]
+  },
+  {
+    "name": "我是四川人？",
+    "id": "deck-OC_L5",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "上课",
+        "pinyin": "shàngkè",
+        "english": "to attend class; to go to class"
+      },
+      {
+        "id": 2,
+        "chinese": "老师",
+        "pinyin": "lǎoshī",
+        "english": "teacher"
+      },
+      {
+        "id": 3,
+        "chinese": "又",
+        "pinyin": "yòu",
+        "english": "again; also; both and"
+      },
+      {
+        "id": 4,
+        "chinese": "问",
+        "pinyin": "wèn",
+        "english": "to ask"
+      },
+      {
+        "id": 5,
+        "chinese": "名字",
+        "pinyin": "míngzi",
+        "english": "name"
+      },
+      {
+        "id": 6,
+        "chinese": "叫",
+        "pinyin": "jiào",
+        "english": "to be called; to call"
+      },
+      {
+        "id": 7,
+        "chinese": "写",
+        "pinyin": "xiě",
+        "english": "to write"
+      },
+      {
+        "id": 8,
+        "chinese": "回答",
+        "pinyin": "huídá",
+        "english": "to answer; answer"
+      },
+      {
+        "id": 9,
+        "chinese": "不好意思",
+        "pinyin": "bù hǎoyìsi",
+        "english": "embarrassed; excuse me"
+      },
+      {
+        "id": 10,
+        "chinese": "出生",
+        "pinyin": "chūshēng",
+        "english": "to be born; birth"
+      },
+      {
+        "id": 11,
+        "chinese": "说法",
+        "pinyin": "shuōfǎ",
+        "english": "way of saying; statement"
+      },
+      {
+        "id": 12,
+        "chinese": "孩子",
+        "pinyin": "háizi",
+        "english": "child; children"
+      },
+      {
+        "id": 13,
+        "chinese": "连",
+        "pinyin": "lián",
+        "english": "even; including"
+      },
+      {
+        "id": 14,
+        "chinese": "能",
+        "pinyin": "néng",
+        "english": "can; to be able to"
+      },
+      {
+        "id": 15,
+        "chinese": "算是",
+        "pinyin": "suànshì",
+        "english": "to count as; to be considered"
+      },
+      {
+        "id": 16,
+        "chinese": "过",
+        "pinyin": "guò",
+        "english": "experiential particle; to pass"
+      },
+      {
+        "id": 17,
+        "chinese": "不过",
+        "pinyin": "búguò",
+        "english": "however; but; only"
+      },
+      {
+        "id": 18,
+        "chinese": "打电话",
+        "pinyin": "dǎ diànhuà",
+        "english": "to make a phone call"
+      },
+      {
+        "id": 19,
+        "chinese": "进来",
+        "pinyin": "jìnlái",
+        "english": "to come in"
+      },
+      {
+        "id": 20,
+        "chinese": "明天",
+        "pinyin": "míngtiān",
+        "english": "tomorrow"
+      },
+      {
+        "id": 21,
+        "chinese": "再",
+        "pinyin": "zài",
+        "english": "again; then"
+      }
+    ]
+  },
+  {
+    "name": "别担心",
+    "id": "deck-OC_L6",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "别",
+        "pinyin": "bié",
+        "english": "do not; other"
+      },
+      {
+        "id": 2,
+        "chinese": "担心",
+        "pinyin": "dānxīn",
+        "english": "to worry; to be concerned"
+      },
+      {
+        "id": 3,
+        "chinese": "操心",
+        "pinyin": "cāoxīn",
+        "english": "to worry; to take trouble over"
+      },
+      {
+        "id": 4,
+        "chinese": "放心",
+        "pinyin": "fàngxīn",
+        "english": "to relax; to be at ease"
+      },
+      {
+        "id": 5,
+        "chinese": "声音",
+        "pinyin": "shēngyīn",
+        "english": "sound; voice"
+      },
+      {
+        "id": 6,
+        "chinese": "屋子",
+        "pinyin": "wūzi",
+        "english": "room"
+      },
+      {
+        "id": 7,
+        "chinese": "没法",
+        "pinyin": "méifǎ",
+        "english": "to have no way; cannot"
+      },
+      {
+        "id": 8,
+        "chinese": "接",
+        "pinyin": "jiē",
+        "english": "to receive; to answer a call; to pick up"
+      },
+      {
+        "id": 9,
+        "chinese": "请",
+        "pinyin": "qǐng",
+        "english": "please; to invite"
+      },
+      {
+        "id": 10,
+        "chinese": "姓名",
+        "pinyin": "xìngmíng",
+        "english": "full name"
+      },
+      {
+        "id": 11,
+        "chinese": "号码",
+        "pinyin": "hàomǎ",
+        "english": "number"
+      },
+      {
+        "id": 12,
+        "chinese": "点",
+        "pinyin": "diǎn",
+        "english": "o'clock; point; a bit"
+      },
+      {
+        "id": 13,
+        "chinese": "整天",
+        "pinyin": "zhěngtiān",
+        "english": "all day; the whole day"
+      },
+      {
+        "id": 14,
+        "chinese": "忙",
+        "pinyin": "máng",
+        "english": "busy"
+      },
+      {
+        "id": 15,
+        "chinese": "些",
+        "pinyin": "xiē",
+        "english": "some; a few"
+      },
+      {
+        "id": 16,
+        "chinese": "上次",
+        "pinyin": "shàngcì",
+        "english": "last time"
+      },
+      {
+        "id": 17,
+        "chinese": "下次",
+        "pinyin": "xiàcì",
+        "english": "next time"
+      },
+      {
+        "id": 18,
+        "chinese": "她",
+        "pinyin": "tā",
+        "english": "she; her"
+      },
+      {
+        "id": 19,
+        "chinese": "男朋友",
+        "pinyin": "nánpéngyǒu",
+        "english": "boyfriend"
+      },
+      {
+        "id": 20,
+        "chinese": "女朋友",
+        "pinyin": "nǚpéngyǒu",
+        "english": "girlfriend"
+      },
+      {
+        "id": 21,
+        "chinese": "几",
+        "pinyin": "jǐ",
+        "english": "how many; several; a few"
+      },
+      {
+        "id": 22,
+        "chinese": "信",
+        "pinyin": "xìn",
+        "english": "to believe; letter"
+      },
+      {
+        "id": 23,
+        "chinese": "住",
+        "pinyin": "zhù",
+        "english": "to live; to stay"
+      },
+      {
+        "id": 24,
+        "chinese": "事",
+        "pinyin": "shì",
+        "english": "matter; affair; thing"
+      },
+      {
+        "id": 25,
+        "chinese": "何必",
+        "pinyin": "hébì",
+        "english": "why bother; there is no need to"
+      },
+      {
+        "id": 26,
+        "chinese": "别的",
+        "pinyin": "biéde",
+        "english": "other; else"
+      },
+      {
+        "id": 27,
+        "chinese": "念书",
+        "pinyin": "niànshū",
+        "english": "to study; to go to school"
+      },
+      {
+        "id": 28,
+        "chinese": "难道",
+        "pinyin": "nándào",
+        "english": "could it be that; is it possible that"
+      },
+      {
+        "id": 29,
+        "chinese": "要是",
+        "pinyin": "yàoshi",
+        "english": "if; in case"
+      },
+      {
+        "id": 30,
+        "chinese": "外国",
+        "pinyin": "wàiguó",
+        "english": "foreign country"
+      },
+      {
+        "id": 31,
+        "chinese": "怎么办",
+        "pinyin": "zěnme bàn",
+        "english": "what to do; what can be done"
+      },
+      {
+        "id": 32,
+        "chinese": "谁",
+        "pinyin": "shuí",
+        "english": "who; whoever"
+      }
+    ]
+  },
+  {
+    "name": "男女同住",
+    "id": "deck-OC_L7",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "同住",
+        "pinyin": "tóngzhù",
+        "english": "to live together"
+      },
+      {
+        "id": 2,
+        "chinese": "合住",
+        "pinyin": "hézhù",
+        "english": "to share housing; to live together"
+      },
+      {
+        "id": 3,
+        "chinese": "学期",
+        "pinyin": "xuéqī",
+        "english": "semester; school term"
+      },
+      {
+        "id": 4,
+        "chinese": "公寓",
+        "pinyin": "gōngyù",
+        "english": "apartment"
+      },
+      {
+        "id": 5,
+        "chinese": "宿舍",
+        "pinyin": "sùshè",
+        "english": "dormitory"
+      },
+      {
+        "id": 6,
+        "chinese": "方便",
+        "pinyin": "fāngbiàn",
+        "english": "convenient"
+      },
+      {
+        "id": 7,
+        "chinese": "搬",
+        "pinyin": "bān",
+        "english": "to move residence"
+      },
+      {
+        "id": 8,
+        "chinese": "出去",
+        "pinyin": "chūqù",
+        "english": "to go out"
+      },
+      {
+        "id": 9,
+        "chinese": "吃饭",
+        "pinyin": "chīfàn",
+        "english": "to eat; to have a meal"
+      },
+      {
+        "id": 10,
+        "chinese": "问题",
+        "pinyin": "wèntí",
+        "english": "problem; question"
+      },
+      {
+        "id": 11,
+        "chinese": "食堂",
+        "pinyin": "shítáng",
+        "english": "cafeteria; dining hall"
+      },
+      {
+        "id": 12,
+        "chinese": "贵",
+        "pinyin": "guì",
+        "english": "expensive"
+      },
+      {
+        "id": 13,
+        "chinese": "好吃",
+        "pinyin": "hǎochī",
+        "english": "delicious; tasty"
+      },
+      {
+        "id": 14,
+        "chinese": "每天",
+        "pinyin": "měitiān",
+        "english": "every day"
+      },
+      {
+        "id": 15,
+        "chinese": "受不了",
+        "pinyin": "shòubuliǎo",
+        "english": "cannot stand; unbearable"
+      },
+      {
+        "id": 16,
+        "chinese": "挑剔",
+        "pinyin": "tiāoti",
+        "english": "picky; fussy"
+      },
+      {
+        "id": 17,
+        "chinese": "功课",
+        "pinyin": "gōngkè",
+        "english": "homework; schoolwork"
+      },
+      {
+        "id": 18,
+        "chinese": "这么",
+        "pinyin": "zhème",
+        "english": "so; this way; like this"
+      },
+      {
+        "id": 19,
+        "chinese": "那么",
+        "pinyin": "nàme",
+        "english": "so; that way; like that"
+      },
+      {
+        "id": 20,
+        "chinese": "时间",
+        "pinyin": "shíjiān",
+        "english": "time"
+      },
+      {
+        "id": 21,
+        "chinese": "买菜",
+        "pinyin": "mǎicài",
+        "english": "to buy groceries"
+      },
+      {
+        "id": 22,
+        "chinese": "早饭",
+        "pinyin": "zǎofàn",
+        "english": "breakfast"
+      },
+      {
+        "id": 23,
+        "chinese": "午饭",
+        "pinyin": "wǔfàn",
+        "english": "lunch"
+      },
+      {
+        "id": 24,
+        "chinese": "晚饭",
+        "pinyin": "wǎnfàn",
+        "english": "dinner"
+      },
+      {
+        "id": 25,
+        "chinese": "简单",
+        "pinyin": "jiǎndān",
+        "english": "simple; easy"
+      },
+      {
+        "id": 26,
+        "chinese": "容易",
+        "pinyin": "róngyì",
+        "english": "easy"
+      },
+      {
+        "id": 27,
+        "chinese": "决定",
+        "pinyin": "juédìng",
+        "english": "to decide; decision"
+      },
+      {
+        "id": 28,
+        "chinese": "带",
+        "pinyin": "dài",
+        "english": "to bring; to carry"
+      },
+      {
+        "id": 29,
+        "chinese": "久",
+        "pinyin": "jiǔ",
+        "english": "long time"
+      },
+      {
+        "id": 30,
+        "chinese": "用",
+        "pinyin": "yòng",
+        "english": "to use"
+      },
+      {
+        "id": 31,
+        "chinese": "坏",
+        "pinyin": "huài",
+        "english": "broken; bad"
+      },
+      {
+        "id": 32,
+        "chinese": "把",
+        "pinyin": "bǎ",
+        "english": "disposal marker; measure word for handled objects"
+      },
+      {
+        "id": 33,
+        "chinese": "对",
+        "pinyin": "duì",
+        "english": "correct; toward; for"
+      },
+      {
+        "id": 34,
+        "chinese": "认识",
+        "pinyin": "rènshi",
+        "english": "to know a person; to recognize"
+      },
+      {
+        "id": 35,
+        "chinese": "最好",
+        "pinyin": "zuìhǎo",
+        "english": "had better; best"
+      },
+      {
+        "id": 36,
+        "chinese": "考虑",
+        "pinyin": "kǎolǜ",
+        "english": "to consider; to think over"
+      },
+      {
+        "id": 37,
+        "chinese": "考试",
+        "pinyin": "kǎoshì",
+        "english": "exam; to take an exam"
+      }
+    ]
+  },
+  {
+    "name": "看电影",
+    "id": "deck-OC_L8",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "看电影",
+        "pinyin": "kàn diànyǐng",
+        "english": "to watch a movie"
+      },
+      {
+        "id": 2,
+        "chinese": "纸",
+        "pinyin": "zhǐ",
+        "english": "paper"
+      },
+      {
+        "id": 3,
+        "chinese": "拿",
+        "pinyin": "ná",
+        "english": "to take; to hold; to grab"
+      },
+      {
+        "id": 4,
+        "chinese": "已经",
+        "pinyin": "yǐjīng",
+        "english": "already"
+      },
+      {
+        "id": 5,
+        "chinese": "至少",
+        "pinyin": "zhìshǎo",
+        "english": "at least"
+      },
+      {
+        "id": 6,
+        "chinese": "哭",
+        "pinyin": "kū",
+        "english": "to cry; to weep"
+      },
+      {
+        "id": 7,
+        "chinese": "样子",
+        "pinyin": "yàngzi",
+        "english": "appearance; manner; look"
+      },
+      {
+        "id": 8,
+        "chinese": "可怜",
+        "pinyin": "kělián",
+        "english": "pitiful; poor thing"
+      },
+      {
+        "id": 9,
+        "chinese": "爱",
+        "pinyin": "ài",
+        "english": "to love; love"
+      },
+      {
+        "id": 10,
+        "chinese": "故事",
+        "pinyin": "gùshi",
+        "english": "story"
+      },
+      {
+        "id": 11,
+        "chinese": "许多",
+        "pinyin": "xǔduō",
+        "english": "many; much; a lot of"
+      },
+      {
+        "id": 12,
+        "chinese": "烦",
+        "pinyin": "fán",
+        "english": "annoyed; fed up; to bother"
+      },
+      {
+        "id": 13,
+        "chinese": "好玩",
+        "pinyin": "hǎowán",
+        "english": "fun; interesting"
+      },
+      {
+        "id": 14,
+        "chinese": "受罪",
+        "pinyin": "shòuzuì",
+        "english": "to suffer; to go through hardship"
+      },
+      {
+        "id": 15,
+        "chinese": "稍微",
+        "pinyin": "shāowēi",
+        "english": "a little; slightly"
+      },
+      {
+        "id": 16,
+        "chinese": "认真",
+        "pinyin": "rènzhēn",
+        "english": "serious; conscientious"
+      },
+      {
+        "id": 17,
+        "chinese": "无聊",
+        "pinyin": "wúliáo",
+        "english": "boring; bored"
+      },
+      {
+        "id": 18,
+        "chinese": "教",
+        "pinyin": "jiāo",
+        "english": "to teach"
+      },
+      {
+        "id": 19,
+        "chinese": "应该",
+        "pinyin": "yīnggāi",
+        "english": "should; ought to"
+      },
+      {
+        "id": 20,
+        "chinese": "向",
+        "pinyin": "xiàng",
+        "english": "toward; to; in the direction of"
+      },
+      {
+        "id": 21,
+        "chinese": "最",
+        "pinyin": "zuì",
+        "english": "most"
+      },
+      {
+        "id": 22,
+        "chinese": "愿意",
+        "pinyin": "yuànyì",
+        "english": "willing to; to want to"
+      },
+      {
+        "id": 23,
+        "chinese": "轻松",
+        "pinyin": "qīngsōng",
+        "english": "relaxed; light; easygoing"
+      },
+      {
+        "id": 24,
+        "chinese": "吵架",
+        "pinyin": "chǎojià",
+        "english": "to quarrel; to argue"
+      }
+    ]
+  },
+  {
+    "name": "我要去中国",
+    "id": "deck-OC_L9",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "兴趣",
+        "pinyin": "xìngqù",
+        "english": "interest; hobby"
+      },
+      {
+        "id": 2,
+        "chinese": "平常",
+        "pinyin": "píngcháng",
+        "english": "ordinary; usually; normally"
+      },
+      {
+        "id": 3,
+        "chinese": "语法",
+        "pinyin": "yǔfǎ",
+        "english": "grammar"
+      },
+      {
+        "id": 4,
+        "chinese": "非常",
+        "pinyin": "fēicháng",
+        "english": "extremely; very"
+      },
+      {
+        "id": 5,
+        "chinese": "语言",
+        "pinyin": "yǔyán",
+        "english": "language"
+      },
+      {
+        "id": 6,
+        "chinese": "练习",
+        "pinyin": "liànxí",
+        "english": "to practice; exercise"
+      },
+      {
+        "id": 7,
+        "chinese": "只有",
+        "pinyin": "zhǐyǒu",
+        "english": "only; only if"
+      },
+      {
+        "id": 8,
+        "chinese": "晚上",
+        "pinyin": "wǎnshàng",
+        "english": "evening; night"
+      },
+      {
+        "id": 9,
+        "chinese": "随便",
+        "pinyin": "suíbiàn",
+        "english": "casual; feel free; as one pleases"
+      },
+      {
+        "id": 10,
+        "chinese": "进步",
+        "pinyin": "jìnbù",
+        "english": "progress; to improve"
+      },
+      {
+        "id": 11,
+        "chinese": "慢",
+        "pinyin": "màn",
+        "english": "slow"
+      },
+      {
+        "id": 12,
+        "chinese": "利用",
+        "pinyin": "lìyòng",
+        "english": "to make use of; to utilize"
+      },
+      {
+        "id": 13,
+        "chinese": "今年",
+        "pinyin": "jīnnián",
+        "english": "this year"
+      },
+      {
+        "id": 14,
+        "chinese": "北京",
+        "pinyin": "Běijīng",
+        "english": "Beijing"
+      },
+      {
+        "id": 15,
+        "chinese": "参加",
+        "pinyin": "cānjiā",
+        "english": "to participate; to join"
+      },
+      {
+        "id": 16,
+        "chinese": "趁",
+        "pinyin": "chèn",
+        "english": "to take advantage of an opportunity"
+      },
+      {
+        "id": 17,
+        "chinese": "了解",
+        "pinyin": "liǎojiě",
+        "english": "to understand; to learn about"
+      },
+      {
+        "id": 18,
+        "chinese": "社会",
+        "pinyin": "shèhuì",
+        "english": "society"
+      },
+      {
+        "id": 19,
+        "chinese": "希望",
+        "pinyin": "xīwàng",
+        "english": "to hope; hope"
+      },
+      {
+        "id": 20,
+        "chinese": "祝",
+        "pinyin": "zhù",
+        "english": "to wish"
+      },
+      {
+        "id": 21,
+        "chinese": "健康",
+        "pinyin": "jiànkāng",
+        "english": "health; healthy"
+      },
+      {
+        "id": 22,
+        "chinese": "月",
+        "pinyin": "yuè",
+        "english": "month; moon"
+      }
+    ]
+  },
+  {
+    "name": "出国前的准备",
+    "id": "deck-OC_L10",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "出国",
+        "pinyin": "chūguó",
+        "english": "to go abroad; to leave the country"
+      },
+      {
+        "id": 2,
+        "chinese": "准备",
+        "pinyin": "zhǔnbèi",
+        "english": "to prepare; preparation"
+      },
+      {
+        "id": 3,
+        "chinese": "夏天",
+        "pinyin": "xiàtiān",
+        "english": "summer"
+      },
+      {
+        "id": 4,
+        "chinese": "读",
+        "pinyin": "dú",
+        "english": "to read; to study"
+      },
+      {
+        "id": 5,
+        "chinese": "有意义",
+        "pinyin": "yǒu yìyì",
+        "english": "meaningful; significant"
+      },
+      {
+        "id": 6,
+        "chinese": "也许",
+        "pinyin": "yěxǔ",
+        "english": "perhaps; maybe"
+      },
+      {
+        "id": 7,
+        "chinese": "使",
+        "pinyin": "shǐ",
+        "english": "to cause; to make; to use"
+      },
+      {
+        "id": 8,
+        "chinese": "关系",
+        "pinyin": "guānxi",
+        "english": "relationship; connection"
+      },
+      {
+        "id": 9,
+        "chinese": "紧张",
+        "pinyin": "jǐnzhāng",
+        "english": "tense; nervous; in short supply"
+      },
+      {
+        "id": 10,
+        "chinese": "后悔",
+        "pinyin": "hòuhuǐ",
+        "english": "to regret"
+      },
+      {
+        "id": 11,
+        "chinese": "当然",
+        "pinyin": "dāngrán",
+        "english": "of course; naturally"
+      },
+      {
+        "id": 12,
+        "chinese": "最近",
+        "pinyin": "zuìjìn",
+        "english": "recently; lately"
+      },
+      {
+        "id": 13,
+        "chinese": "公司",
+        "pinyin": "gōngsī",
+        "english": "company; firm"
+      },
+      {
+        "id": 14,
+        "chinese": "钱",
+        "pinyin": "qián",
+        "english": "money"
+      },
+      {
+        "id": 15,
+        "chinese": "申请",
+        "pinyin": "shēnqǐng",
+        "english": "to apply; application"
+      },
+      {
+        "id": 16,
+        "chinese": "帮",
+        "pinyin": "bāng",
+        "english": "to help"
+      },
+      {
+        "id": 17,
+        "chinese": "飞机票",
+        "pinyin": "fēijīpiào",
+        "english": "airplane ticket"
+      },
+      {
+        "id": 18,
+        "chinese": "护照",
+        "pinyin": "hùzhào",
+        "english": "passport"
+      },
+      {
+        "id": 19,
+        "chinese": "签证",
+        "pinyin": "qiānzhèng",
+        "english": "visa"
+      },
+      {
+        "id": 20,
+        "chinese": "办",
+        "pinyin": "bàn",
+        "english": "to handle; to do; to manage"
+      },
+      {
+        "id": 21,
+        "chinese": "寄",
+        "pinyin": "jì",
+        "english": "to mail; to send"
+      }
+    ]
+  },
+  {
+    "name": "为什么学中文",
+    "id": "deck-OC_L11",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "移民",
+        "pinyin": "yímín",
+        "english": "immigrant; to immigrate"
+      },
+      {
+        "id": 2,
+        "chinese": "来自",
+        "pinyin": "láizì",
+        "english": "to come from"
+      },
+      {
+        "id": 3,
+        "chinese": "所有的",
+        "pinyin": "suǒyǒude",
+        "english": "all; every"
+      },
+      {
+        "id": 4,
+        "chinese": "适应",
+        "pinyin": "shìyìng",
+        "english": "to adapt; to adjust to"
+      },
+      {
+        "id": 5,
+        "chinese": "过程",
+        "pinyin": "guòchéng",
+        "english": "process; course"
+      },
+      {
+        "id": 6,
+        "chinese": "或多或少",
+        "pinyin": "huò duō huò shǎo",
+        "english": "more or less"
+      },
+      {
+        "id": 7,
+        "chinese": "经历",
+        "pinyin": "jīnglì",
+        "english": "to experience; experience"
+      },
+      {
+        "id": 8,
+        "chinese": "方面",
+        "pinyin": "fāngmiàn",
+        "english": "aspect; side; respect"
+      },
+      {
+        "id": 9,
+        "chinese": "保持",
+        "pinyin": "bǎochí",
+        "english": "to keep; to maintain"
+      },
+      {
+        "id": 10,
+        "chinese": "原来",
+        "pinyin": "yuánlái",
+        "english": "originally; as it turns out"
+      },
+      {
+        "id": 11,
+        "chinese": "明显",
+        "pinyin": "míngxiǎn",
+        "english": "obvious; evident"
+      },
+      {
+        "id": 12,
+        "chinese": "负担",
+        "pinyin": "fùdān",
+        "english": "burden; load"
+      },
+      {
+        "id": 13,
+        "chinese": "放假",
+        "pinyin": "fàngjià",
+        "english": "to have a holiday; to take a break"
+      },
+      {
+        "id": 14,
+        "chinese": "处罚",
+        "pinyin": "chǔfá",
+        "english": "punishment; to punish"
+      },
+      {
+        "id": 15,
+        "chinese": "不知不觉",
+        "pinyin": "bùzhī bùjué",
+        "english": "unconsciously; without realizing"
+      },
+      {
+        "id": 16,
+        "chinese": "产生",
+        "pinyin": "chǎnshēng",
+        "english": "to produce; to generate; to arise"
+      },
+      {
+        "id": 17,
+        "chinese": "心理",
+        "pinyin": "xīnlǐ",
+        "english": "psychology; mental state"
+      },
+      {
+        "id": 18,
+        "chinese": "矛盾",
+        "pinyin": "máodùn",
+        "english": "contradiction; conflict"
+      },
+      {
+        "id": 19,
+        "chinese": "自然",
+        "pinyin": "zìrán",
+        "english": "natural; nature"
+      },
+      {
+        "id": 20,
+        "chinese": "华裔",
+        "pinyin": "Huáyì",
+        "english": "ethnic Chinese; of Chinese descent"
+      },
+      {
+        "id": 21,
+        "chinese": "主动",
+        "pinyin": "zhǔdòng",
+        "english": "to take initiative; active"
+      },
+      {
+        "id": 22,
+        "chinese": "例子",
+        "pinyin": "lìzi",
+        "english": "example"
+      },
+      {
+        "id": 23,
+        "chinese": "毕业",
+        "pinyin": "bìyè",
+        "english": "to graduate"
+      },
+      {
+        "id": 24,
+        "chinese": "工作",
+        "pinyin": "gōngzuò",
+        "english": "work; job; to work"
+      },
+      {
+        "id": 25,
+        "chinese": "与其",
+        "pinyin": "yǔqí",
+        "english": "rather than"
+      },
+      {
+        "id": 26,
+        "chinese": "不如",
+        "pinyin": "bùrú",
+        "english": "not as good as; better to"
+      },
+      {
+        "id": 27,
+        "chinese": "背景",
+        "pinyin": "bèijǐng",
+        "english": "background"
+      }
+    ]
+  },
+  {
+    "name": "做孩子也不容易",
+    "id": "deck-OC_L12",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "家庭",
+        "pinyin": "jiātíng",
+        "english": "family"
+      },
+      {
+        "id": 2,
+        "chinese": "之间",
+        "pinyin": "zhījiān",
+        "english": "between; among"
+      },
+      {
+        "id": 3,
+        "chinese": "距离",
+        "pinyin": "jùlí",
+        "english": "distance; gap"
+      },
+      {
+        "id": 4,
+        "chinese": "往往",
+        "pinyin": "wǎngwǎng",
+        "english": "often; frequently"
+      },
+      {
+        "id": 5,
+        "chinese": "年龄",
+        "pinyin": "niánlíng",
+        "english": "age"
+      },
+      {
+        "id": 6,
+        "chinese": "所谓",
+        "pinyin": "suǒwèi",
+        "english": "so-called"
+      },
+      {
+        "id": 7,
+        "chinese": "代沟",
+        "pinyin": "dàigōu",
+        "english": "generation gap"
+      },
+      {
+        "id": 8,
+        "chinese": "经常",
+        "pinyin": "jīngcháng",
+        "english": "often; frequently; regularly"
+      },
+      {
+        "id": 9,
+        "chinese": "成年",
+        "pinyin": "chéngnián",
+        "english": "to come of age; adult"
+      },
+      {
+        "id": 10,
+        "chinese": "母语",
+        "pinyin": "mǔyǔ",
+        "english": "mother tongue; native language"
+      },
+      {
+        "id": 11,
+        "chinese": "因此",
+        "pinyin": "yīncǐ",
+        "english": "therefore; as a result"
+      },
+      {
+        "id": 12,
+        "chinese": "沟通",
+        "pinyin": "gōutōng",
+        "english": "to communicate; communication"
+      },
+      {
+        "id": 13,
+        "chinese": "心事",
+        "pinyin": "xīnshì",
+        "english": "worry; what is on one's mind"
+      },
+      {
+        "id": 14,
+        "chinese": "体会",
+        "pinyin": "tǐhuì",
+        "english": "to understand; to appreciate; to experience"
+      },
+      {
+        "id": 15,
+        "chinese": "关爱",
+        "pinyin": "guān'ài",
+        "english": "care and love"
+      },
+      {
+        "id": 16,
+        "chinese": "误解",
+        "pinyin": "wùjiě",
+        "english": "to misunderstand; misunderstanding"
+      },
+      {
+        "id": 17,
+        "chinese": "干涉",
+        "pinyin": "gānshè",
+        "english": "to interfere; interference"
+      },
+      {
+        "id": 18,
+        "chinese": "造成",
+        "pinyin": "zàochéng",
+        "english": "to cause; to bring about"
+      },
+      {
+        "id": 19,
+        "chinese": "唯一",
+        "pinyin": "wéiyī",
+        "english": "only; sole; unique"
+      },
+      {
+        "id": 20,
+        "chinese": "原因",
+        "pinyin": "yuányīn",
+        "english": "reason; cause"
+      },
+      {
+        "id": 21,
+        "chinese": "接受",
+        "pinyin": "jiēshòu",
+        "english": "to accept; to receive"
+      },
+      {
+        "id": 22,
+        "chinese": "听话",
+        "pinyin": "tīnghuà",
+        "english": "obedient; to do as one is told"
+      },
+      {
+        "id": 23,
+        "chinese": "乖",
+        "pinyin": "guāi",
+        "english": "well-behaved; obedient"
+      },
+      {
+        "id": 24,
+        "chinese": "重视",
+        "pinyin": "zhòngshì",
+        "english": "to value; to attach importance to"
+      },
+      {
+        "id": 25,
+        "chinese": "独立",
+        "pinyin": "dúlì",
+        "english": "independent; independence"
+      },
+      {
+        "id": 26,
+        "chinese": "发展",
+        "pinyin": "fāzhǎn",
+        "english": "to develop; development"
+      },
+      {
+        "id": 27,
+        "chinese": "相对来说",
+        "pinyin": "xiāngduì lái shuō",
+        "english": "relatively speaking"
+      },
+      {
+        "id": 28,
+        "chinese": "尊重",
+        "pinyin": "zūnzhòng",
+        "english": "to respect; respect"
+      },
+      {
+        "id": 29,
+        "chinese": "个人",
+        "pinyin": "gèrén",
+        "english": "individual; personal"
+      },
+      {
+        "id": 30,
+        "chinese": "强加",
+        "pinyin": "qiángjiā",
+        "english": "to impose; to force upon"
+      }
+    ]
+  },
+  {
+    "name": "说标准的普通话",
+    "id": "deck-OC_L13",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "普通话",
+        "pinyin": "pǔtōnghuà",
+        "english": "Mandarin; standard Chinese"
+      },
+      {
+        "id": 2,
+        "chinese": "念",
+        "pinyin": "niàn",
+        "english": "to read aloud; to study"
+      },
+      {
+        "id": 3,
+        "chinese": "笑",
+        "pinyin": "xiào",
+        "english": "to laugh; to smile; to laugh at"
+      },
+      {
+        "id": 4,
+        "chinese": "发音",
+        "pinyin": "fāyīn",
+        "english": "pronunciation; to pronounce"
+      },
+      {
+        "id": 5,
+        "chinese": "变",
+        "pinyin": "biàn",
+        "english": "to change; to become"
+      },
+      {
+        "id": 6,
+        "chinese": "要不然",
+        "pinyin": "yàobùrán",
+        "english": "otherwise; or else"
+      },
+      {
+        "id": 7,
+        "chinese": "南腔北调",
+        "pinyin": "nán qiāng běi diào",
+        "english": "a mix of regional accents"
+      },
+      {
+        "id": 8,
+        "chinese": "方言",
+        "pinyin": "fāngyán",
+        "english": "dialect"
+      },
+      {
+        "id": 9,
+        "chinese": "目的",
+        "pinyin": "mùdì",
+        "english": "purpose; goal; aim"
+      },
+      {
+        "id": 10,
+        "chinese": "互相",
+        "pinyin": "hùxiāng",
+        "english": "mutually; each other"
+      },
+      {
+        "id": 11,
+        "chinese": "别人",
+        "pinyin": "biérén",
+        "english": "other people; others"
+      },
+      {
+        "id": 12,
+        "chinese": "道理",
+        "pinyin": "dàolǐ",
+        "english": "reason; sense; principle"
+      },
+      {
+        "id": 13,
+        "chinese": "低",
+        "pinyin": "dī",
+        "english": "low"
+      }
+    ]
+  },
+  {
+    "name": "都怪你妈妈",
+    "id": "deck-OC_L15",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "怪",
+        "pinyin": "guài",
+        "english": "to blame; strange; weird"
+      },
+      {
+        "id": 2,
+        "chinese": "发现",
+        "pinyin": "fāxiàn",
+        "english": "to discover; to find"
+      },
+      {
+        "id": 3,
+        "chinese": "特别",
+        "pinyin": "tèbié",
+        "english": "special; especially; particularly"
+      },
+      {
+        "id": 4,
+        "chinese": "作为",
+        "pinyin": "zuòwéi",
+        "english": "as; to serve as; to regard as"
+      },
+      {
+        "id": 5,
+        "chinese": "专业",
+        "pinyin": "zhuānyè",
+        "english": "major; specialty; professional"
+      },
+      {
+        "id": 6,
+        "chinese": "学院",
+        "pinyin": "xuéyuàn",
+        "english": "college; institute; school"
+      },
+      {
+        "id": 7,
+        "chinese": "真正",
+        "pinyin": "zhēnzhèng",
+        "english": "true; genuine; real"
+      },
+      {
+        "id": 8,
+        "chinese": "感兴趣",
+        "pinyin": "gǎn xìngqù",
+        "english": "to be interested in"
+      },
+      {
+        "id": 9,
+        "chinese": "烦恼",
+        "pinyin": "fánnǎo",
+        "english": "worried; troubled; annoyance"
+      },
+      {
+        "id": 10,
+        "chinese": "结束",
+        "pinyin": "jiéshù",
+        "english": "to end; to finish"
+      },
+      {
+        "id": 11,
+        "chinese": "剩下",
+        "pinyin": "shèngxià",
+        "english": "to remain; to be left over"
+      },
+      {
+        "id": 12,
+        "chinese": "同事",
+        "pinyin": "tóngshì",
+        "english": "colleague; coworker"
+      },
+      {
+        "id": 13,
+        "chinese": "儿子",
+        "pinyin": "érzi",
+        "english": "son"
+      },
+      {
+        "id": 14,
+        "chinese": "工程",
+        "pinyin": "gōngchéng",
+        "english": "engineering; project"
+      },
+      {
+        "id": 15,
+        "chinese": "恨",
+        "pinyin": "hèn",
+        "english": "to hate"
+      },
+      {
+        "id": 16,
+        "chinese": "数学",
+        "pinyin": "shùxué",
+        "english": "mathematics"
+      },
+      {
+        "id": 17,
+        "chinese": "培养",
+        "pinyin": "péiyǎng",
+        "english": "to cultivate; to train; to develop"
+      },
+      {
+        "id": 18,
+        "chinese": "音乐",
+        "pinyin": "yīnyuè",
+        "english": "music"
+      },
+      {
+        "id": 19,
+        "chinese": "怕",
+        "pinyin": "pà",
+        "english": "to fear; to be afraid"
+      },
+      {
+        "id": 20,
+        "chinese": "送",
+        "pinyin": "sòng",
+        "english": "to send; to give as a gift; to see off"
+      },
+      {
+        "id": 21,
+        "chinese": "将来",
+        "pinyin": "jiānglái",
+        "english": "in the future; future"
+      },
+      {
+        "id": 22,
+        "chinese": "再说",
+        "pinyin": "zàishuō",
+        "english": "moreover; besides; to say again"
+      }
+    ]
+  },
+  {
+    "name": "厕所里没有卫生纸",
+    "id": "deck-ATC_L2",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "厕所",
+        "pinyin": "cèsuǒ",
+        "english": "toilet; restroom; bathroom"
+      },
+      {
+        "id": 2,
+        "chinese": "公共",
+        "pinyin": "gōnggòng",
+        "english": "public; communal"
+      },
+      {
+        "id": 3,
+        "chinese": "随身",
+        "pinyin": "suíshēn",
+        "english": "to carry on one's person; with one"
+      },
+      {
+        "id": 4,
+        "chinese": "幸亏",
+        "pinyin": "xìngkuī",
+        "english": "fortunately; luckily; thanks to"
+      },
+      {
+        "id": 5,
+        "chinese": "救",
+        "pinyin": "jiù",
+        "english": "to save; to rescue"
+      },
+      {
+        "id": 6,
+        "chinese": "不然",
+        "pinyin": "bùrán",
+        "english": "otherwise; if not; or else"
+      },
+      {
+        "id": 7,
+        "chinese": "出问题",
+        "pinyin": "chū wèntí",
+        "english": "to have a problem; to go wrong"
+      },
+      {
+        "id": 8,
+        "chinese": "一再",
+        "pinyin": "yīzài",
+        "english": "repeatedly; again and again"
+      },
+      {
+        "id": 9,
+        "chinese": "落后",
+        "pinyin": "luòhòu",
+        "english": "backward; to fall behind"
+      },
+      {
+        "id": 10,
+        "chinese": "喝水",
+        "pinyin": "hē shuǐ",
+        "english": "to drink water"
+      },
+      {
+        "id": 11,
+        "chinese": "用不着",
+        "pinyin": "yòngbuzháo",
+        "english": "to not need; no use for"
+      },
+      {
+        "id": 12,
+        "chinese": "起先",
+        "pinyin": "qǐxiān",
+        "english": "at first; initially"
+      },
+      {
+        "id": 13,
+        "chinese": "装",
+        "pinyin": "zhuāng",
+        "english": "to contain; to pack; to pretend"
+      },
+      {
+        "id": 14,
+        "chinese": "洗澡",
+        "pinyin": "xǐzǎo",
+        "english": "to take a bath/shower"
+      },
+      {
+        "id": 15,
+        "chinese": "全天",
+        "pinyin": "quántiān",
+        "english": "all day; the whole day"
+      },
+      {
+        "id": 16,
+        "chinese": "供应",
+        "pinyin": "gōngyìng",
+        "english": "to supply; supply"
+      },
+      {
+        "id": 17,
+        "chinese": "比较",
+        "pinyin": "bǐjiào",
+        "english": "relatively; to compare; fairly"
+      },
+      {
+        "id": 18,
+        "chinese": "天气",
+        "pinyin": "tiānqì",
+        "english": "weather"
+      },
+      {
+        "id": 19,
+        "chinese": "留学生",
+        "pinyin": "liúxuéshēng",
+        "english": "international student; student studying abroad"
+      }
+    ]
+  },
+  {
+    "name": "我是个穷学生",
+    "id": "deck-ATC_L5",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "穷",
+        "pinyin": "qióng",
+        "english": "poor; poverty-stricken"
+      },
+      {
+        "id": 2,
+        "chinese": "一般来说",
+        "pinyin": "yībān lái shuō",
+        "english": "generally speaking; in general"
+      },
+      {
+        "id": 3,
+        "chinese": "受到",
+        "pinyin": "shòudào",
+        "english": "to receive; to be subjected to"
+      },
+      {
+        "id": 4,
+        "chinese": "平等",
+        "pinyin": "píngděng",
+        "english": "equal; equality"
+      },
+      {
+        "id": 5,
+        "chinese": "待遇",
+        "pinyin": "dàiyù",
+        "english": "treatment; pay; remuneration"
+      },
+      {
+        "id": 6,
+        "chinese": "讲价",
+        "pinyin": "jiǎngjià",
+        "english": "to bargain; to haggle over price"
+      },
+      {
+        "id": 7,
+        "chinese": "上当",
+        "pinyin": "shàngdàng",
+        "english": "to be fooled; to be cheated"
+      },
+      {
+        "id": 8,
+        "chinese": "受骗",
+        "pinyin": "shòupiàn",
+        "english": "to be deceived; to be taken in"
+      },
+      {
+        "id": 9,
+        "chinese": "任何",
+        "pinyin": "rènhé",
+        "english": "any; whatever; whichever"
+      },
+      {
+        "id": 10,
+        "chinese": "收入",
+        "pinyin": "shōurù",
+        "english": "income; revenue"
+      },
+      {
+        "id": 11,
+        "chinese": "靠",
+        "pinyin": "kào",
+        "english": "to rely on; to depend on; to lean against"
+      },
+      {
+        "id": 12,
+        "chinese": "奖学金",
+        "pinyin": "jiǎngxuéjīn",
+        "english": "scholarship"
+      },
+      {
+        "id": 13,
+        "chinese": "小气",
+        "pinyin": "xiǎoqì",
+        "english": "stingy; petty; narrow-minded"
+      },
+      {
+        "id": 14,
+        "chinese": "过日子",
+        "pinyin": "guò rìzi",
+        "english": "to live one's life; to get by"
+      },
+      {
+        "id": 15,
+        "chinese": "改革开放",
+        "pinyin": "gǎigé kāifàng",
+        "english": "reform and opening up"
+      }
+    ]
+  },
+  {
+    "name": "没有什么大不同",
+    "id": "deck-ATC_L8",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "比方说",
+        "pinyin": "bǐfāng shuō",
+        "english": "for example; for instance"
+      },
+      {
+        "id": 2,
+        "chinese": "孝顺",
+        "pinyin": "xiàoshùn",
+        "english": "filial piety; to be filial"
+      },
+      {
+        "id": 3,
+        "chinese": "尊敬",
+        "pinyin": "zūnjìng",
+        "english": "to respect; respectful"
+      },
+      {
+        "id": 4,
+        "chinese": "另外",
+        "pinyin": "lìngwài",
+        "english": "in addition; besides; another"
+      },
+      {
+        "id": 5,
+        "chinese": "批评",
+        "pinyin": "pīpíng",
+        "english": "to criticize; criticism"
+      },
+      {
+        "id": 6,
+        "chinese": "骂",
+        "pinyin": "mà",
+        "english": "to scold; to curse; to call names"
+      },
+      {
+        "id": 7,
+        "chinese": "偶尔",
+        "pinyin": "ǒuěr",
+        "english": "occasionally; once in a while"
+      },
+      {
+        "id": 8,
+        "chinese": "拥抱",
+        "pinyin": "yōngbào",
+        "english": "to hug; to embrace; hug"
+      },
+      {
+        "id": 9,
+        "chinese": "公园",
+        "pinyin": "gōngyuán",
+        "english": "park"
+      },
+      {
+        "id": 10,
+        "chinese": "走",
+        "pinyin": "zǒu",
+        "english": "to walk; to go; to leave"
+      },
+      {
+        "id": 11,
+        "chinese": "夸大",
+        "pinyin": "kuādà",
+        "english": "to exaggerate; to overstate"
+      },
+      {
+        "id": 12,
+        "chinese": "文化",
+        "pinyin": "wénhuà",
+        "english": "culture; civilization"
+      },
+      {
+        "id": 13,
+        "chinese": "错误",
+        "pinyin": "cuòwù",
+        "english": "mistake; error; wrong"
+      }
+    ]
+  },
+  {
+    "name": "为什么不排队",
+    "id": "deck-ATC_L10",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "排队",
+        "pinyin": "páiduì",
+        "english": "to line up; to queue; to stand in line"
+      },
+      {
+        "id": 2,
+        "chinese": "无论",
+        "pinyin": "wúlùn",
+        "english": "no matter; regardless of"
+      },
+      {
+        "id": 3,
+        "chinese": "公共汽车",
+        "pinyin": "gōnggòng qìchē",
+        "english": "bus; public bus"
+      },
+      {
+        "id": 4,
+        "chinese": "餐厅",
+        "pinyin": "cāntīng",
+        "english": "restaurant; dining room"
+      },
+      {
+        "id": 5,
+        "chinese": "取钱",
+        "pinyin": "qǔqián",
+        "english": "to withdraw money"
+      },
+      {
+        "id": 6,
+        "chinese": "存钱",
+        "pinyin": "cúnqián",
+        "english": "to deposit money; to save money"
+      },
+      {
+        "id": 7,
+        "chinese": "站",
+        "pinyin": "zhàn",
+        "english": "to stand; stop; station"
+      },
+      {
+        "id": 8,
+        "chinese": "结果",
+        "pinyin": "jiéguǒ",
+        "english": "result; outcome; as a result"
+      },
+      {
+        "id": 9,
+        "chinese": "甚至",
+        "pinyin": "shènzhì",
+        "english": "even; go so far as to"
+      },
+      {
+        "id": 10,
+        "chinese": "主要",
+        "pinyin": "zhǔyào",
+        "english": "main; primary; mainly"
+      },
+      {
+        "id": 11,
+        "chinese": "教育",
+        "pinyin": "jiàoyù",
+        "english": "education; to educate"
+      },
+      {
+        "id": 12,
+        "chinese": "道德",
+        "pinyin": "dàodé",
+        "english": "morality; ethics; moral"
+      },
+      {
+        "id": 13,
+        "chinese": "设备",
+        "pinyin": "shèbèi",
+        "english": "equipment; facilities"
+      },
+      {
+        "id": 14,
+        "chinese": "资源",
+        "pinyin": "zīyuán",
+        "english": "resources; natural resources"
+      },
+      {
+        "id": 15,
+        "chinese": "有限",
+        "pinyin": "yǒuxiàn",
+        "english": "limited; finite"
+      },
+      {
+        "id": 16,
+        "chinese": "争先恐后",
+        "pinyin": "zhēng xiān kǒng hòu",
+        "english": "to scramble to be first; to jostle for position"
+      },
+      {
+        "id": 17,
+        "chinese": "不可避免",
+        "pinyin": "bùkě bìmiǎn",
+        "english": "unavoidable; inevitable"
+      },
+      {
+        "id": 18,
+        "chinese": "显然",
+        "pinyin": "xiǎnrán",
+        "english": "obviously; evidently; clearly"
+      },
+      {
+        "id": 19,
+        "chinese": "地铁",
+        "pinyin": "dìtiě",
+        "english": "subway; metro"
+      },
+      {
+        "id": 20,
+        "chinese": "交通",
+        "pinyin": "jiāotōng",
+        "english": "traffic; transportation"
+      },
+      {
+        "id": 21,
+        "chinese": "停车",
+        "pinyin": "tíngchē",
+        "english": "to park; to stop a vehicle"
+      },
+      {
+        "id": 22,
+        "chinese": "其他",
+        "pinyin": "qítā",
+        "english": "other; the rest"
+      },
+      {
+        "id": 23,
+        "chinese": "乱",
+        "pinyin": "luàn",
+        "english": "chaotic; disorderly; messy"
+      }
+    ]
+  },
+  {
+    "name": "到了北京",
+    "id": "deck-ANC_L1",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "准时",
+        "pinyin": "zhǔnshí",
+        "english": "on time; punctual"
+      },
+      {
+        "id": 2,
+        "chinese": "机场",
+        "pinyin": "jīchǎng",
+        "english": "airport"
+      },
+      {
+        "id": 3,
+        "chinese": "派",
+        "pinyin": "pài",
+        "english": "to send; to dispatch; to assign"
+      },
+      {
+        "id": 4,
+        "chinese": "先生",
+        "pinyin": "xiānshēng",
+        "english": "Mr.; teacher; husband"
+      },
+      {
+        "id": 5,
+        "chinese": "通过",
+        "pinyin": "tōngguò",
+        "english": "to pass through; by means of"
+      },
+      {
+        "id": 6,
+        "chinese": "海关",
+        "pinyin": "hǎiguān",
+        "english": "customs"
+      },
+      {
+        "id": 7,
+        "chinese": "据说",
+        "pinyin": "jùshuō",
+        "english": "it is said that; reportedly"
+      },
+      {
+        "id": 8,
+        "chinese": "杂志",
+        "pinyin": "zázhì",
+        "english": "magazine"
+      },
+      {
+        "id": 9,
+        "chinese": "查",
+        "pinyin": "chá",
+        "english": "to check; to inspect; to look up"
+      },
+      {
+        "id": 10,
+        "chinese": "严格",
+        "pinyin": "yángé",
+        "english": "strict; stringent"
+      },
+      {
+        "id": 11,
+        "chinese": "好在",
+        "pinyin": "hǎozài",
+        "english": "fortunately; luckily"
+      },
+      {
+        "id": 12,
+        "chinese": "根本",
+        "pinyin": "gēnběn",
+        "english": "at all; fundamentally; basic"
+      },
+      {
+        "id": 13,
+        "chinese": "打开",
+        "pinyin": "dǎkāi",
+        "english": "to open; to turn on"
+      },
+      {
+        "id": 14,
+        "chinese": "行李",
+        "pinyin": "xíngli",
+        "english": "luggage; baggage"
+      },
+      {
+        "id": 15,
+        "chinese": "开车",
+        "pinyin": "kāichē",
+        "english": "to drive a car"
+      },
+      {
+        "id": 16,
+        "chinese": "差不多",
+        "pinyin": "chàbuduō",
+        "english": "almost; about; similar"
+      },
+      {
+        "id": 17,
+        "chinese": "印象",
+        "pinyin": "yìnxiàng",
+        "english": "impression"
+      },
+      {
+        "id": 18,
+        "chinese": "检查",
+        "pinyin": "jiǎnchá",
+        "english": "to inspect; to check; inspection"
+      },
+      {
+        "id": 19,
+        "chinese": "现代化",
+        "pinyin": "xiàndàihuà",
+        "english": "modernization; modernized"
+      },
+      {
+        "id": 20,
+        "chinese": "想象",
+        "pinyin": "xiǎngxiàng",
+        "english": "to imagine; imagination"
+      },
+      {
+        "id": 21,
+        "chinese": "古老",
+        "pinyin": "gǔlǎo",
+        "english": "ancient; old"
+      },
+      {
+        "id": 22,
+        "chinese": "兴奋",
+        "pinyin": "xīngfèn",
+        "english": "excited; excitement"
+      },
+      {
+        "id": 23,
+        "chinese": "舒服",
+        "pinyin": "shūfu",
+        "english": "comfortable"
+      },
+      {
+        "id": 24,
+        "chinese": "时差",
+        "pinyin": "shíchā",
+        "english": "time difference; jet lag"
+      },
+      {
+        "id": 25,
+        "chinese": "一直",
+        "pinyin": "yīzhí",
+        "english": "always; continuously; straight"
+      },
+      {
+        "id": 26,
+        "chinese": "睡着",
+        "pinyin": "shuìzháo",
+        "english": "to fall asleep"
+      }
+    ]
+  },
+  {
+    "name": "去银行换钱",
+    "id": "deck-ANC_L9",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "要求",
+        "pinyin": "yāoqiú",
+        "english": "to require; to demand; requirement"
+      },
+      {
+        "id": 2,
+        "chinese": "简直",
+        "pinyin": "jiǎnzhí",
+        "english": "simply; at all; virtually"
+      },
+      {
+        "id": 3,
+        "chinese": "周末",
+        "pinyin": "zhōumò",
+        "english": "weekend"
+      },
+      {
+        "id": 4,
+        "chinese": "抱怨",
+        "pinyin": "bàoyuàn",
+        "english": "to complain; to grumble"
+      },
+      {
+        "id": 5,
+        "chinese": "条件",
+        "pinyin": "tiáojiàn",
+        "english": "condition; terms; requirement"
+      },
+      {
+        "id": 6,
+        "chinese": "挤",
+        "pinyin": "jǐ",
+        "english": "crowded; to squeeze; to crowd"
+      },
+      {
+        "id": 7,
+        "chinese": "基本",
+        "pinyin": "jīběn",
+        "english": "basic; fundamental; essentially"
+      },
+      {
+        "id": 8,
+        "chinese": "舒适",
+        "pinyin": "shūshì",
+        "english": "comfortable; cozy"
+      },
+      {
+        "id": 9,
+        "chinese": "生活",
+        "pinyin": "shēnghuó",
+        "english": "life; to live"
+      },
+      {
+        "id": 10,
+        "chinese": "环境",
+        "pinyin": "huánjìng",
+        "english": "environment; surroundings"
+      },
+      {
+        "id": 11,
+        "chinese": "合理",
+        "pinyin": "hélǐ",
+        "english": "reasonable; rational"
+      },
+      {
+        "id": 12,
+        "chinese": "标准",
+        "pinyin": "biāozhǔn",
+        "english": "standard; criterion"
+      },
+      {
+        "id": 13,
+        "chinese": "影响",
+        "pinyin": "yǐngxiǎng",
+        "english": "to influence; influence; effect"
+      },
+      {
+        "id": 14,
+        "chinese": "情绪",
+        "pinyin": "qíngxù",
+        "english": "mood; emotion; feeling"
+      },
+      {
+        "id": 15,
+        "chinese": "同意",
+        "pinyin": "tóngyì",
+        "english": "to agree; to consent"
+      },
+      {
+        "id": 16,
+        "chinese": "既然",
+        "pinyin": "jìrán",
+        "english": "since; now that; given that"
+      },
+      {
+        "id": 17,
+        "chinese": "体验",
+        "pinyin": "tǐyàn",
+        "english": "to experience; firsthand experience"
+      },
+      {
+        "id": 18,
+        "chinese": "重要",
+        "pinyin": "zhòngyào",
+        "english": "important"
+      },
+      {
+        "id": 19,
+        "chinese": "留",
+        "pinyin": "liú",
+        "english": "to stay; to remain; to keep"
+      }
+    ]
+  },
+  {
+    "name": "老年人的生活",
+    "id": "deck-ANC_L35",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "流行",
+        "pinyin": "liúxíng",
+        "english": "popular; fashionable; to spread"
+      },
+      {
+        "id": 2,
+        "chinese": "天堂",
+        "pinyin": "tiāntáng",
+        "english": "paradise; heaven"
+      },
+      {
+        "id": 3,
+        "chinese": "大致",
+        "pinyin": "dàzhì",
+        "english": "roughly; approximately; generally"
+      },
+      {
+        "id": 4,
+        "chinese": "反映",
+        "pinyin": "fǎnyìng",
+        "english": "to reflect; to mirror; to report"
+      },
+      {
+        "id": 5,
+        "chinese": "注重",
+        "pinyin": "zhùzhòng",
+        "english": "to emphasize; to attach importance to"
+      },
+      {
+        "id": 6,
+        "chinese": "或者",
+        "pinyin": "huòzhě",
+        "english": "or; either or"
+      },
+      {
+        "id": 7,
+        "chinese": "压力",
+        "pinyin": "yālì",
+        "english": "pressure; stress"
+      },
+      {
+        "id": 8,
+        "chinese": "至于",
+        "pinyin": "zhìyú",
+        "english": "as for; as to; regarding"
+      },
+      {
+        "id": 9,
+        "chinese": "竞争",
+        "pinyin": "jìngzhēng",
+        "english": "to compete; competition"
+      },
+      {
+        "id": 10,
+        "chinese": "激烈",
+        "pinyin": "jīliè",
+        "english": "intense; fierce"
+      },
+      {
+        "id": 11,
+        "chinese": "必须",
+        "pinyin": "bìxū",
+        "english": "must; have to"
+      },
+      {
+        "id": 12,
+        "chinese": "尽",
+        "pinyin": "jìn",
+        "english": "to the utmost; to exhaust; to use up"
+      },
+      {
+        "id": 13,
+        "chinese": "努力",
+        "pinyin": "nǔlì",
+        "english": "to work hard; effort; diligent"
+      },
+      {
+        "id": 14,
+        "chinese": "淘汰",
+        "pinyin": "táotài",
+        "english": "to eliminate; to phase out"
+      },
+      {
+        "id": 15,
+        "chinese": "反对",
+        "pinyin": "fǎnduì",
+        "english": "to oppose; to be against; opposition"
+      },
+      {
+        "id": 16,
+        "chinese": "自愿",
+        "pinyin": "zìyuàn",
+        "english": "voluntary; of one's own accord"
+      },
+      {
+        "id": 17,
+        "chinese": "满意",
+        "pinyin": "mǎnyì",
+        "english": "satisfied; content"
+      },
+      {
+        "id": 18,
+        "chinese": "加重",
+        "pinyin": "jiāzhòng",
+        "english": "to make heavier; to worsen; to increase"
+      },
+      {
+        "id": 19,
+        "chinese": "随着",
+        "pinyin": "suízhe",
+        "english": "along with; following; as"
+      },
+      {
+        "id": 20,
+        "chinese": "工业化",
+        "pinyin": "gōngyèhuà",
+        "english": "industrialization"
+      },
+      {
+        "id": 21,
+        "chinese": "快速",
+        "pinyin": "kuàisù",
+        "english": "fast; rapid; quick"
+      },
+      {
+        "id": 22,
+        "chinese": "取代",
+        "pinyin": "qǔdài",
+        "english": "to replace; to substitute"
+      }
+    ]
+  },
+  {
+    "name": "中文桌子",
+    "id": "deck-FS_L21",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "活动",
+        "pinyin": "huódòng",
+        "english": "activity; event; to exercise"
+      },
+      {
+        "id": 2,
+        "chinese": "一起",
+        "pinyin": "yīqǐ",
+        "english": "together; at the same time"
+      },
+      {
+        "id": 3,
+        "chinese": "大家",
+        "pinyin": "dàjiā",
+        "english": "everyone; everybody"
+      },
+      {
+        "id": 4,
+        "chinese": "谈话",
+        "pinyin": "tánhuà",
+        "english": "to talk; to have a conversation; talk"
+      },
+      {
+        "id": 5,
+        "chinese": "机会",
+        "pinyin": "jīhuì",
+        "english": "opportunity; chance"
+      },
+      {
+        "id": 6,
+        "chinese": "口音",
+        "pinyin": "kǒuyīn",
+        "english": "accent; pronunciation"
+      },
+      {
+        "id": 7,
+        "chinese": "看法",
+        "pinyin": "kànfǎ",
+        "english": "view; opinion; way of looking at something"
+      },
+      {
+        "id": 8,
+        "chinese": "年级",
+        "pinyin": "niánjí",
+        "english": "grade; year (in school)"
+      },
+      {
+        "id": 9,
+        "chinese": "水平",
+        "pinyin": "shuǐpíng",
+        "english": "level; standard; proficiency"
+      }
+    ]
+  }
+]
