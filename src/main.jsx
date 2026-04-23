@@ -336,9 +336,9 @@ const APP_VERSION = '1.1.0';
 const TUTORIAL_STEPS = {
   welcome: {
     title: 'Welcome to 中文 Learn! 👋',
-    content: 'Let\'s take a quick tour so you know how to use every feature.\n\nIf you are in Princeton\'s CHI 101, 102, or 108, click "Download Decks + 课文 (Princeton Only)" to get your course decks and readings.\n\nAre you a Princeton CHI student?',
+    content: 'Let\'s take a quick tour so you know how to use every feature.\n\nIf you are in Princeton\'s CHI 101, 102, 103, or 108, click "Download Decks + 课文 (Princeton Only)" to get your course decks and readings.\n\nAre you a Princeton CHI student?',
     choices: [
-      { label: '✓ Yes, Princeton CHI 101/102/108', nextId: 'chi108-path', chi108: true },
+      { label: '✓ Yes, Princeton CHI 101/102/103/108', nextId: 'chi108-path', chi108: true },
       { label: '◎ No, just exploring', nextId: 'hsk-intro', chi108: false },
     ],
     view: 'home',
@@ -372,8 +372,8 @@ const TUTORIAL_STEPS = {
     view: 'home',
   },
   'chi108-browse': {
-    title: 'Browse CHI 108 Decks 🔍',
-    content: 'Click "Browse Decks", find this week\'s CHI 108 deck, and click Import.\n\nAfter importing, close the panel (click ✕) — then click Next → below.',
+    title: 'Browse Princeton Decks 🔍',
+    content: 'Click "Browse Decks", select your course (103 or 108) from the dropdown, find this week\'s deck, and click Import.\n\nAfter importing, close the panel (click ✕) — then click Next → below.',
     nextId: 'deck-ready',
     prevId: 'chi108-path',
     targetId: 'tutorial-browse-btn',
@@ -1176,39 +1176,66 @@ const ChineseLearningApp = () => {
   // Browse built-in decks
   const [showBrowseDecks, setShowBrowseDecks] = useState(false);
   const [browseLoading, setBrowseLoading] = useState(null); // deck filename being fetched
+  const [browseFilter, setBrowseFilter] = useState('108'); // '103' or '108'
 
   // All available built-in vocab decks hosted on GitHub Pages alongside the app
   const BUILT_IN_DECKS = [
-    { filename: '108vocab/写字比赛 Vocab.json',              name: '写字比赛 Vocabulary (CHI103 + CHI108)', cards: 829, topic: 'CHI103 + CHI108 Review', highlight: true },
-    { filename: '108vocab/Privacy.json',                    name: 'Privacy 隐私',                       cards: 43,  topic: 'Lesson 11' },
-    { filename: '108vocab/走后门.json',                      name: '走后门',                              cards: 35,  topic: 'Lesson 12' },
-    { filename: '108vocab/到时候再说吧.json',                 name: '到时候再说吧',                         cards: 44,  topic: 'ANC Lesson 18' },
-    { filename: '108vocab/饭桌上的客套.json',                 name: '饭桌上的客套',                         cards: 48,  topic: 'Oh China Lesson 18' },
-    { filename: '108vocab/北京的早晨.json',                   name: '北京的早晨',                           cards: 41,  topic: 'Lesson 14' },
-    { filename: '108vocab/北京的夜市.json',                   name: '北京的夜市',                           cards: 32,  topic: 'ANC Lesson 15' },
-    { filename: '108vocab/北京的交通.json',                   name: '北京的交通',                           cards: 29,  topic: 'Lesson 16' },
-    { filename: '108vocab/麦当劳.json',                      name: '麦当劳',                              cards: 25,  topic: 'Lesson 20' },
-    { filename: '108vocab/体育和爱国.json',                   name: '体育和爱国',                           cards: 33,  topic: 'Lesson 22' },
-    { filename: '108vocab/中国制造.json',                     name: '中国制造',                             cards: 31,  topic: 'ANC Lesson 24' },
-    { filename: '108vocab/铁饭碗打破了.json',                 name: '铁饭碗打破了',                          cards: 23,  topic: 'ANC Lesson 27' },
-    { filename: '108vocab/高考.json',                        name: '高考',                               cards: 36,  topic: 'ANC Lesson 29' },
-    { filename: '108vocab/开放留学政策.json',                  name: '开放留学政策',                          cards: 28,  topic: 'ANC Lesson 38' },
-    { filename: '108vocab/家里的小皇帝.json',                  name: '家里的小皇帝',                          cards: 42,  topic: 'Lesson 27' },
-    { filename: '108vocab/读书和考试.json',                    name: '读书和考试',                           cards: 41,  topic: 'Lesson 28' },
-    { filename: '108vocab/现在好还是从前好.json',               name: '现在好还是从前好',                       cards: 27,  topic: 'Lesson 33' },
-    { filename: '108vocab/双语教育.json',                     name: '双语教育',                             cards: 31,  topic: 'Oh China Lesson 22' },
-    { filename: '108vocab/美国的华侨.json',                    name: '美国的华侨',                           cards: 48,  topic: 'Oh China Lesson 19' },
-    { filename: '108vocab/华裔需要不需要政治代表.json',           name: '华裔需要不需要政治代表',                   cards: 47,  topic: 'Oh China Lesson 20' },
-    { filename: '108vocab/中国的妇女.json',                    name: '中国的妇女',                           cards: 48,  topic: 'Lesson 25' },
-    { filename: '108vocab/离婚.json',                        name: '离婚',                               cards: 52,  topic: 'Lesson 26' },
-    { filename: '108vocab/人权和贸易.json',                    name: '人权和贸易',                           cards: 27,  topic: 'Oh China Lesson 23' },
-    { filename: '108vocab/中国人的衣食住行.json',               name: '中国人的衣食住行',                       cards: 56,  topic: 'Oh China Lesson 31' },
-    { filename: '103vocab/CHI103-CHAR LIST.json',           name: 'CHI 103 Character List',             cards: 522, topic: 'CHI 103 Review' },
-    { filename: '103vocab/CHI103-VOCAB LIST.json',          name: 'CHI 103 Vocabulary',                 cards: 483, topic: 'CHI 103 Review' },
+    // ── CHI 108 ──────────────────────────────────────────────────────────────
+    { course: '108', filename: '108vocab/写字比赛 Vocab.json',              name: '写字比赛 Vocabulary (CHI103 + CHI108)', cards: 829, topic: 'CHI103 + CHI108 Review', highlight: true },
+    { course: '108', filename: '108vocab/Privacy.json',                    name: 'Privacy 隐私',                       cards: 43,  topic: 'Lesson 11' },
+    { course: '108', filename: '108vocab/走后门.json',                      name: '走后门',                              cards: 35,  topic: 'Lesson 12' },
+    { course: '108', filename: '108vocab/到时候再说吧.json',                 name: '到时候再说吧',                         cards: 44,  topic: 'ANC Lesson 18' },
+    { course: '108', filename: '108vocab/饭桌上的客套.json',                 name: '饭桌上的客套',                         cards: 48,  topic: 'Oh China Lesson 18' },
+    { course: '108', filename: '108vocab/北京的早晨.json',                   name: '北京的早晨',                           cards: 41,  topic: 'Lesson 14' },
+    { course: '108', filename: '108vocab/北京的夜市.json',                   name: '北京的夜市',                           cards: 32,  topic: 'ANC Lesson 15' },
+    { course: '108', filename: '108vocab/北京的交通.json',                   name: '北京的交通',                           cards: 29,  topic: 'Lesson 16' },
+    { course: '108', filename: '108vocab/麦当劳.json',                      name: '麦当劳',                              cards: 25,  topic: 'Lesson 20' },
+    { course: '108', filename: '108vocab/体育和爱国.json',                   name: '体育和爱国',                           cards: 33,  topic: 'Lesson 22' },
+    { course: '108', filename: '108vocab/中国制造.json',                     name: '中国制造',                             cards: 31,  topic: 'ANC Lesson 24' },
+    { course: '108', filename: '108vocab/铁饭碗打破了.json',                 name: '铁饭碗打破了',                          cards: 23,  topic: 'ANC Lesson 27' },
+    { course: '108', filename: '108vocab/高考.json',                        name: '高考',                               cards: 36,  topic: 'ANC Lesson 29' },
+    { course: '108', filename: '108vocab/开放留学政策.json',                  name: '开放留学政策',                          cards: 28,  topic: 'ANC Lesson 38' },
+    { course: '108', filename: '108vocab/家里的小皇帝.json',                  name: '家里的小皇帝',                          cards: 42,  topic: 'Lesson 27' },
+    { course: '108', filename: '108vocab/读书和考试.json',                    name: '读书和考试',                           cards: 41,  topic: 'Lesson 28' },
+    { course: '108', filename: '108vocab/现在好还是从前好.json',               name: '现在好还是从前好',                       cards: 27,  topic: 'Lesson 33' },
+    { course: '108', filename: '108vocab/双语教育.json',                     name: '双语教育',                             cards: 31,  topic: 'Oh China Lesson 22' },
+    { course: '108', filename: '108vocab/美国的华侨.json',                    name: '美国的华侨',                           cards: 48,  topic: 'Oh China Lesson 19' },
+    { course: '108', filename: '108vocab/华裔需要不需要政治代表.json',           name: '华裔需要不需要政治代表',                   cards: 47,  topic: 'Oh China Lesson 20' },
+    { course: '108', filename: '108vocab/中国的妇女.json',                    name: '中国的妇女',                           cards: 48,  topic: 'Lesson 25' },
+    { course: '108', filename: '108vocab/离婚.json',                        name: '离婚',                               cards: 52,  topic: 'Lesson 26' },
+    { course: '108', filename: '108vocab/人权和贸易.json',                    name: '人权和贸易',                           cards: 27,  topic: 'Oh China Lesson 23' },
+    { course: '108', filename: '108vocab/中国人的衣食住行.json',               name: '中国人的衣食住行',                       cards: 56,  topic: 'Oh China Lesson 31' },
+    { course: '108', filename: '103vocab/CHI103-CHAR LIST.json',           name: 'CHI 103 Character List',             cards: 522, topic: 'CHI 103 Review' },
+    { course: '108', filename: '103vocab/CHI103-VOCAB LIST.json',          name: 'CHI 103 Vocabulary',                 cards: 483, topic: 'CHI 103 Review' },
+    // ── CHI 103 ──────────────────────────────────────────────────────────────
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 0,  name: '我的家在哪儿',       cards: 38, topic: 'OC Lesson 2' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 1,  name: '我们都是美国人',     cards: 17, topic: 'OC Lesson 3' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 2,  name: '美国人学中文',       cards: 32, topic: 'OC Lesson 4' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 3,  name: '我是四川人？',       cards: 21, topic: 'OC Lesson 5' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 4,  name: '别担心',            cards: 32, topic: 'OC Lesson 6' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 5,  name: '男女同住',           cards: 37, topic: 'OC Lesson 7' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 6,  name: '看电影',            cards: 24, topic: 'OC Lesson 8' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 7,  name: '我要去中国',         cards: 22, topic: 'OC Lesson 9' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 8,  name: '出国前的准备',       cards: 21, topic: 'OC Lesson 10' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 9,  name: '为什么学中文',       cards: 27, topic: 'OC Lesson 11' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 10, name: '做孩子也不容易',     cards: 30, topic: 'OC Lesson 12' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 11, name: '说标准的普通话',     cards: 13, topic: 'OC Lesson 13' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 12, name: '都怪你妈妈',         cards: 22, topic: 'OC Lesson 14' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 13, name: '厕所里没有卫生纸',   cards: 19, topic: 'OC Lesson 15' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 14, name: '我是个穷学生',       cards: 15, topic: 'OC Lesson 16' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 15, name: '没有什么大不同',     cards: 13, topic: 'OC Lesson 17' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 16, name: '为什么不排队',       cards: 23, topic: 'OC Lesson 18' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 17, name: '到了北京',           cards: 26, topic: 'OC Lesson 19' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 18, name: '去银行换钱',         cards: 19, topic: 'OC Lesson 20' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 19, name: '老年人的生活',       cards: 22, topic: 'OC Lesson 21' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 20, name: '中文桌子',           cards: 9,  topic: 'OC Lesson 22' },
+    { course: '103', filename: '103vocab/CHI103-CHAR LIST.json',           name: 'CHI 103 Character List', cards: 522, topic: 'CHI 103 Review' },
+    { course: '103', filename: '103vocab/CHI103-VOCAB LIST.json',          name: 'CHI 103 Vocabulary',     cards: 483, topic: 'CHI 103 Review' },
   ];
 
   const importBuiltInDeck = async (deckInfo) => {
-    setBrowseLoading(deckInfo.filename);
+    const deckKey = deckInfo.deckIndex !== undefined ? `${deckInfo.filename}-${deckInfo.deckIndex}` : deckInfo.filename;
+    setBrowseLoading(deckKey);
     try {
       const base = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
       const url = base + deckInfo.filename;
@@ -1216,11 +1243,13 @@ const ChineseLearningApp = () => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const imported = await res.json();
       // Assign a fresh ID
-      const deck = Array.isArray(imported) ? imported[0] : imported;
+      const deck = Array.isArray(imported)
+        ? (deckInfo.deckIndex !== undefined ? imported[deckInfo.deckIndex] : imported[0])
+        : imported;
       deck.id = 'deck-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
       setDecks(prev => [...prev, deck]);
       // Brief success flash then close
-      setBrowseLoading('done-' + deckInfo.filename);
+      setBrowseLoading('done-' + deckKey);
       setTimeout(() => setBrowseLoading(null), 1200);
     } catch (e) {
       console.error('Failed to fetch deck:', e);
@@ -8053,18 +8082,29 @@ Rules:
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
               <div className="p-5 border-b border-gray-100 flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800">Browse CHI 108 Decks</h3>
+                  <h3 className="text-xl font-bold text-gray-800">Browse Princeton Decks</h3>
                   <p className="text-sm text-gray-500 mt-0.5">Tap a deck to add it instantly — no download needed</p>
                 </div>
                 <button onClick={() => setShowBrowseDecks(false)} className="text-gray-400 hover:text-gray-600 transition"><X size={22} /></button>
               </div>
+              <div className="px-4 pt-3 pb-1">
+                <select
+                  value={browseFilter}
+                  onChange={e => setBrowseFilter(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-300"
+                >
+                  <option value="103">CHI 103</option>
+                  <option value="108">CHI 108</option>
+                </select>
+              </div>
               <div className="overflow-y-auto flex-1 p-3">
-                {BUILT_IN_DECKS.map((deck) => {
+                {BUILT_IN_DECKS.filter(d => d.course === browseFilter).map((deck) => {
                   const alreadyAdded = decks.some(d => d.name === deck.name);
-                  const isLoading = browseLoading === deck.filename;
-                  const isDone = browseLoading === ('done-' + deck.filename);
+                  const deckKey = deck.deckIndex !== undefined ? `${deck.filename}-${deck.deckIndex}` : deck.filename;
+                  const isLoading = browseLoading === deckKey;
+                  const isDone = browseLoading === ('done-' + deckKey);
                   return (
-                    <div key={deck.filename} className={`flex items-center justify-between px-4 py-3 rounded-xl transition group ${deck.highlight ? 'bg-amber-50 hover:bg-amber-100 border border-amber-200' : 'hover:bg-gray-50'}`}>
+                    <div key={deckKey} className={`flex items-center justify-between px-4 py-3 rounded-xl transition group ${deck.highlight ? 'bg-amber-50 hover:bg-amber-100 border border-amber-200' : 'hover:bg-gray-50'}`}>
                       <div className="flex-1 min-w-0 mr-3">
                         <div className={`font-semibold text-sm flex items-center gap-1.5 ${deck.highlight ? 'text-amber-800' : 'text-gray-800'}`}>
                           {deck.highlight && <span>⭐</span>}
