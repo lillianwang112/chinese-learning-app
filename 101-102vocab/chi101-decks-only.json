@@ -1,0 +1,2390 @@
+[
+  {
+    "name": "第一课 老师和学生",
+    "id": "deck-chi101102-1",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "老",
+        "pinyin": "lǎo",
+        "english": "teacher"
+      },
+      {
+        "id": 2,
+        "chinese": "师",
+        "pinyin": "shī",
+        "english": "teacher"
+      },
+      {
+        "id": 3,
+        "chinese": "和",
+        "pinyin": "hé",
+        "english": ""
+      },
+      {
+        "id": 4,
+        "chinese": "学",
+        "pinyin": "xué",
+        "english": "student"
+      },
+      {
+        "id": 5,
+        "chinese": "生",
+        "pinyin": "shēng",
+        "english": "student"
+      },
+      {
+        "id": 6,
+        "chinese": "你",
+        "pinyin": "nǐ",
+        "english": "you"
+      },
+      {
+        "id": 7,
+        "chinese": "您",
+        "pinyin": "nín",
+        "english": "you (polite form)"
+      },
+      {
+        "id": 8,
+        "chinese": "贵",
+        "pinyin": "guì",
+        "english": "your surname (honorific)"
+      },
+      {
+        "id": 9,
+        "chinese": "姓",
+        "pinyin": "xìng",
+        "english": "your surname (honorific)"
+      },
+      {
+        "id": 10,
+        "chinese": "我",
+        "pinyin": "wǒ",
+        "english": "we, us"
+      },
+      {
+        "id": 11,
+        "chinese": "叫",
+        "pinyin": "jiào",
+        "english": "to be called"
+      },
+      {
+        "id": 12,
+        "chinese": "王",
+        "pinyin": "wáng",
+        "english": ""
+      },
+      {
+        "id": 13,
+        "chinese": "二",
+        "pinyin": "èr",
+        "english": ""
+      },
+      {
+        "id": 14,
+        "chinese": "是",
+        "pinyin": "shì",
+        "english": "or (in questions)"
+      },
+      {
+        "id": 15,
+        "chinese": "什",
+        "pinyin": "shén",
+        "english": "what"
+      },
+      {
+        "id": 16,
+        "chinese": "么",
+        "pinyin": "me",
+        "english": "what"
+      },
+      {
+        "id": 17,
+        "chinese": "丁",
+        "pinyin": "dīng",
+        "english": ""
+      },
+      {
+        "id": 18,
+        "chinese": "一",
+        "pinyin": "yī",
+        "english": ""
+      },
+      {
+        "id": 19,
+        "chinese": "的",
+        "pinyin": "de",
+        "english": "possessive particle"
+      },
+      {
+        "id": 20,
+        "chinese": "名",
+        "pinyin": "míng",
+        "english": "name"
+      },
+      {
+        "id": 21,
+        "chinese": "字",
+        "pinyin": "zì",
+        "english": "name"
+      },
+      {
+        "id": 22,
+        "chinese": "他",
+        "pinyin": "tā",
+        "english": "he, him"
+      },
+      {
+        "id": 23,
+        "chinese": "谁",
+        "pinyin": "shéi",
+        "english": "who"
+      },
+      {
+        "id": 24,
+        "chinese": "张",
+        "pinyin": "zhāng",
+        "english": ""
+      },
+      {
+        "id": 25,
+        "chinese": "三",
+        "pinyin": "sān",
+        "english": ""
+      },
+      {
+        "id": 26,
+        "chinese": "也",
+        "pinyin": "yě",
+        "english": "also, too"
+      },
+      {
+        "id": 27,
+        "chinese": "吗",
+        "pinyin": "ma",
+        "english": "question particle"
+      },
+      {
+        "id": 28,
+        "chinese": "们",
+        "pinyin": "men",
+        "english": "we, us"
+      },
+      {
+        "id": 29,
+        "chinese": "都",
+        "pinyin": "dōu",
+        "english": "all, both"
+      },
+      {
+        "id": 30,
+        "chinese": "中",
+        "pinyin": "zhōng",
+        "english": "China"
+      },
+      {
+        "id": 31,
+        "chinese": "国",
+        "pinyin": "guó",
+        "english": "China"
+      },
+      {
+        "id": 32,
+        "chinese": "还",
+        "pinyin": "hái",
+        "english": "or (in questions)"
+      },
+      {
+        "id": 33,
+        "chinese": "美",
+        "pinyin": "měi",
+        "english": "America, USA"
+      },
+      {
+        "id": 34,
+        "chinese": "不",
+        "pinyin": "bù",
+        "english": "not, no"
+      },
+      {
+        "id": 35,
+        "chinese": "日",
+        "pinyin": "rì",
+        "english": "Japan"
+      },
+      {
+        "id": 36,
+        "chinese": "本",
+        "pinyin": "běn",
+        "english": "Japan"
+      },
+      {
+        "id": 37,
+        "chinese": "人",
+        "pinyin": "rén",
+        "english": "person, people"
+      }
+    ]
+  },
+  {
+    "name": "第二课 书在桌子上",
+    "id": "deck-chi101102-2",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "书",
+        "pinyin": "shū",
+        "english": "book"
+      },
+      {
+        "id": 2,
+        "chinese": "在",
+        "pinyin": "zài",
+        "english": "to be at/in/on"
+      },
+      {
+        "id": 3,
+        "chinese": "桌",
+        "pinyin": "zhuō",
+        "english": "table, desk"
+      },
+      {
+        "id": 4,
+        "chinese": "子",
+        "pinyin": "zi",
+        "english": "table, desk"
+      },
+      {
+        "id": 5,
+        "chinese": "上",
+        "pinyin": "shàng",
+        "english": "on, above, up"
+      },
+      {
+        "id": 6,
+        "chinese": "这",
+        "pinyin": "zhè",
+        "english": "this"
+      },
+      {
+        "id": 7,
+        "chinese": "那",
+        "pinyin": "nà",
+        "english": "that"
+      },
+      {
+        "id": 8,
+        "chinese": "支",
+        "pinyin": "zhī",
+        "english": "measure word for long thin objects"
+      },
+      {
+        "id": 9,
+        "chinese": "笔",
+        "pinyin": "bǐ",
+        "english": "pen, pencil"
+      },
+      {
+        "id": 10,
+        "chinese": "两",
+        "pinyin": "liǎng",
+        "english": "two"
+      },
+      {
+        "id": 11,
+        "chinese": "哪",
+        "pinyin": "nǎ",
+        "english": "where"
+      },
+      {
+        "id": 12,
+        "chinese": "儿",
+        "pinyin": "er",
+        "english": "where"
+      },
+      {
+        "id": 13,
+        "chinese": "有",
+        "pinyin": "yǒu",
+        "english": "to have; there is/are"
+      },
+      {
+        "id": 14,
+        "chinese": "没",
+        "pinyin": "méi",
+        "english": "to not have; there is not"
+      },
+      {
+        "id": 15,
+        "chinese": "下",
+        "pinyin": "xià",
+        "english": "below, underneath"
+      },
+      {
+        "id": 16,
+        "chinese": "头",
+        "pinyin": "tóu",
+        "english": "below, underneath"
+      },
+      {
+        "id": 17,
+        "chinese": "几",
+        "pinyin": "jǐ",
+        "english": "how many (less than 10)"
+      },
+      {
+        "id": 18,
+        "chinese": "白",
+        "pinyin": "bái",
+        "english": "white"
+      },
+      {
+        "id": 19,
+        "chinese": "纸",
+        "pinyin": "zhǐ",
+        "english": "paper"
+      },
+      {
+        "id": 20,
+        "chinese": "黑",
+        "pinyin": "hēi",
+        "english": "black"
+      },
+      {
+        "id": 21,
+        "chinese": "旁",
+        "pinyin": "páng",
+        "english": "beside, next to"
+      },
+      {
+        "id": 22,
+        "chinese": "边",
+        "pinyin": "biān",
+        "english": "beside, next to"
+      },
+      {
+        "id": 23,
+        "chinese": "把",
+        "pinyin": "bǎ",
+        "english": "measure word for things with handles"
+      },
+      {
+        "id": 24,
+        "chinese": "椅",
+        "pinyin": "yǐ",
+        "english": "chair"
+      },
+      {
+        "id": 25,
+        "chinese": "东",
+        "pinyin": "dōng",
+        "english": "things, stuff"
+      },
+      {
+        "id": 26,
+        "chinese": "西",
+        "pinyin": "xī",
+        "english": "things, stuff"
+      },
+      {
+        "id": 27,
+        "chinese": "个",
+        "pinyin": "gè",
+        "english": "general measure word"
+      },
+      {
+        "id": 28,
+        "chinese": "汉",
+        "pinyin": "hàn",
+        "english": "hamburger"
+      },
+      {
+        "id": 29,
+        "chinese": "堡",
+        "pinyin": "bǎo",
+        "english": "hamburger"
+      },
+      {
+        "id": 30,
+        "chinese": "包",
+        "pinyin": "bāo",
+        "english": "hamburger"
+      },
+      {
+        "id": 31,
+        "chinese": "四",
+        "pinyin": "sì",
+        "english": ""
+      },
+      {
+        "id": 32,
+        "chinese": "五",
+        "pinyin": "wǔ",
+        "english": ""
+      },
+      {
+        "id": 33,
+        "chinese": "六",
+        "pinyin": "liù",
+        "english": ""
+      },
+      {
+        "id": 34,
+        "chinese": "七",
+        "pinyin": "qī",
+        "english": ""
+      },
+      {
+        "id": 35,
+        "chinese": "八",
+        "pinyin": "bā",
+        "english": ""
+      },
+      {
+        "id": 36,
+        "chinese": "九",
+        "pinyin": "jiǔ",
+        "english": ""
+      },
+      {
+        "id": 37,
+        "chinese": "十",
+        "pinyin": "shí",
+        "english": ""
+      }
+    ]
+  },
+  {
+    "name": "第三课 今天我很忙",
+    "id": "deck-chi101102-3",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "今",
+        "pinyin": "jīn",
+        "english": "today"
+      },
+      {
+        "id": 2,
+        "chinese": "天",
+        "pinyin": "tiān",
+        "english": "today"
+      },
+      {
+        "id": 3,
+        "chinese": "很",
+        "pinyin": "hěn",
+        "english": ""
+      },
+      {
+        "id": 4,
+        "chinese": "忙",
+        "pinyin": "máng",
+        "english": "busy"
+      },
+      {
+        "id": 5,
+        "chinese": "因",
+        "pinyin": "yīn",
+        "english": "because"
+      },
+      {
+        "id": 6,
+        "chinese": "为",
+        "pinyin": "wèi",
+        "english": "why"
+      },
+      {
+        "id": 7,
+        "chinese": "所",
+        "pinyin": "suǒ",
+        "english": "therefore, so"
+      },
+      {
+        "id": 8,
+        "chinese": "以",
+        "pinyin": "yǐ",
+        "english": "therefore, so"
+      },
+      {
+        "id": 9,
+        "chinese": "节",
+        "pinyin": "jié",
+        "english": "measure word for class periods"
+      },
+      {
+        "id": 10,
+        "chinese": "课",
+        "pinyin": "kè",
+        "english": "class, lesson"
+      },
+      {
+        "id": 11,
+        "chinese": "英",
+        "pinyin": "yīng",
+        "english": "English (language)"
+      },
+      {
+        "id": 12,
+        "chinese": "文",
+        "pinyin": "wén",
+        "english": "Chinese (language)"
+      },
+      {
+        "id": 13,
+        "chinese": "喜",
+        "pinyin": "xǐ",
+        "english": "to like"
+      },
+      {
+        "id": 14,
+        "chinese": "欢",
+        "pinyin": "huan",
+        "english": "to like"
+      },
+      {
+        "id": 15,
+        "chinese": "漂",
+        "pinyin": "piào",
+        "english": "pretty, beautiful"
+      },
+      {
+        "id": 16,
+        "chinese": "亮",
+        "pinyin": "liang",
+        "english": "pretty, beautiful"
+      },
+      {
+        "id": 17,
+        "chinese": "现",
+        "pinyin": "xiàn",
+        "english": "now"
+      },
+      {
+        "id": 18,
+        "chinese": "空",
+        "pinyin": "kōng",
+        "english": "to have free time"
+      },
+      {
+        "id": 19,
+        "chinese": "请",
+        "pinyin": "qǐng",
+        "english": "to invite; please"
+      },
+      {
+        "id": 20,
+        "chinese": "喝",
+        "pinyin": "hē",
+        "english": "to drink"
+      },
+      {
+        "id": 21,
+        "chinese": "咖",
+        "pinyin": "kā",
+        "english": "coffee"
+      },
+      {
+        "id": 22,
+        "chinese": "啡",
+        "pinyin": "fēi",
+        "english": "coffee"
+      },
+      {
+        "id": 23,
+        "chinese": "只",
+        "pinyin": "zhǐ",
+        "english": "only"
+      },
+      {
+        "id": 24,
+        "chinese": "茶",
+        "pinyin": "chá",
+        "english": "tea"
+      },
+      {
+        "id": 25,
+        "chinese": "绿",
+        "pinyin": "lǜ",
+        "english": "green tea"
+      },
+      {
+        "id": 26,
+        "chinese": "红",
+        "pinyin": "hóng",
+        "english": "black (red) tea"
+      },
+      {
+        "id": 27,
+        "chinese": "想",
+        "pinyin": "xiǎng",
+        "english": "to want to; to think"
+      },
+      {
+        "id": 28,
+        "chinese": "吃",
+        "pinyin": "chī",
+        "english": "to eat"
+      },
+      {
+        "id": 29,
+        "chinese": "点",
+        "pinyin": "diǎn",
+        "english": "snacks, dim sum"
+      },
+      {
+        "id": 30,
+        "chinese": "心",
+        "pinyin": "xīn",
+        "english": "snacks, dim sum"
+      },
+      {
+        "id": 31,
+        "chinese": "饼",
+        "pinyin": "bǐng",
+        "english": "cookies, crackers"
+      },
+      {
+        "id": 32,
+        "chinese": "干",
+        "pinyin": "gān",
+        "english": "cookies, crackers"
+      },
+      {
+        "id": 33,
+        "chinese": "谢",
+        "pinyin": "xiè",
+        "english": "thank you"
+      },
+      {
+        "id": 34,
+        "chinese": "客",
+        "pinyin": "kè",
+        "english": "you're welcome"
+      },
+      {
+        "id": 35,
+        "chinese": "气",
+        "pinyin": "qi",
+        "english": "you're welcome"
+      }
+    ]
+  },
+  {
+    "name": "第四课 北京烤鸭",
+    "id": "deck-chi101102-4",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "北",
+        "pinyin": "běi",
+        "english": "Beijing"
+      },
+      {
+        "id": 2,
+        "chinese": "京",
+        "pinyin": "jīng",
+        "english": "Beijing"
+      },
+      {
+        "id": 3,
+        "chinese": "烤",
+        "pinyin": "kǎo",
+        "english": "Peking roast duck"
+      },
+      {
+        "id": 4,
+        "chinese": "鸭",
+        "pinyin": "yā",
+        "english": "Peking roast duck"
+      },
+      {
+        "id": 5,
+        "chinese": "难",
+        "pinyin": "nán",
+        "english": "difficult"
+      },
+      {
+        "id": 6,
+        "chinese": "多",
+        "pinyin": "duō",
+        "english": "many, a lot"
+      },
+      {
+        "id": 7,
+        "chinese": "朋",
+        "pinyin": "péng",
+        "english": "friend"
+      },
+      {
+        "id": 8,
+        "chinese": "友",
+        "pinyin": "yǒu",
+        "english": "friend"
+      },
+      {
+        "id": 9,
+        "chinese": "去",
+        "pinyin": "qù",
+        "english": "to go"
+      },
+      {
+        "id": 10,
+        "chinese": "工",
+        "pinyin": "gōng",
+        "english": "to work; work"
+      },
+      {
+        "id": 11,
+        "chinese": "作",
+        "pinyin": "zuò",
+        "english": "to work; work"
+      },
+      {
+        "id": 12,
+        "chinese": "过",
+        "pinyin": "guò",
+        "english": "experiential aspect marker"
+      },
+      {
+        "id": 13,
+        "chinese": "次",
+        "pinyin": "cì",
+        "english": "time, occurrence (measure word)"
+      },
+      {
+        "id": 14,
+        "chinese": "海",
+        "pinyin": "hǎi",
+        "english": "Shanghai"
+      },
+      {
+        "id": 15,
+        "chinese": "最",
+        "pinyin": "zuì",
+        "english": "most"
+      },
+      {
+        "id": 16,
+        "chinese": "虽",
+        "pinyin": "suī",
+        "english": "although"
+      },
+      {
+        "id": 17,
+        "chinese": "然",
+        "pinyin": "rán",
+        "english": "although"
+      },
+      {
+        "id": 18,
+        "chinese": "可",
+        "pinyin": "kě",
+        "english": "but, however"
+      },
+      {
+        "id": 19,
+        "chinese": "纽",
+        "pinyin": "niǔ",
+        "english": "New York"
+      },
+      {
+        "id": 20,
+        "chinese": "约",
+        "pinyin": "yuē",
+        "english": "New York"
+      },
+      {
+        "id": 21,
+        "chinese": "太",
+        "pinyin": "tài",
+        "english": "too... (excessively)"
+      },
+      {
+        "id": 22,
+        "chinese": "油",
+        "pinyin": "yóu",
+        "english": "oily, greasy"
+      },
+      {
+        "id": 23,
+        "chinese": "了",
+        "pinyin": "le",
+        "english": "too... (excessively)"
+      },
+      {
+        "id": 24,
+        "chinese": "真",
+        "pinyin": "zhēn",
+        "english": "real, genuine"
+      },
+      {
+        "id": 25,
+        "chinese": "好",
+        "pinyin": "hǎo",
+        "english": "delicious"
+      },
+      {
+        "id": 26,
+        "chinese": "菜",
+        "pinyin": "cài",
+        "english": "dish, food, vegetable"
+      },
+      {
+        "id": 27,
+        "chinese": "怎",
+        "pinyin": "zěn",
+        "english": "how is it? what's it like?"
+      },
+      {
+        "id": 28,
+        "chinese": "样",
+        "pinyin": "yàng",
+        "english": "how is it? what's it like?"
+      },
+      {
+        "id": 29,
+        "chinese": "甜",
+        "pinyin": "tián",
+        "english": "sweet"
+      },
+      {
+        "id": 30,
+        "chinese": "第",
+        "pinyin": "dì",
+        "english": "the first time"
+      },
+      {
+        "id": 31,
+        "chinese": "来",
+        "pinyin": "lái",
+        "english": ""
+      },
+      {
+        "id": 32,
+        "chinese": "牛",
+        "pinyin": "niú",
+        "english": "steak"
+      },
+      {
+        "id": 33,
+        "chinese": "排",
+        "pinyin": "pái",
+        "english": "steak"
+      },
+      {
+        "id": 34,
+        "chinese": "吧",
+        "pinyin": "ba",
+        "english": "suggestion particle"
+      }
+    ]
+  },
+  {
+    "name": "第五课 一张照片",
+    "id": "deck-chi101102-5",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "照",
+        "pinyin": "zhào",
+        "english": "photograph"
+      },
+      {
+        "id": 2,
+        "chinese": "片",
+        "pinyin": "piàn",
+        "english": "photograph"
+      },
+      {
+        "id": 3,
+        "chinese": "墙",
+        "pinyin": "qiáng",
+        "english": "wall"
+      },
+      {
+        "id": 4,
+        "chinese": "家",
+        "pinyin": "jiā",
+        "english": "family members"
+      },
+      {
+        "id": 5,
+        "chinese": "爸",
+        "pinyin": "bà",
+        "english": "dad, father"
+      },
+      {
+        "id": 6,
+        "chinese": "妈",
+        "pinyin": "mā",
+        "english": "mom, mother"
+      },
+      {
+        "id": 7,
+        "chinese": "间",
+        "pinyin": "jiān",
+        "english": "middle, center"
+      },
+      {
+        "id": 8,
+        "chinese": "呢",
+        "pinyin": "ne",
+        "english": ""
+      },
+      {
+        "id": 9,
+        "chinese": "左",
+        "pinyin": "zuǒ",
+        "english": "left side"
+      },
+      {
+        "id": 10,
+        "chinese": "右",
+        "pinyin": "yòu",
+        "english": "right side"
+      },
+      {
+        "id": 11,
+        "chinese": "哥",
+        "pinyin": "gē",
+        "english": "older brother"
+      },
+      {
+        "id": 12,
+        "chinese": "弟",
+        "pinyin": "dì",
+        "english": "younger brother"
+      },
+      {
+        "id": 13,
+        "chinese": "姐",
+        "pinyin": "jiě",
+        "english": "older sister"
+      },
+      {
+        "id": 14,
+        "chinese": "妹",
+        "pinyin": "mèi",
+        "english": "younger sister"
+      },
+      {
+        "id": 15,
+        "chinese": "后",
+        "pinyin": "hòu",
+        "english": "behind, in back"
+      },
+      {
+        "id": 16,
+        "chinese": "高",
+        "pinyin": "gāo",
+        "english": "tall; high"
+      },
+      {
+        "id": 17,
+        "chinese": "矮",
+        "pinyin": "ǎi",
+        "english": "short (in stature)"
+      },
+      {
+        "id": 18,
+        "chinese": "大",
+        "pinyin": "dà",
+        "english": "how old"
+      },
+      {
+        "id": 19,
+        "chinese": "小",
+        "pinyin": "xiǎo",
+        "english": "small; young"
+      },
+      {
+        "id": 20,
+        "chinese": "岁",
+        "pinyin": "suì",
+        "english": "years old"
+      },
+      {
+        "id": 21,
+        "chinese": "比",
+        "pinyin": "bǐ",
+        "english": "compared to"
+      },
+      {
+        "id": 22,
+        "chinese": "那",
+        "pinyin": "nà",
+        "english": "so, that much"
+      },
+      {
+        "id": 23,
+        "chinese": "女",
+        "pinyin": "nǚ",
+        "english": ""
+      },
+      {
+        "id": 24,
+        "chinese": "先",
+        "pinyin": "xiān",
+        "english": "husband; Mr."
+      },
+      {
+        "id": 25,
+        "chinese": "结",
+        "pinyin": "jié",
+        "english": "to get married"
+      },
+      {
+        "id": 26,
+        "chinese": "婚",
+        "pinyin": "hūn",
+        "english": "to get married"
+      },
+      {
+        "id": 27,
+        "chinese": "她",
+        "pinyin": "tā",
+        "english": ""
+      },
+      {
+        "id": 28,
+        "chinese": "孩",
+        "pinyin": "hái",
+        "english": "child, children"
+      },
+      {
+        "id": 29,
+        "chinese": "但",
+        "pinyin": "dàn",
+        "english": "not only...but also"
+      },
+      {
+        "id": 30,
+        "chinese": "而",
+        "pinyin": "ér",
+        "english": "not only...but also"
+      },
+      {
+        "id": 31,
+        "chinese": "且",
+        "pinyin": "qiě",
+        "english": "not only...but also"
+      },
+      {
+        "id": 32,
+        "chinese": "聪",
+        "pinyin": "cōng",
+        "english": "smart, intelligent"
+      },
+      {
+        "id": 33,
+        "chinese": "明",
+        "pinyin": "míng",
+        "english": "smart, intelligent"
+      },
+      {
+        "id": 34,
+        "chinese": "得",
+        "pinyin": "de",
+        "english": "much more (comparative)"
+      }
+    ]
+  },
+  {
+    "name": "第六课 我的两个朋友",
+    "id": "deck-chi101102-6",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "啊",
+        "pinyin": "a",
+        "english": ""
+      },
+      {
+        "id": 2,
+        "chinese": "会",
+        "pinyin": "huì",
+        "english": "can, to know how to"
+      },
+      {
+        "id": 3,
+        "chinese": "说",
+        "pinyin": "shuō",
+        "english": "to speak, to say"
+      },
+      {
+        "id": 4,
+        "chinese": "话",
+        "pinyin": "huà",
+        "english": "speech, words"
+      },
+      {
+        "id": 5,
+        "chinese": "写",
+        "pinyin": "xiě",
+        "english": "to write"
+      },
+      {
+        "id": 6,
+        "chinese": "跟",
+        "pinyin": "gēn",
+        "english": "with; and"
+      },
+      {
+        "id": 7,
+        "chinese": "常",
+        "pinyin": "cháng",
+        "english": "often, frequently"
+      },
+      {
+        "id": 8,
+        "chinese": "听",
+        "pinyin": "tīng",
+        "english": "to listen, to hear"
+      },
+      {
+        "id": 9,
+        "chinese": "懂",
+        "pinyin": "dǒng",
+        "english": "to understand"
+      },
+      {
+        "id": 10,
+        "chinese": "觉",
+        "pinyin": "jué",
+        "english": "to feel, to think"
+      },
+      {
+        "id": 11,
+        "chinese": "快",
+        "pinyin": "kuài",
+        "english": "fast, quick"
+      },
+      {
+        "id": 12,
+        "chinese": "慢",
+        "pinyin": "màn",
+        "english": "slow"
+      },
+      {
+        "id": 13,
+        "chinese": "要",
+        "pinyin": "yào",
+        "english": "if"
+      },
+      {
+        "id": 14,
+        "chinese": "就",
+        "pinyin": "jiù",
+        "english": "then (in conditionals)"
+      },
+      {
+        "id": 15,
+        "chinese": "地",
+        "pinyin": "de/di",
+        "english": ""
+      },
+      {
+        "id": 16,
+        "chinese": "总",
+        "pinyin": "zǒng",
+        "english": "always"
+      },
+      {
+        "id": 17,
+        "chinese": "像",
+        "pinyin": "xiàng",
+        "english": ""
+      },
+      {
+        "id": 18,
+        "chinese": "热",
+        "pinyin": "rè",
+        "english": ""
+      },
+      {
+        "id": 19,
+        "chinese": "容",
+        "pinyin": "róng",
+        "english": "easy"
+      },
+      {
+        "id": 20,
+        "chinese": "易",
+        "pinyin": "yì",
+        "english": "easy"
+      }
+    ]
+  },
+  {
+    "name": "第七课 选课",
+    "id": "deck-chi101102-7",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "选",
+        "pinyin": "xuǎn",
+        "english": "to choose, to select"
+      },
+      {
+        "id": 2,
+        "chinese": "问",
+        "pinyin": "wèn",
+        "english": "may I ask..."
+      },
+      {
+        "id": 3,
+        "chinese": "位",
+        "pinyin": "wèi",
+        "english": ""
+      },
+      {
+        "id": 4,
+        "chinese": "同",
+        "pinyin": "tóng",
+        "english": "classmate"
+      },
+      {
+        "id": 5,
+        "chinese": "李",
+        "pinyin": "lǐ",
+        "english": ""
+      },
+      {
+        "id": 6,
+        "chinese": "手",
+        "pinyin": "shǒu",
+        "english": "cell phone"
+      },
+      {
+        "id": 7,
+        "chinese": "机",
+        "pinyin": "jī",
+        "english": "cell phone"
+      },
+      {
+        "id": 8,
+        "chinese": "号",
+        "pinyin": "hào",
+        "english": "number"
+      },
+      {
+        "id": 9,
+        "chinese": "码",
+        "pinyin": "mǎ",
+        "english": "number"
+      },
+      {
+        "id": 10,
+        "chinese": "再",
+        "pinyin": "zài",
+        "english": "again"
+      },
+      {
+        "id": 11,
+        "chinese": "昨",
+        "pinyin": "zuó",
+        "english": ""
+      },
+      {
+        "id": 12,
+        "chinese": "给",
+        "pinyin": "gěi",
+        "english": "to give; for"
+      },
+      {
+        "id": 13,
+        "chinese": "打",
+        "pinyin": "dǎ",
+        "english": "to make a phone call"
+      },
+      {
+        "id": 14,
+        "chinese": "电",
+        "pinyin": "diàn",
+        "english": "to make a phone call"
+      },
+      {
+        "id": 15,
+        "chinese": "期",
+        "pinyin": "qī",
+        "english": "semester"
+      },
+      {
+        "id": 16,
+        "chinese": "门",
+        "pinyin": "mén",
+        "english": "measure word for courses"
+      },
+      {
+        "id": 17,
+        "chinese": "从",
+        "pinyin": "cóng",
+        "english": "from"
+      },
+      {
+        "id": 18,
+        "chinese": "到",
+        "pinyin": "dào",
+        "english": ""
+      },
+      {
+        "id": 19,
+        "chinese": "星",
+        "pinyin": "xīng",
+        "english": "Monday"
+      },
+      {
+        "id": 20,
+        "chinese": "每",
+        "pinyin": "měi",
+        "english": "every day"
+      },
+      {
+        "id": 21,
+        "chinese": "除",
+        "pinyin": "chú",
+        "english": "in addition to, besides"
+      },
+      {
+        "id": 22,
+        "chinese": "外",
+        "pinyin": "wài",
+        "english": "in addition to, besides"
+      },
+      {
+        "id": 23,
+        "chinese": "考",
+        "pinyin": "kǎo",
+        "english": "exam, test"
+      },
+      {
+        "id": 24,
+        "chinese": "试",
+        "pinyin": "shì",
+        "english": "exam, test"
+      },
+      {
+        "id": 25,
+        "chinese": "录",
+        "pinyin": "lù",
+        "english": "audio recording"
+      },
+      {
+        "id": 26,
+        "chinese": "音",
+        "pinyin": "yīn",
+        "english": "audio recording"
+      },
+      {
+        "id": 27,
+        "chinese": "做",
+        "pinyin": "zuò",
+        "english": ""
+      },
+      {
+        "id": 28,
+        "chinese": "完",
+        "pinyin": "wán",
+        "english": ""
+      },
+      {
+        "id": 29,
+        "chinese": "业",
+        "pinyin": "yè",
+        "english": "homework"
+      },
+      {
+        "id": 30,
+        "chinese": "非",
+        "pinyin": "fēi",
+        "english": "very, extremely"
+      },
+      {
+        "id": 31,
+        "chinese": "意",
+        "pinyin": "yì",
+        "english": "interesting"
+      },
+      {
+        "id": 32,
+        "chinese": "思",
+        "pinyin": "si",
+        "english": "interesting"
+      },
+      {
+        "id": 33,
+        "chinese": "历",
+        "pinyin": "lì",
+        "english": "history"
+      },
+      {
+        "id": 34,
+        "chinese": "史",
+        "pinyin": "shǐ",
+        "english": "history"
+      },
+      {
+        "id": 35,
+        "chinese": "乐",
+        "pinyin": "yuè/lè",
+        "english": "music"
+      },
+      {
+        "id": 36,
+        "chinese": "数",
+        "pinyin": "shù",
+        "english": "mathematics"
+      },
+      {
+        "id": 37,
+        "chinese": "些",
+        "pinyin": "xiē",
+        "english": ""
+      }
+    ]
+  },
+  {
+    "name": "第八课 看不清楚",
+    "id": "deck-chi101102-8",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "看",
+        "pinyin": "kàn",
+        "english": "to look, to read"
+      },
+      {
+        "id": 2,
+        "chinese": "清",
+        "pinyin": "qīng",
+        "english": "clear"
+      },
+      {
+        "id": 3,
+        "chinese": "楚",
+        "pinyin": "chǔ",
+        "english": "clear"
+      },
+      {
+        "id": 4,
+        "chinese": "板",
+        "pinyin": "bǎn",
+        "english": "blackboard"
+      },
+      {
+        "id": 5,
+        "chinese": "并",
+        "pinyin": "bìng",
+        "english": "not at all, certainly not"
+      },
+      {
+        "id": 6,
+        "chinese": "又",
+        "pinyin": "yòu",
+        "english": "both...and"
+      },
+      {
+        "id": 7,
+        "chinese": "坐",
+        "pinyin": "zuò",
+        "english": ""
+      },
+      {
+        "id": 8,
+        "chinese": "前",
+        "pinyin": "qián",
+        "english": "front, in front"
+      },
+      {
+        "id": 9,
+        "chinese": "眼",
+        "pinyin": "yǎn",
+        "english": "eye(s)"
+      },
+      {
+        "id": 10,
+        "chinese": "睛",
+        "pinyin": "jing",
+        "english": "eye(s)"
+      },
+      {
+        "id": 11,
+        "chinese": "题",
+        "pinyin": "tí",
+        "english": "problem, question"
+      },
+      {
+        "id": 12,
+        "chinese": "脑",
+        "pinyin": "nǎo",
+        "english": "brain, mind"
+      },
+      {
+        "id": 13,
+        "chinese": "刚",
+        "pinyin": "gāng",
+        "english": "just now"
+      },
+      {
+        "id": 14,
+        "chinese": "才",
+        "pinyin": "cái",
+        "english": "just now"
+      }
+    ]
+  },
+  {
+    "name": "第九课 喝茶还是喝咖啡",
+    "id": "deck-chi101102-9",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "冰",
+        "pinyin": "bīng",
+        "english": "ice water"
+      },
+      {
+        "id": 2,
+        "chinese": "水",
+        "pinyin": "shuǐ",
+        "english": "ice water"
+      },
+      {
+        "id": 3,
+        "chinese": "饭",
+        "pinyin": "fàn",
+        "english": "restaurant"
+      },
+      {
+        "id": 4,
+        "chinese": "馆",
+        "pinyin": "guǎn",
+        "english": "restaurant"
+      },
+      {
+        "id": 5,
+        "chinese": "晚",
+        "pinyin": "wǎn",
+        "english": "evening, night"
+      },
+      {
+        "id": 6,
+        "chinese": "睡",
+        "pinyin": "shuì",
+        "english": "to sleep"
+      },
+      {
+        "id": 7,
+        "chinese": "着",
+        "pinyin": "zháo/zhe",
+        "english": "cannot fall asleep"
+      },
+      {
+        "id": 8,
+        "chinese": "时",
+        "pinyin": "shí",
+        "english": "what time, when"
+      },
+      {
+        "id": 9,
+        "chinese": "候",
+        "pinyin": "hòu",
+        "english": "what time, when"
+      },
+      {
+        "id": 10,
+        "chinese": "早",
+        "pinyin": "zǎo",
+        "english": "morning"
+      },
+      {
+        "id": 11,
+        "chinese": "杯",
+        "pinyin": "bēi",
+        "english": "cup (measure word)"
+      },
+      {
+        "id": 12,
+        "chinese": "醒",
+        "pinyin": "xǐng",
+        "english": "to wake up"
+      },
+      {
+        "id": 13,
+        "chinese": "少",
+        "pinyin": "shǎo",
+        "english": "rarely, seldom"
+      },
+      {
+        "id": 14,
+        "chinese": "淇",
+        "pinyin": "qí",
+        "english": "ice cream"
+      },
+      {
+        "id": 15,
+        "chinese": "淋",
+        "pinyin": "lín",
+        "english": "ice cream"
+      },
+      {
+        "id": 16,
+        "chinese": "蛋",
+        "pinyin": "dàn",
+        "english": "cake"
+      },
+      {
+        "id": 17,
+        "chinese": "糕",
+        "pinyin": "gāo",
+        "english": "cake"
+      },
+      {
+        "id": 18,
+        "chinese": "瓜",
+        "pinyin": "guā",
+        "english": "watermelon"
+      },
+      {
+        "id": 19,
+        "chinese": "果",
+        "pinyin": "guǒ",
+        "english": "fruit"
+      },
+      {
+        "id": 20,
+        "chinese": "香",
+        "pinyin": "xiāng",
+        "english": "banana"
+      },
+      {
+        "id": 21,
+        "chinese": "蕉",
+        "pinyin": "jiāo",
+        "english": "banana"
+      },
+      {
+        "id": 22,
+        "chinese": "桔",
+        "pinyin": "jú",
+        "english": "orange (fruit)"
+      },
+      {
+        "id": 23,
+        "chinese": "习",
+        "pinyin": "xí",
+        "english": "habit; to be accustomed to"
+      },
+      {
+        "id": 24,
+        "chinese": "惯",
+        "pinyin": "guàn",
+        "english": "habit; to be accustomed to"
+      },
+      {
+        "id": 25,
+        "chinese": "用",
+        "pinyin": "yòng",
+        "english": ""
+      },
+      {
+        "id": 26,
+        "chinese": "刀",
+        "pinyin": "dāo",
+        "english": "knife and fork"
+      },
+      {
+        "id": 27,
+        "chinese": "叉",
+        "pinyin": "chā",
+        "english": "knife and fork"
+      },
+      {
+        "id": 28,
+        "chinese": "汤",
+        "pinyin": "tāng",
+        "english": "soup"
+      },
+      {
+        "id": 29,
+        "chinese": "鱼",
+        "pinyin": "yú",
+        "english": "fish"
+      },
+      {
+        "id": 30,
+        "chinese": "肉",
+        "pinyin": "ròu",
+        "english": "meat"
+      },
+      {
+        "id": 31,
+        "chinese": "谈",
+        "pinyin": "tán",
+        "english": ""
+      },
+      {
+        "id": 32,
+        "chinese": "兴",
+        "pinyin": "xìng",
+        "english": ""
+      }
+    ]
+  },
+  {
+    "name": "第十课 戴着眼镜儿找眼镜儿",
+    "id": "deck-chi101102-10",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "戴",
+        "pinyin": "dài",
+        "english": "to wear (glasses, hat, etc.)"
+      },
+      {
+        "id": 2,
+        "chinese": "镜",
+        "pinyin": "jìng",
+        "english": "glasses, spectacles"
+      },
+      {
+        "id": 3,
+        "chinese": "找",
+        "pinyin": "zhǎo",
+        "english": "to look for, to find"
+      },
+      {
+        "id": 4,
+        "chinese": "见",
+        "pinyin": "jiàn",
+        "english": "has disappeared, is gone"
+      },
+      {
+        "id": 5,
+        "chinese": "长",
+        "pinyin": "zhǎng/cháng",
+        "english": "to grow"
+      },
+      {
+        "id": 6,
+        "chinese": "对",
+        "pinyin": "duì",
+        "english": ""
+      },
+      {
+        "id": 7,
+        "chinese": "印",
+        "pinyin": "yìn",
+        "english": "printer"
+      },
+      {
+        "id": 8,
+        "chinese": "抽",
+        "pinyin": "chōu",
+        "english": "drawer"
+      },
+      {
+        "id": 9,
+        "chinese": "屉",
+        "pinyin": "ti",
+        "english": "drawer"
+      },
+      {
+        "id": 10,
+        "chinese": "床",
+        "pinyin": "chuáng",
+        "english": "bed"
+      },
+      {
+        "id": 11,
+        "chinese": "道",
+        "pinyin": "dào",
+        "english": "could it be that..."
+      },
+      {
+        "id": 12,
+        "chinese": "腿",
+        "pinyin": "tuǐ",
+        "english": "leg"
+      },
+      {
+        "id": 13,
+        "chinese": "自",
+        "pinyin": "zì",
+        "english": "oneself"
+      },
+      {
+        "id": 14,
+        "chinese": "己",
+        "pinyin": "jǐ",
+        "english": "oneself"
+      },
+      {
+        "id": 15,
+        "chinese": "跑",
+        "pinyin": "pǎo",
+        "english": "to run"
+      },
+      {
+        "id": 16,
+        "chinese": "出",
+        "pinyin": "chū",
+        "english": "to go out"
+      },
+      {
+        "id": 17,
+        "chinese": "屋",
+        "pinyin": "wū",
+        "english": "room"
+      },
+      {
+        "id": 18,
+        "chinese": "能",
+        "pinyin": "néng",
+        "english": ""
+      },
+      {
+        "id": 19,
+        "chinese": "根",
+        "pinyin": "gēn",
+        "english": "at all, fundamentally"
+      }
+    ]
+  },
+  {
+    "name": "第十一课 谁吃了我的东西",
+    "id": "deck-chi101102-11",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "放",
+        "pinyin": "fàng",
+        "english": "to put, to place"
+      },
+      {
+        "id": 2,
+        "chinese": "箱",
+        "pinyin": "xiāng",
+        "english": "refrigerator"
+      },
+      {
+        "id": 3,
+        "chinese": "瓶",
+        "pinyin": "píng",
+        "english": "bottle (measure word)"
+      },
+      {
+        "id": 4,
+        "chinese": "肯",
+        "pinyin": "kěn",
+        "english": "definitely, certainly"
+      },
+      {
+        "id": 5,
+        "chinese": "定",
+        "pinyin": "dìng",
+        "english": "definitely, certainly"
+      },
+      {
+        "id": 6,
+        "chinese": "苹",
+        "pinyin": "píng",
+        "english": "apple"
+      },
+      {
+        "id": 7,
+        "chinese": "掉",
+        "pinyin": "diào",
+        "english": "to eat up, to finish eating"
+      },
+      {
+        "id": 8,
+        "chinese": "盒",
+        "pinyin": "hé",
+        "english": ""
+      },
+      {
+        "id": 9,
+        "chinese": "酸",
+        "pinyin": "suān",
+        "english": ""
+      },
+      {
+        "id": 10,
+        "chinese": "奶",
+        "pinyin": "nǎi",
+        "english": ""
+      },
+      {
+        "id": 11,
+        "chinese": "买",
+        "pinyin": "mǎi",
+        "english": "to buy"
+      },
+      {
+        "id": 12,
+        "chinese": "被",
+        "pinyin": "bèi",
+        "english": ""
+      },
+      {
+        "id": 13,
+        "chinese": "回",
+        "pinyin": "huí",
+        "english": ""
+      },
+      {
+        "id": 14,
+        "chinese": "宿",
+        "pinyin": "sù",
+        "english": ""
+      },
+      {
+        "id": 15,
+        "chinese": "舍",
+        "pinyin": "shè",
+        "english": ""
+      },
+      {
+        "id": 16,
+        "chinese": "极",
+        "pinyin": "jí",
+        "english": ""
+      },
+      {
+        "id": 17,
+        "chinese": "知",
+        "pinyin": "zhī",
+        "english": "to know"
+      },
+      {
+        "id": 18,
+        "chinese": "连",
+        "pinyin": "lián",
+        "english": "even..."
+      },
+      {
+        "id": 19,
+        "chinese": "起",
+        "pinyin": "qǐ",
+        "english": "it looks like, it seems"
+      },
+      {
+        "id": 20,
+        "chinese": "办",
+        "pinyin": "bàn",
+        "english": "method, way"
+      },
+      {
+        "id": 21,
+        "chinese": "法",
+        "pinyin": "fǎ",
+        "english": "method, way"
+      },
+      {
+        "id": 22,
+        "chinese": "麻",
+        "pinyin": "má",
+        "english": "troublesome; trouble"
+      },
+      {
+        "id": 23,
+        "chinese": "烦",
+        "pinyin": "fán",
+        "english": "troublesome; trouble"
+      },
+      {
+        "id": 24,
+        "chinese": "已",
+        "pinyin": "yǐ",
+        "english": "already"
+      },
+      {
+        "id": 25,
+        "chinese": "经",
+        "pinyin": "jīng",
+        "english": "already"
+      },
+      {
+        "id": 26,
+        "chinese": "胖",
+        "pinyin": "pàng",
+        "english": "fat, overweight"
+      },
+      {
+        "id": 27,
+        "chinese": "别",
+        "pinyin": "bié",
+        "english": "other people"
+      },
+      {
+        "id": 28,
+        "chinese": "走",
+        "pinyin": "zǒu",
+        "english": "cannot walk (anymore)"
+      },
+      {
+        "id": 29,
+        "chinese": "路",
+        "pinyin": "lù",
+        "english": ""
+      },
+      {
+        "id": 30,
+        "chinese": "动",
+        "pinyin": "dòng",
+        "english": "cannot walk (anymore)"
+      }
+    ]
+  },
+  {
+    "name": "第十三课 买鞋",
+    "id": "deck-chi101102-13",
+    "cards": [
+      {
+        "id": 1,
+        "chinese": "售",
+        "pinyin": "shòuhuòyuán",
+        "english": "salesperson, shop assistant"
+      },
+      {
+        "id": 2,
+        "chinese": "货",
+        "pinyin": "shòuhuòyuán",
+        "english": "salesperson, shop assistant"
+      },
+      {
+        "id": 3,
+        "chinese": "员",
+        "pinyin": "shòuhuòyuán",
+        "english": "salesperson, shop assistant"
+      },
+      {
+        "id": 4,
+        "chinese": "顾",
+        "pinyin": "gùkè",
+        "english": "customer"
+      },
+      {
+        "id": 5,
+        "chinese": "客",
+        "pinyin": "gùkè",
+        "english": "customer"
+      },
+      {
+        "id": 6,
+        "chinese": "鞋",
+        "pinyin": "xié",
+        "english": "shoe(s)"
+      },
+      {
+        "id": 7,
+        "chinese": "双",
+        "pinyin": "shuāng",
+        "english": "pair (measure word)"
+      },
+      {
+        "id": 8,
+        "chinese": "蓝",
+        "pinyin": "lánsè",
+        "english": "blue (color)"
+      },
+      {
+        "id": 9,
+        "chinese": "色",
+        "pinyin": "lánsè",
+        "english": "blue (color)"
+      },
+      {
+        "id": 10,
+        "chinese": "球",
+        "pinyin": "qiúxié",
+        "english": "sneakers, athletic shoes"
+      },
+      {
+        "id": 11,
+        "chinese": "穿",
+        "pinyin": "chuān",
+        "english": "to wear (clothing); to put on"
+      },
+      {
+        "id": 12,
+        "chinese": "号",
+        "pinyin": "hào",
+        "english": "number, size"
+      },
+      {
+        "id": 13,
+        "chinese": "半",
+        "pinyin": "bàn",
+        "english": "half"
+      },
+      {
+        "id": 14,
+        "chinese": "拿",
+        "pinyin": "ná",
+        "english": "to take, to get"
+      },
+      {
+        "id": 15,
+        "chinese": "让",
+        "pinyin": "ràng",
+        "english": "to let, to allow"
+      },
+      {
+        "id": 16,
+        "chinese": "试",
+        "pinyin": "shì",
+        "english": "to try"
+      },
+      {
+        "id": 17,
+        "chinese": "不",
+        "pinyin": "chuān bu jìnqù",
+        "english": "cannot put on (too small)"
+      },
+      {
+        "id": 18,
+        "chinese": "进",
+        "pinyin": "chuān bu jìnqù",
+        "english": "cannot put on (too small)"
+      },
+      {
+        "id": 19,
+        "chinese": "去",
+        "pinyin": "chuān bu jìnqù",
+        "english": "cannot put on (too small)"
+      },
+      {
+        "id": 20,
+        "chinese": "舒",
+        "pinyin": "shūfu",
+        "english": "comfortable"
+      },
+      {
+        "id": 21,
+        "chinese": "服",
+        "pinyin": "shūfu",
+        "english": "comfortable"
+      },
+      {
+        "id": 22,
+        "chinese": "其",
+        "pinyin": "qíshí",
+        "english": "actually, in fact"
+      },
+      {
+        "id": 23,
+        "chinese": "实",
+        "pinyin": "qíshí",
+        "english": "actually, in fact"
+      },
+      {
+        "id": 24,
+        "chinese": "差",
+        "pinyin": "chàbuduō",
+        "english": "almost the same; about"
+      },
+      {
+        "id": 25,
+        "chinese": "多",
+        "pinyin": "chàbuduō",
+        "english": "almost the same; about"
+      },
+      {
+        "id": 26,
+        "chinese": "颜",
+        "pinyin": "yánsè",
+        "english": "color"
+      },
+      {
+        "id": 27,
+        "chinese": "白",
+        "pinyin": "báisè",
+        "english": "white (color)"
+      },
+      {
+        "id": 28,
+        "chinese": "同",
+        "pinyin": "tóngyīgè",
+        "english": "the same (one)"
+      },
+      {
+        "id": 29,
+        "chinese": "一",
+        "pinyin": "tóngyīgè",
+        "english": "the same (one)"
+      },
+      {
+        "id": 30,
+        "chinese": "个",
+        "pinyin": "tóngyīgè",
+        "english": "the same (one)"
+      },
+      {
+        "id": 31,
+        "chinese": "牌",
+        "pinyin": "páizi",
+        "english": "brand, label"
+      },
+      {
+        "id": 32,
+        "chinese": "子",
+        "pinyin": "páizi",
+        "english": "brand, label"
+      },
+      {
+        "id": 33,
+        "chinese": "合",
+        "pinyin": "héshì",
+        "english": "suitable, fitting"
+      },
+      {
+        "id": 34,
+        "chinese": "适",
+        "pinyin": "héshì",
+        "english": "suitable, fitting"
+      },
+      {
+        "id": 35,
+        "chinese": "好",
+        "pinyin": "hǎokàn",
+        "english": "nice-looking, attractive"
+      },
+      {
+        "id": 36,
+        "chinese": "看",
+        "pinyin": "hǎokàn",
+        "english": "nice-looking, attractive"
+      },
+      {
+        "id": 37,
+        "chinese": "少",
+        "pinyin": "duōshǎo qián",
+        "english": "how much money"
+      },
+      {
+        "id": 38,
+        "chinese": "钱",
+        "pinyin": "duōshǎo qián",
+        "english": "how much money"
+      },
+      {
+        "id": 39,
+        "chinese": "打",
+        "pinyin": "dǎzhé",
+        "english": "to give a discount"
+      },
+      {
+        "id": 40,
+        "chinese": "折",
+        "pinyin": "dǎzhé",
+        "english": "to give a discount"
+      },
+      {
+        "id": 41,
+        "chinese": "块",
+        "pinyin": "kuài",
+        "english": "yuan (spoken)"
+      },
+      {
+        "id": 42,
+        "chinese": "毛",
+        "pinyin": "máo",
+        "english": "jiao, 10 cents (spoken)"
+      },
+      {
+        "id": 43,
+        "chinese": "样",
+        "pinyin": "yàngzi",
+        "english": "style, appearance"
+      },
+      {
+        "id": 44,
+        "chinese": "黑",
+        "pinyin": "hēisè",
+        "english": "black (color)"
+      },
+      {
+        "id": 45,
+        "chinese": "比",
+        "pinyin": "bǐjiào",
+        "english": "relatively, comparatively"
+      },
+      {
+        "id": 46,
+        "chinese": "较",
+        "pinyin": "bǐjiào",
+        "english": "relatively, comparatively"
+      },
+      {
+        "id": 47,
+        "chinese": "贵",
+        "pinyin": "guì",
+        "english": "expensive"
+      },
+      {
+        "id": 48,
+        "chinese": "便",
+        "pinyin": "piányí",
+        "english": "cheap, inexpensive"
+      },
+      {
+        "id": 49,
+        "chinese": "宜",
+        "pinyin": "piányí",
+        "english": "cheap, inexpensive"
+      },
+      {
+        "id": 50,
+        "chinese": "完",
+        "pinyin": "wánquán",
+        "english": "completely, entirely"
+      },
+      {
+        "id": 51,
+        "chinese": "全",
+        "pinyin": "wánquán",
+        "english": "completely, entirely"
+      },
+      {
+        "id": 52,
+        "chinese": "信",
+        "pinyin": "xìnyòngkǎ",
+        "english": "credit card"
+      },
+      {
+        "id": 53,
+        "chinese": "用",
+        "pinyin": "xìnyòngkǎ",
+        "english": "credit card"
+      },
+      {
+        "id": 54,
+        "chinese": "卡",
+        "pinyin": "xìnyòngkǎ",
+        "english": "credit card"
+      },
+      {
+        "id": 55,
+        "chinese": "现",
+        "pinyin": "xiànjīn",
+        "english": "cash"
+      },
+      {
+        "id": 56,
+        "chinese": "金",
+        "pinyin": "xiànjīn",
+        "english": "cash"
+      },
+      {
+        "id": 57,
+        "chinese": "找",
+        "pinyin": "zhǎo",
+        "english": "to give change"
+      }
+    ]
+  }
+]
