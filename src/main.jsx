@@ -1231,6 +1231,33 @@ const ChineseLearningApp = () => {
     { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 20, name: '中文桌子',           cards: 9,  topic: 'OC Lesson 22' },
     { course: '103', filename: '103vocab/CHI103-CHAR LIST.json',           name: 'CHI 103 Character List', cards: 522, topic: 'CHI 103 Review' },
     { course: '103', filename: '103vocab/CHI103-VOCAB LIST.json',          name: 'CHI 103 Vocabulary',     cards: 483, topic: 'CHI 103 Review' },
+    // ── CHI 102 ──────────────────────────────────────────────────────────────
+    { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 0,  name: '第十二课 门锁着，进不去',     cards: 32, topic: 'Lesson 12' },
+    { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 1,  name: '第十四课 起不来，迟到了',     cards: 26, topic: 'Lesson 14' },
+    { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 2,  name: '第十五课 下雪了',            cards: 39, topic: 'Lesson 15' },
+    { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 3,  name: '第十六课 越来越胖，怎么办？', cards: 25, topic: 'Lesson 16' },
+    { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 4,  name: '第十七课 骑自行车',          cards: 24, topic: 'Lesson 17' },
+    { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 5,  name: '第十八课 自行车被偷了',      cards: 8,  topic: 'Lesson 18' },
+    { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 6,  name: '第十九课 中国城',            cards: 25, topic: 'Lesson 19' },
+    { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 7,  name: '第二十课 东亚图书馆',        cards: 19, topic: 'Lesson 20' },
+    { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 8,  name: '第二十一课 中文桌子',        cards: 13, topic: 'Lesson 21' },
+    { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 9,  name: '第二十二课 我们的中文老师',  cards: 12, topic: 'Lesson 22' },
+    { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 10, name: '第二十三课 个别谈话',        cards: 5,  topic: 'Lesson 23' },
+    { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 11, name: '第二十四课 看电影',          cards: 10, topic: 'Lesson 24' },
+    { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 12, name: '第二十七课 我得搬家',        cards: 10, topic: 'Lesson 27' },
+    // ── CHI 101 ──────────────────────────────────────────────────────────────
+    { course: '101', filename: '101-102vocab/chi101-decks-only.json', deckIndex: 0,  name: '第一课 老师和学生',          cards: 37, topic: 'Lesson 1' },
+    { course: '101', filename: '101-102vocab/chi101-decks-only.json', deckIndex: 1,  name: '第二课 书在桌子上',          cards: 37, topic: 'Lesson 2' },
+    { course: '101', filename: '101-102vocab/chi101-decks-only.json', deckIndex: 2,  name: '第三课 今天我很忙',          cards: 35, topic: 'Lesson 3' },
+    { course: '101', filename: '101-102vocab/chi101-decks-only.json', deckIndex: 3,  name: '第四课 北京烤鸭',            cards: 34, topic: 'Lesson 4' },
+    { course: '101', filename: '101-102vocab/chi101-decks-only.json', deckIndex: 4,  name: '第五课 一张照片',            cards: 34, topic: 'Lesson 5' },
+    { course: '101', filename: '101-102vocab/chi101-decks-only.json', deckIndex: 5,  name: '第六课 我的两个朋友',        cards: 20, topic: 'Lesson 6' },
+    { course: '101', filename: '101-102vocab/chi101-decks-only.json', deckIndex: 6,  name: '第七课 选课',               cards: 37, topic: 'Lesson 7' },
+    { course: '101', filename: '101-102vocab/chi101-decks-only.json', deckIndex: 7,  name: '第八课 看不清楚',            cards: 14, topic: 'Lesson 8' },
+    { course: '101', filename: '101-102vocab/chi101-decks-only.json', deckIndex: 8,  name: '第九课 喝茶还是喝咖啡',      cards: 32, topic: 'Lesson 9' },
+    { course: '101', filename: '101-102vocab/chi101-decks-only.json', deckIndex: 9,  name: '第十课 戴着眼镜儿找眼镜儿', cards: 19, topic: 'Lesson 10' },
+    { course: '101', filename: '101-102vocab/chi101-decks-only.json', deckIndex: 10, name: '第十一课 谁吃了我的东西',    cards: 30, topic: 'Lesson 11' },
+    { course: '101', filename: '101-102vocab/chi101-decks-only.json', deckIndex: 11, name: '第十三课 买鞋',              cards: 57, topic: 'Lesson 13' },
   ];
 
   const importBuiltInDeck = async (deckInfo) => {
@@ -8087,15 +8114,23 @@ Rules:
                 </div>
                 <button onClick={() => setShowBrowseDecks(false)} className="text-gray-400 hover:text-gray-600 transition"><X size={22} /></button>
               </div>
-              <div className="px-4 pt-3 pb-1">
-                <select
-                  value={browseFilter}
-                  onChange={e => setBrowseFilter(e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-300"
-                >
-                  <option value="103">CHI 103</option>
-                  <option value="108">CHI 108</option>
-                </select>
+              <div className="px-4 pt-3 pb-2">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Pick your class</p>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[['101','CHI 101'],['102','CHI 102'],['103','CHI 103'],['108','CHI 108']].map(([val, label]) => (
+                    <button
+                      key={val}
+                      onClick={() => setBrowseFilter(val)}
+                      className={`py-2 rounded-lg text-sm font-semibold transition-all ${
+                        browseFilter === val
+                          ? 'bg-rose-500 text-white shadow-sm'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="overflow-y-auto flex-1 p-3">
                 {BUILT_IN_DECKS.filter(d => d.course === browseFilter).map((deck) => {
