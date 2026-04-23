@@ -1208,27 +1208,26 @@ const ChineseLearningApp = () => {
     { course: '108', filename: '103vocab/CHI103-CHAR LIST.json',           name: 'CHI 103 Character List',             cards: 522, topic: 'CHI 103 Review' },
     { course: '108', filename: '103vocab/CHI103-VOCAB LIST.json',          name: 'CHI 103 Vocabulary',                 cards: 483, topic: 'CHI 103 Review' },
     // ── CHI 103 ──────────────────────────────────────────────────────────────
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 0,  name: '我的家在哪儿',       cards: 38, topic: 'OC Lesson 2' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 1,  name: '我们都是美国人',     cards: 17, topic: 'OC Lesson 3' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 2,  name: '美国人学中文',       cards: 32, topic: 'OC Lesson 4' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 3,  name: '我是四川人？',       cards: 21, topic: 'OC Lesson 5' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 4,  name: '别担心',            cards: 32, topic: 'OC Lesson 6' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 5,  name: '男女同住',           cards: 37, topic: 'OC Lesson 7' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 6,  name: '看电影',            cards: 24, topic: 'OC Lesson 8' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 7,  name: '我要去中国',         cards: 22, topic: 'OC Lesson 9' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 8,  name: '出国前的准备',       cards: 21, topic: 'OC Lesson 10' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 9,  name: '为什么学中文',       cards: 27, topic: 'OC Lesson 11' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 10, name: '做孩子也不容易',     cards: 30, topic: 'OC Lesson 12' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 11, name: '说标准的普通话',     cards: 13, topic: 'OC Lesson 13' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 12, name: '都怪你妈妈',         cards: 22, topic: 'OC Lesson 14' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 13, name: '厕所里没有卫生纸',   cards: 19, topic: 'OC Lesson 15' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 14, name: '我是个穷学生',       cards: 15, topic: 'OC Lesson 16' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 15, name: '没有什么大不同',     cards: 13, topic: 'OC Lesson 17' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 16, name: '为什么不排队',       cards: 23, topic: 'OC Lesson 18' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 17, name: '到了北京',           cards: 26, topic: 'OC Lesson 19' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 18, name: '去银行换钱',         cards: 19, topic: 'OC Lesson 20' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 19, name: '老年人的生活',       cards: 22, topic: 'OC Lesson 21' },
-    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 20, name: '中文桌子',           cards: 9,  topic: 'OC Lesson 22' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 0,  name: '我的家在哪儿',       cards: 38, topic: 'Oh China L2' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 1,  name: '我们都是美国人',     cards: 17, topic: 'Oh China L3' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 2,  name: '美国人学中文',       cards: 32, topic: 'Oh China L4' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 3,  name: '我是四川人？',       cards: 21, topic: 'Oh China L5' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 4,  name: '别担心',            cards: 32, topic: 'Oh China L6' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 20, name: '活动 (中文桌子)',    cards: 9,  topic: 'First Step L21' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 5,  name: '男女同住',           cards: 37, topic: 'Oh China L7' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 6,  name: '看电影',            cards: 24, topic: 'Oh China L8' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 7,  name: '我要去中国',         cards: 22, topic: 'Oh China L9' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 8,  name: '出国前的准备',       cards: 21, topic: 'Oh China L10' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 17, name: '到了北京',           cards: 26, topic: 'A New China L1' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 13, name: '厕所里没有卫生纸',   cards: 19, topic: 'A Trip to China L2' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 14, name: '我是个穷学生',       cards: 15, topic: 'A Trip to China L5' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 15, name: '没有什么大不同',     cards: 13, topic: 'A Trip to China L8' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 16, name: '为什么不排队',       cards: 23, topic: 'A Trip to China L10' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 11, name: '说标准的普通话',     cards: 13, topic: 'Oh China L13' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 9,  name: '为什么学中文',       cards: 27, topic: 'Oh China L11' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 10, name: '做孩子也不容易',     cards: 30, topic: 'Oh China L12' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 19, name: '老年人的生活',       cards: 22, topic: 'A New China L35' },
+    { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 12, name: '都怪你妈妈',         cards: 22, topic: 'Oh China L15' },
     { course: '103', filename: '103vocab/CHI103-CHAR LIST.json',           name: 'CHI 103 Character List', cards: 522, topic: 'CHI 103 Review' },
     { course: '103', filename: '103vocab/CHI103-VOCAB LIST.json',          name: 'CHI 103 Vocabulary',     cards: 483, topic: 'CHI 103 Review' },
     // ── CHI 102 ──────────────────────────────────────────────────────────────
@@ -1274,6 +1273,7 @@ const ChineseLearningApp = () => {
         ? (deckInfo.deckIndex !== undefined ? imported[deckInfo.deckIndex] : imported[0])
         : imported;
       deck.id = 'deck-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+      deck.name = deckInfo.name;
       setDecks(prev => [...prev, deck]);
       // Brief success flash then close
       setBrowseLoading('done-' + deckKey);
