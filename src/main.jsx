@@ -9041,49 +9041,51 @@ Rules:
         {/* What's New modal — portal so it overlays everything */}
         {showWhatsNew && createPortal(
           <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); }}>
-            <div style={{ background: darkMode ? '#1f2937' : '#fff', borderRadius: '1rem', padding: '2rem', maxWidth: '480px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>What's New in v{APP_VERSION} 🎉</h2>
-              <p style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: '1.25rem' }}>Here's what's been added:</p>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', background: 'linear-gradient(135deg, #fef3c7, #fde68a)', borderRadius: '0.75rem', padding: '0.75rem', border: '1px solid #f59e0b' }}>
-                  <span style={{ fontSize: '1.25rem' }}>📚</span>
-                  <div><strong style={{ color: '#92400e' }}>Princeton CHI 101, 102, or 108?</strong><br/><span style={{ color: '#b45309', fontSize: '0.875rem' }}>Click <strong>"Download Decks + 课文 (Princeton Only)"</strong> — the button in the top bar — to get your course decks and readings.</span></div>
+            <div style={{ background: darkMode ? '#1f2937' : '#fff', borderRadius: '1rem', padding: '1.25rem', maxWidth: '480px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', maxHeight: 'min(92dvh, 620px)' }} onClick={e => e.stopPropagation()}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem', color: darkMode ? '#f3f4f6' : '#1a1a1a', flexShrink: 0 }}>What's New in v{APP_VERSION} 🎉</h2>
+              <p style={{ fontSize: '0.8125rem', color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: '0.75rem', flexShrink: 0 }}>Here's what's been added:</p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 0.75rem 0', display: 'flex', flexDirection: 'column', gap: '0.5rem', overflowY: 'auto', flex: 1 }}>
+                <li style={{ display: 'flex', gap: '0.625rem', alignItems: 'flex-start', background: 'linear-gradient(135deg, #fef3c7, #fde68a)', borderRadius: '0.75rem', padding: '0.625rem', border: '1px solid #f59e0b', flexShrink: 0 }}>
+                  <span style={{ fontSize: '1.125rem' }}>📚</span>
+                  <div><strong style={{ color: '#92400e' }}>Princeton CHI 101, 102, or 108?</strong><br/><span style={{ color: '#b45309', fontSize: '0.8125rem' }}>Click <strong>"Download Decks + 课文 (Princeton Only)"</strong> — the button in the top bar — to get your course decks and readings.</span></div>
                 </li>
-                <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                  <span style={{ fontSize: '1.25rem' }}>🌙</span>
-                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Dark mode</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>Opt-in toggle in Settings — easy on the eyes at night.</span></div>
+                <li style={{ display: 'flex', gap: '0.625rem', alignItems: 'flex-start', flexShrink: 0 }}>
+                  <span style={{ fontSize: '1.125rem' }}>🌙</span>
+                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Dark mode</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.8125rem' }}>Opt-in toggle in Settings — easy on the eyes at night.</span></div>
                 </li>
-                <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                  <span style={{ fontSize: '1.25rem' }}>🧠</span>
-                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Anki-style SRS ratings</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>Opt-in in Settings — Again / Hard / Good / Easy instead of binary buttons.</span></div>
+                <li style={{ display: 'flex', gap: '0.625rem', alignItems: 'flex-start', flexShrink: 0 }}>
+                  <span style={{ fontSize: '1.125rem' }}>🧠</span>
+                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Anki-style SRS ratings</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.8125rem' }}>Opt-in in Settings — Again / Hard / Good / Easy instead of binary buttons.</span></div>
                 </li>
-                <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                  <span style={{ fontSize: '1.25rem' }}>✨</span>
-                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Clearer AI sign-in info</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>AI features use Puter.js — you'll be prompted for a free account on first use.</span></div>
+                <li style={{ display: 'flex', gap: '0.625rem', alignItems: 'flex-start', flexShrink: 0 }}>
+                  <span style={{ fontSize: '1.125rem' }}>✨</span>
+                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Clearer AI sign-in info</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.8125rem' }}>AI features use Puter.js — you'll be prompted for a free account on first use.</span></div>
                 </li>
-                <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                  <span style={{ fontSize: '1.25rem' }}>⚡</span>
-                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Performance improvements</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>Removed debug logging and other optimizations.</span></div>
+                <li style={{ display: 'flex', gap: '0.625rem', alignItems: 'flex-start', flexShrink: 0 }}>
+                  <span style={{ fontSize: '1.125rem' }}>⚡</span>
+                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Performance improvements</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.8125rem' }}>Removed debug logging and other optimizations.</span></div>
                 </li>
-                <li style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                  <span style={{ fontSize: '1.25rem' }}>🎓</span>
-                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Guided Tour</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.875rem' }}>New to the app? Take the guided tour to learn all the key features — you can replay it anytime from the header.</span></div>
+                <li style={{ display: 'flex', gap: '0.625rem', alignItems: 'flex-start', flexShrink: 0 }}>
+                  <span style={{ fontSize: '1.125rem' }}>🎓</span>
+                  <div><strong style={{ color: darkMode ? '#f3f4f6' : '#1a1a1a' }}>Guided Tour</strong><br/><span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '0.8125rem' }}>New to the app? Take the guided tour to learn all the key features — you can replay it anytime from the header.</span></div>
                 </li>
               </ul>
-              {isNewUser && (
+              <div style={{ flexShrink: 0 }}>
+                {isNewUser && (
+                  <button
+                    onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); setIsNewUser(false); startTutorial(); }}
+                    style={{ width: '100%', background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff', border: 'none', borderRadius: '0.75rem', padding: '0.75rem', fontSize: '0.9375rem', fontWeight: 600, cursor: 'pointer', marginBottom: '0.5rem' }}
+                  >
+                    🎓 Take the Tour
+                  </button>
+                )}
                 <button
-                  onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); setIsNewUser(false); startTutorial(); }}
-                  style={{ width: '100%', background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff', border: 'none', borderRadius: '0.75rem', padding: '0.875rem', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', marginBottom: '0.75rem' }}
+                  onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); setIsNewUser(false); }}
+                  style={{ width: '100%', background: 'linear-gradient(135deg, #e11d48, #be123c)', color: '#fff', border: 'none', borderRadius: '0.75rem', padding: '0.75rem', fontSize: '0.9375rem', fontWeight: 600, cursor: 'pointer' }}
                 >
-                  🎓 Take the Tour
+                  Got it!
                 </button>
-              )}
-              <button
-                onClick={() => { localStorage.setItem('zhongwen_app_version', APP_VERSION); setShowWhatsNew(false); setIsNewUser(false); }}
-                style={{ width: '100%', background: 'linear-gradient(135deg, #e11d48, #be123c)', color: '#fff', border: 'none', borderRadius: '0.75rem', padding: '0.875rem', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' }}
-              >
-                Got it!
-              </button>
+              </div>
             </div>
           </div>,
           document.body
