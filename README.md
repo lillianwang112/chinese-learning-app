@@ -1,14 +1,14 @@
 # 中文-Learn 
-### CHI 108 - Princeton University
+### CHI 101, 102, 103, 105, 107, 108 - Princeton University
 
 <p align="center">
-  <img src="screenshots/hero.jpeg" width="100%" alt="Chinese Learning App - Free flashcards, writing practice, and spaced repetition for CHI 108"/>
+  <img src="screenshots/hero.jpeg" width="100%" alt="Chinese Learning App - Free flashcards, writing practice, and spaced repetition for Princeton Chinese courses CHI 101, 102, 103, 105, 107, and 108"/>
 </p>
 
 <p align="center">
   <strong>Master Chinese vocabulary with adaptive flashcards, AI tools, and spaced repetition</strong>
   <br>
-  Free, ad-free, and built specifically for CHI 108
+  Free, ad-free, and built for Princeton Chinese courses CHI 101, 102, 103, 105, 107, and 108
 </p>
 
 <p align="center">
@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Princeton-CHI%20108-orange?style=for-the-badge" alt="CHI 108"/>
+  <img src="https://img.shields.io/badge/Princeton-CHI%20101%2C102%2C103%2C105%2C107%2C108-orange?style=for-the-badge" alt="Princeton Chinese Courses"/>
   <img src="https://img.shields.io/badge/100%25_Free-No_Ads-brightgreen?style=for-the-badge" alt="Free & No Ads"/>
   <img src="https://img.shields.io/badge/900+-汉字-blue?style=for-the-badge" alt="900+ 汉字"/>
   <img src="https://img.shields.io/badge/Spring-2026-red?style=for-the-badge" alt="Spring 2026"/>
@@ -28,7 +28,7 @@
 
 大家好! 👋
 
-I built this app to help with learning vocabulary for CHI 108. It's a full-featured Chinese learning tool with flashcards, handwriting practice, stroke order animations, AI-powered tools, games, and more — all completely free.
+I built this app to help with learning vocabulary across Princeton Chinese courses CHI 101, 102, 103, 105, 107, and 108. It's a full-featured Chinese learning tool with flashcards, handwriting practice, stroke order animations, AI-powered tools, games, and more — all completely free.
 
 ## 📋 Table of Contents
 - [Quick Start](#%EF%B8%8F-quick-start-tldr)
@@ -46,7 +46,7 @@ I built this app to help with learning vocabulary for CHI 108. It's a full-featu
 ## ⚡️ Quick Start (TL;DR)
 1. Visit **[https://lillianwang112.github.io/chinese-learning-app/](https://lillianwang112.github.io/chinese-learning-app/)**
 2. Click **"Browse Decks"** and tap "+ Add" on the decks you want — instant, no download needed
-3. Princeton CHI 108 students: tap **"Download Decks + 课文 (Princeton Only)"** on the home screen banner to grab all 23 CHI 108 decks with 课文 reading texts pre-attached, then import via **"Import / Export"**
+3. For bundled Princeton deck packs: tap **"Download Decks + 课文 (Princeton Only)"** on the home screen banner to grab bundled course decks with 课文 reading texts pre-attached, then import via **"Import / Export"**
 4. Start with **Study Mode** for flashcard review
 5. Use **Learn Mode** for active quizzing (multiple choice + fill-in-the-blank)
 6. Use **Writing** to practice drawing characters — with animated stroke order and a tracing overlay
@@ -107,11 +107,11 @@ Visit: **[https://lillianwang112.github.io/chinese-learning-app/](https://lillia
 ### Step 2: Add Vocabulary Decks
 **The easiest way — Browse Decks:**
 1. Click **"Browse Decks"** on the home screen
-2. All 25 CHI 108 / CHI 103 decks are listed
+2. Built-in decks for CHI 101, 102, 103, 105, 107, and 108 are listed
 3. Tap **"+ Add"** on any deck — imports instantly, no files needed
 
 **Manual import from GitHub:**
-1. Download JSON files from the [108vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/108vocab) or [103vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/103vocab)
+1. Download JSON files from the [101-102vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/101-102vocab), [103vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/103vocab), [105-107vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/105-107vocab), or [108vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/108vocab)
 2. Click **"Import Deck(s)"** and select the files
 3. Choose to import as separate decks or combine into one
 
@@ -141,9 +141,9 @@ Visit: **[https://lillianwang112.github.io/chinese-learning-app/](https://lillia
 
 ## 📚 Available Vocabulary Decks
 
-**25 (23 CHI 108 + 2 CHI 103) vocabulary decks** covering all CHI 108 topics — **over 900 vocabulary words** total! 🎉
+**31 built-in vocabulary decks across CHI 101, 102, 103, 105, 107, and 108** — **over 900 vocabulary words** total! 🎉
 
-The easiest way to get these is the **Browse Decks** button in the app. All files are also in the [108vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/108vocab) and [103vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/103vocab) on GitHub. Princeton students can also grab all 23 CHI 108 decks in one go — with 课文 reading texts pre-attached — via the **"Download Decks + 课文 (Princeton Only)"** button on the home screen (requires a Princeton Google account).
+The easiest way to get these is the **Browse Decks** button in the app. All files are also in the [101-102vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/101-102vocab), [103vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/103vocab), [105-107vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/105-107vocab), and [108vocab folder](https://github.com/lillianwang112/chinese-learning-app/tree/main/108vocab) on GitHub. Princeton students can also use **"Download Decks + 课文 (Princeton Only)"** for bundled imports (requires a Princeton Google account).
 
 **Note:** Decks contain all vocabulary from the 课本, not just study guide items. You can edit decks to remove cards you don't need.
 
@@ -441,7 +441,7 @@ Select one or multiple decks to pull vocabulary from (and their attached 课文 
 - **Edit deck name** — Click Edit → change the title at the top
 - **Add cards manually** — type Chinese, pinyin, and English; or use AI Autofill / Bulk Add
 - **Bulk select & delete** — select multiple cards at once in edit mode and delete in one go
-- **Browse Decks** — one-tap import of any CHI 108 / CHI 103 deck
+- **Browse Decks** — one-tap import of built-in decks for CHI 101, 102, 103, 105, 107, and 108
 - **Export / Import** — back up and restore decks as JSON files; use **"Import / Export"** on the home screen to access both options. **Multi-deck export** lets you select which decks to include and choose whether to bundle 课文 texts
 - **Multi-file import** — import several JSON files at once; keep as separate decks or combine; assign to a folder
 - **Combine Decks** — merge existing decks into one (duplicates removed)
@@ -539,9 +539,9 @@ Yes! Go to Create Deck → Combine Decks. Select the decks you want to merge, gi
 </details>
 
 <details>
-<summary><strong>What's the easiest way to get the CHI 108 vocabulary?</strong></summary>
+<summary><strong>What's the easiest way to get the course vocabulary decks?</strong></summary>
 <br>
-Click the <strong>Browse Decks</strong> button on the home screen — all 25 decks are listed, just tap "+ Add" to import instantly. No GitHub, no file downloads needed.
+Click the <strong>Browse Decks</strong> button on the home screen — built-in decks for CHI 101, 102, 103, 105, 107, and 108 are listed, and you can tap "+ Add" to import instantly. No GitHub, no file downloads needed.
 </details>
 
 <details>
@@ -636,7 +636,7 @@ If you are on eduroam, you may need to try using a VPN or manually configuring t
 | **Configurable Tests** | ⚠️ Limited | ✅ Yes (paywalled) | ❌ No | ✅ **Question types, count, direction** |
 | **Cross-device Sync** | ✅ Yes (paid) | ✅ Yes | ✅ Yes | ✅ **Free with account** |
 | **Chinese-Specific Features** | ✅ Stroke order, tones | ⚠️ Basic | ✅ OCR, dictionary | ✅ **Pinyin, audio, stroke order, CC-CEDICT lookup** |
-| **CHI 108 Vocabulary** | ❌ Manual import | ❌ Manual import | ❌ N/A | ✅ **25 decks, one-tap import** |
+| **Princeton course vocabulary decks** | ❌ Manual import | ❌ Manual import | ❌ N/A | ✅ **31 decks, one-tap import** |
 | **Works Offline** | ✅ Yes | ⚠️ Limited | ✅ Yes | ✅ **Yes** |
 | **No Download Required** | ❌ App required | ❌ App required | ❌ App required | ✅ **Browser-based + installable PWA** |
 | **Mastery Tracking** | ✅ Yes | ✅ Yes (paywalled) | ⚠️ Limited | ✅ **3-tier system** |
@@ -646,7 +646,7 @@ If you are on eduroam, you may need to try using a VPN or manually configuring t
 | **Study Streak & Heatmap** | ⚠️ Basic | ❌ No | ❌ No | ✅ **GitHub-style calendar** |
 
 ### 💡 Bottom Line
-If you're already paying for Skritter or Quizlet Plus and love them, keep using them! But if you want a **free, comprehensive, ad-free study tool built specifically for CHI 108** — with AI features those paid apps don't even have — this covers everything. **No paywalls. No subscriptions. No ads. Just learning.** 🎯
+If you're already paying for Skritter or Quizlet Plus and love them, keep using them! But if you want a **free, comprehensive, ad-free study tool built for Princeton Chinese courses CHI 101, 102, 103, 105, 107, and 108** — with AI features those paid apps don't even have — this covers everything. **No paywalls. No subscriptions. No ads. Just learning.** 🎯
 
 ## 🛠️ Tech Stack
 
@@ -710,7 +710,7 @@ npm run dev        # → http://localhost:5173
 
 ## 🙏 About This Project
 
-This app was created by a CHI 108 student who wanted a better vocabulary learning experience — one built around the actual class, not a generic flashcard app, and free for everyone.
+This app was created by a Princeton Chinese student who wanted a better vocabulary learning experience — one built around real course needs, not a generic flashcard app, and free for everyone.
 
 It's still a work in progress. If you find bugs or have suggestions, please reach out at **lw3319@princeton.edu** — feedback genuinely helps!
 
@@ -749,4 +749,4 @@ The app is open source. If you find it useful, share it with other Chinese learn
 
 *Perfect for: Daily review • 写字比赛 prep • Character practice • Quick refreshers before class • Pre-小考 cramming*
 
-*Made by Lillian Wang - Princeton University - CHI 108 - Spring 2026*
+*Made by Lillian Wang - Princeton University - CHI 101, 102, 103, 105, 107, 108 - Spring 2026*
