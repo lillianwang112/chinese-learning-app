@@ -1176,7 +1176,7 @@ const ChineseLearningApp = () => {
   // Browse built-in decks
   const [showBrowseDecks, setShowBrowseDecks] = useState(false);
   const [browseLoading, setBrowseLoading] = useState(null); // deck filename being fetched
-  const [browseFilter, setBrowseFilter] = useState('108'); // '103' or '108'
+  const [browseFilter, setBrowseFilter] = useState('108'); // '101' | '102' | '103' | '105' | '107' | '108'
 
   // All available built-in vocab decks hosted on GitHub Pages alongside the app
   const BUILT_IN_DECKS = [
@@ -1231,6 +1231,46 @@ const ChineseLearningApp = () => {
     { course: '103', filename: '103vocab/chi103-decks-only.json', deckIndex: 18, name: '都怪你妈妈',         cards: 22, topic: 'Oh China L15' },
     { course: '103', filename: '103vocab/CHI103-CHAR LIST.json',           name: 'CHI 103 Character List', cards: 522, topic: 'CHI 103 Review' },
     { course: '103', filename: '103vocab/CHI103-VOCAB LIST.json',          name: 'CHI 103 Vocabulary',     cards: 483, topic: 'CHI 103 Review' },
+
+    // ── CHI 107 ──────────────────────────────────────────────────────────────
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 0,  name: '第十一课 Privacy',         cards: 43, topic: 'Lesson 11' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 1,  name: '第十二课 走后门',          cards: 35, topic: 'Lesson 12' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 2,  name: '第十二课 做孩子也不容易',   cards: 17, topic: 'Lesson 12' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 3,  name: '第十五课 都怪你妈妈',      cards: 21, topic: 'Lesson 15' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 4,  name: '第十六课 北京的交通',      cards: 29, topic: 'Lesson 16' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 5,  name: '第十七课 打的',            cards: 44, topic: 'Lesson 17' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 6,  name: '第二十一课 过马路真危险',  cards: 30, topic: 'Lesson 21' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 7,  name: '第二十二课 好好学习，天天向上', cards: 53, topic: 'Lesson 22' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 8,  name: '第二十三课 普通话和规范字',  cards: 57, topic: 'Lesson 23' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 9,  name: '第二十四课 中国制造',      cards: 31, topic: 'Lesson 24' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 10, name: '第二十六课 脱了裤子放屁',  cards: 29, topic: 'Lesson 26' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 11, name: '第二十八课 乒乓外交',      cards: 36, topic: 'Lesson 28' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 12, name: '第二十九课 高考',          cards: 36, topic: 'Lesson 29' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 13, name: '第三十五课 老年人的生活',  cards: 35, topic: 'Lesson 35' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 14, name: '第三十七课 手机和电子邮件', cards: 18, topic: 'Lesson 37' },
+    { course: '107', filename: '105-107vocab/chi107-decks-only.json', deckIndex: 15, name: '第四十四课 学习外语',      cards: 36, topic: 'Lesson 44' },
+
+    // ── CHI 105 ──────────────────────────────────────────────────────────────
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 0,  name: '第一课 到了北京',          cards: 51, topic: 'Lesson 1' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 1,  name: '第二课 给妈妈打电话',      cards: 47, topic: 'Lesson 2' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 2,  name: '第三课 早起、洗澡',        cards: 45, topic: 'Lesson 3' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 3,  name: '第五课 拉肚子、睡不好',    cards: 32, topic: 'Lesson 5' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 4,  name: '第六课 睡午觉、喝热水',    cards: 33, topic: 'Lesson 6' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 5,  name: '第七课 洗衣服',           cards: 31, topic: 'Lesson 7' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 6,  name: '第八课 理发',             cards: 35, topic: 'Lesson 8' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 7,  name: '第九课 要求太高了',        cards: 28, topic: 'Lesson 9' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 8,  name: '第十课 讲价',             cards: 28, topic: 'Lesson 10' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 9,  name: '第十一课 同志、小姐、先生', cards: 49, topic: 'Lesson 11' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 10, name: '第十二课 厕所',           cards: 34, topic: 'Lesson 12' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 11, name: '第十三课 坐火车',         cards: 29, topic: 'Lesson 13' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 12, name: '第十四课 北京的公园',      cards: 39, topic: 'Lesson 14' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 13, name: '第十五课 北京的夜市',      cards: 32, topic: 'Lesson 15' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 14, name: '第十六课 北京动物园',      cards: 53, topic: 'Lesson 16' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 15, name: '第十七课 万里长城',        cards: 43, topic: 'Lesson 17' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 16, name: '第十八课 到时候再说吧！',   cards: 33, topic: 'Lesson 18' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 17, name: '第十九课 在饭桌上',        cards: 58, topic: 'Lesson 19' },
+    { course: '105', filename: '105-107vocab/chi105-decks-only.json', deckIndex: 18, name: '第二十课 点菜',           cards: 75, topic: 'Lesson 20' },
+
     // ── CHI 102 ──────────────────────────────────────────────────────────────
     { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 0,  name: '第十二课 门锁着，进不去',     cards: 32, topic: 'Lesson 12' },
     { course: '102', filename: '101-102vocab/chi102-decks-only.json', deckIndex: 1,  name: '第十四课 起不来，迟到了',     cards: 26, topic: 'Lesson 14' },
@@ -8116,8 +8156,8 @@ Rules:
               </div>
               <div className="px-4 pt-3 pb-2">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Pick your class</p>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {[['101','CHI 101'],['102','CHI 102'],['103','CHI 103'],['108','CHI 108']].map(([val, label]) => (
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+                  {[['101','CHI 101'],['102','CHI 102'],['103','CHI 103'],['105','CHI 105'],['107','CHI 107'],['108','CHI 108']].map(([val, label]) => (
                     <button
                       key={val}
                       onClick={() => setBrowseFilter(val)}
