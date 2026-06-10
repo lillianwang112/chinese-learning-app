@@ -7137,7 +7137,7 @@ Rules:
                       if (expandedDecks.size > 0) {
                         setExpandedDecks(new Set());
                       } else {
-                        setExpandedDecks(new Set(visibleDecks.map(d => d.id)));
+                        setExpandedDecks(new Set(decks.map(d => d.id)));
                         setMinimalDecks(new Set());
                       }
                     }}
@@ -7150,7 +7150,7 @@ Rules:
                       if (minimalDecks.size > 0) {
                         setMinimalDecks(new Set());
                       } else {
-                        setMinimalDecks(new Set(visibleDecks.map(d => d.id)));
+                        setMinimalDecks(new Set(decks.map(d => d.id)));
                         setExpandedDecks(new Set());
                       }
                     }}
@@ -7205,7 +7205,7 @@ Rules:
               {reorderMode && (
                 <button
                   onClick={() => {
-                    const allIds = visibleDecks.map(d => d.id);
+                    const allIds = decks.map(d => d.id);
                     const allSelected = allIds.every(id => bulkMoveSelectedDecks.has(id));
                     if (allSelected) {
                       setBulkMoveSelectedDecks(new Set());
@@ -7215,7 +7215,7 @@ Rules:
                   }}
                   className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold bg-gradient-to-r from-blue-400 to-blue-500 text-white hover:from-blue-500 hover:to-blue-600 text-sm"
                 >
-                  {visibleDecks.every(d => bulkMoveSelectedDecks.has(d.id)) ? '✗ Deselect All' : '✓ Select All'}
+                  {decks.every(d => bulkMoveSelectedDecks.has(d.id)) ? '✗ Deselect All' : '✓ Select All'}
                 </button>
               )}
               {reorderMode && bulkMoveSelectedDecks.size > 0 ? (
@@ -7764,6 +7764,8 @@ Rules:
 
                     return (
                       <div key={deck.id} className={`bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 border overflow-hidden relative ${
+                        minimalDecks.has(deck.id) ? 'self-start' : ''
+                      } ${
                         reorderMode && bulkMoveSelectedDecks.has(deck.id)
                           ? 'border-blue-500 border-2 ring-2 ring-blue-200'
                           : reorderMode ? 'border-yellow-300 border-2' : 'border-gray-100'
