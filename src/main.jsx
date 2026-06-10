@@ -1328,6 +1328,7 @@ const ChineseLearningApp = () => {
   // Search
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedDecks, setExpandedDecks] = useState(new Set());
+  const [minimalDecks, setMinimalDecks] = useState(new Set());
 
   // Calendar heatmap tooltip
   const [hoveredDay, setHoveredDay] = useState(null);
@@ -7129,19 +7130,35 @@ Rules:
                 ✍️ Recognize
               </button>
               {decks.length > 0 && (
-                <button
-                  id="tutorial-expand-btn"
-                  onClick={() => {
-                    if (expandedDecks.size > 0) {
-                      setExpandedDecks(new Set());
-                    } else {
-                      setExpandedDecks(new Set(decks.map(d => d.id)));
-                    }
-                  }}
-                  className="flex items-center gap-2 bg-gradient-to-r from-gray-400 to-gray-500 text-white px-5 py-3 rounded-xl hover:from-gray-500 hover:to-gray-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold text-sm"
-                >
-                  {expandedDecks.size > 0 ? '▲ Collapse All' : '▼ Expand All'}
-                </button>
+                <>
+                  <button
+                    id="tutorial-expand-btn"
+                    onClick={() => {
+                      if (expandedDecks.size > 0) {
+                        setExpandedDecks(new Set());
+                      } else {
+                        setExpandedDecks(new Set(decks.map(d => d.id)));
+                        setMinimalDecks(new Set());
+                      }
+                    }}
+                    className="flex items-center gap-2 bg-gradient-to-r from-gray-400 to-gray-500 text-white px-5 py-3 rounded-xl hover:from-gray-500 hover:to-gray-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold text-sm"
+                  >
+                    {expandedDecks.size > 0 ? '▲ Collapse All' : '▼ Expand All'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (minimalDecks.size > 0) {
+                        setMinimalDecks(new Set());
+                      } else {
+                        setMinimalDecks(new Set(decks.map(d => d.id)));
+                        setExpandedDecks(new Set());
+                      }
+                    }}
+                    className="flex items-center gap-2 bg-gradient-to-r from-slate-400 to-slate-500 text-white px-5 py-3 rounded-xl hover:from-slate-500 hover:to-slate-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold text-sm"
+                  >
+                    {minimalDecks.size > 0 ? '⊞ Restore All' : '⊟ Minimize All'}
+                  </button>
+                </>
               )}
               <button
                 id="tutorial-settings-btn"
@@ -7183,6 +7200,22 @@ Rules:
                   }`}
                 >
                   {reorderMode && bulkMoveSelectedDecks.size > 0 ? `🗑 Delete ${bulkMoveSelectedDecks.size}` : (reorderMode ? '✓ Done' : '☑ Select')}
+                </button>
+              )}
+              {reorderMode && (
+                <button
+                  onClick={() => {
+                    const allIds = decks.map(d => d.id);
+                    const allSelected = allIds.every(id => bulkMoveSelectedDecks.has(id));
+                    if (allSelected) {
+                      setBulkMoveSelectedDecks(new Set());
+                    } else {
+                      setBulkMoveSelectedDecks(new Set(allIds));
+                    }
+                  }}
+                  className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold bg-gradient-to-r from-blue-400 to-blue-500 text-white hover:from-blue-500 hover:to-blue-600 text-sm"
+                >
+                  {decks.every(d => bulkMoveSelectedDecks.has(d.id)) ? '✗ Deselect All' : '✓ Select All'}
                 </button>
               )}
               {reorderMode && bulkMoveSelectedDecks.size > 0 ? (
@@ -7731,6 +7764,8 @@ Rules:
 
                     return (
                       <div key={deck.id} className={`bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 border overflow-hidden relative ${
+                        minimalDecks.has(deck.id) ? 'self-start' : ''
+                      } ${
                         reorderMode && bulkMoveSelectedDecks.has(deck.id)
                           ? 'border-blue-500 border-2 ring-2 ring-blue-200'
                           : reorderMode ? 'border-yellow-300 border-2' : 'border-gray-100'
@@ -7800,12 +7835,33 @@ Rules:
                               <h3 className="text-xl font-bold text-white mb-1 line-clamp-2">{deck.name}</h3>
                               <p className="text-sm text-orange-100 font-medium">{totalCards} cards</p>
                             </div>
-                            <BookOpen className="text-white opacity-75" size={28} />
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setMinimalDecks(prev => {
+                                    const next = new Set(prev);
+                                    if (next.has(deck.id)) {
+                                      next.delete(deck.id);
+                                    } else {
+                                      next.add(deck.id);
+                                      setExpandedDecks(p => { const n = new Set(p); n.delete(deck.id); return n; });
+                                    }
+                                    return next;
+                                  });
+                                }}
+                                className="text-white opacity-60 hover:opacity-100 transition text-xs font-bold px-1"
+                                title={minimalDecks.has(deck.id) ? 'Restore' : 'Minimize'}
+                              >
+                                {minimalDecks.has(deck.id) ? '⊞' : '⊟'}
+                              </button>
+                              <BookOpen className="text-white opacity-75" size={28} />
+                            </div>
                           </div>
                         </div>
 
                         {/* Card Body */}
-                        <div className="p-5">
+                        {!minimalDecks.has(deck.id) && <div className="p-5">
                           {/* Progress Section - 3 tier */}
                           <div className="mb-5">
                             <div className="flex justify-between text-xs font-semibold text-gray-600 mb-2">
@@ -8026,7 +8082,7 @@ Rules:
 
                           </React.Fragment>
                           )}
-                        </div>
+                        </div>}
                       </div>
                     );
                   })}
